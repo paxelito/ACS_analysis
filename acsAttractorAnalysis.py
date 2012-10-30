@@ -26,7 +26,7 @@ print "Simulation Results Path: ", StrPath
 
 today = dt.date.today()
 	
-tmpDirs = os.listdir(StrPath)
+tmpDirs = sort(os.listdir(StrPath))
 allSortedSpecies = [] 
 allConcentrations = [] 
 allSortedSpeciesNOINFLUX = [] 
