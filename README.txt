@@ -1,0 +1,1 @@
+This repository contains analysis script devoted to the study and the characterization of the simulations carried out by means of the CARNESS simulator. 
