@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''Function to compute the different attractors emerging from a simulazione. The algorithm compares all the final states of the simulation computing 
-	The differences between those
+	The differences between those. test
 '''
 
 import sys, os # Standard library
