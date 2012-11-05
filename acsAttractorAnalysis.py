@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 '''Function to compute the different attractors emerging from a simulazione. The algorithm compares all the final states of the simulation computing 
 	The differences between those. test
+	https://help.github.com/articles/fork-a-repo
 '''
 
 import sys, os # Standard library
@@ -14,6 +15,17 @@ try:
     from pylab import *
 except:
     pass
+
+#--------------------------------------------------------------------------------------
+# Function to create string zero string vector before graph filename. 
+# According to the total number of reactions N zeros will be add before the instant reaction number 
+# (e.g. reaction 130 of 10000 the string became '00130')
+def zeroBeforeStrNum(tmpl, tmpL):
+	strZero = ''
+	nZeros = len(str(tmpL)) - len(str(tmpl))
+	if nZeros > 0:
+		for i in range(0,nZeros): strZero = strZero + '0'
+	return strZero
 	
 # get path for placing simulation
 try:
@@ -44,35 +56,43 @@ for tmpDir in tmpDirs:
 		resDirPath = os.path.join(totDirName, "res")
 		if os.path.isdir(resDirPath):
 			os.chdir(resDirPath)
-		
-			# Searching for files
-			speciesFiles = sorted(glob.glob(os.path.join(resDirPath,'species_*')))
-			speciesFile = speciesFiles[-1]
-		
-			print " |- Species File: ", speciesFile
-			# Open Catalysis File
-			try:
-				fidSpecies = open(speciesFile, 'r')
-			except:
-				print ' |- impossible to load ', speciesFile; sys.exit(1)
 			
-			# For each last species file
-			seq = []; conc = []; seqNOINFLUX = []
-			for sp in fidSpecies:
-				tmpID, tmpSeq, tmpConc, tmpDiff, tmpSol, tmpCpxDiss, tmpCpxCut, tmpEval, tmpAge, tmpReb, tmpCatID, tmpSubID, tmpKpho, tmpLoadConc, tmpConcLock = sp.split()
-				if (int(tmpCpxCut) == 0) & (float(tmpConc) > 0):
-					seq.append(str(tmpSeq))
-					conc.append(float(tmpConc))
-					if len(str(tmpSeq)) > tmpMaxFluxL:
-						seqNOINFLUX.append(str(tmpSeq))	
-			# Common ordered species List 
-			allSortedSpecies = list(set(seq) | set(allSortedSpecies))
-			allSortedSpecies.sort()	
-			# NO influx
-			allSortedSpeciesNOINFLUX = list(set(seqNOINFLUX) | set(allSortedSpeciesNOINFLUX))
-			allSortedSpeciesNOINFLUX.sort()	
+			# Find the number of generations
+			numberOfGen = len(glob.glob(os.path.join(resDirPath,'times_*')))
 			
-			fidSpecies.close()	
+			for ngen in range(1,numberOfGen+1):
+			  
+			  strZeros = zeroBeforeStrNum(ngen, numberOfGen)
+			  strSpecies = 'species_' + strZeros + str(ngen) + '*'
+		  
+			  # Searching for files
+			  speciesFiles = sorted(glob.glob(os.path.join(resDirPath,strSpecies)))
+			  speciesFile = speciesFiles[-1]
+		  
+			  print " |- Species File: ", speciesFile
+			  # Open Catalysis File
+			  try:
+				  fidSpecies = open(speciesFile, 'r')
+			  except:
+				  print ' |- impossible to load ', speciesFile; sys.exit(1)
+			  
+			  # For each last species file
+			  seq = []; conc = []; seqNOINFLUX = []
+			  for sp in fidSpecies:
+				  tmpID, tmpSeq, tmpConc, tmpDiff, tmpSol, tmpCpxDiss, tmpCpxCut, tmpEval, tmpAge, tmpReb, tmpCatID, tmpSubID, tmpKpho, tmpLoadConc, tmpConcLock = sp.split()
+				  if (int(tmpCpxCut) == 0) & (float(tmpConc) > 0):
+					  seq.append(str(tmpSeq))
+					  conc.append(float(tmpConc))
+					  if len(str(tmpSeq)) > tmpMaxFluxL:
+						  seqNOINFLUX.append(str(tmpSeq))	
+			  # Common ordered species List 
+			  allSortedSpecies = list(set(seq) | set(allSortedSpecies))
+			  allSortedSpecies.sort()	
+			  # NO influx
+			  allSortedSpeciesNOINFLUX = list(set(seqNOINFLUX) | set(allSortedSpeciesNOINFLUX))
+			  allSortedSpeciesNOINFLUX.sort()	
+			  
+			  fidSpecies.close()	
 			
 print '|- STEP 2. Creating species concentration lists according to the overall sorted species list...'		
 overallConcList = []
@@ -86,47 +106,57 @@ for tmpDir in tmpDirs:
 		os.chdir(totDirName)
 		resDirPath = os.path.join(totDirName, "res")
 		if os.path.isdir(resDirPath):
-			numberOfFolders += 1
+			
 			os.chdir(resDirPath)
+			
+			# Find the number of generations
+			numberOfGen = len(glob.glob(os.path.join(resDirPath,'times_*')))
 		
-			# Searching for files
-			speciesFiles = sorted(glob.glob(os.path.join(resDirPath,'species_*')))
-			speciesFile = speciesFiles[-1]
-		
-			print " |- Species File: ", speciesFile
-			# Open Catalysis File
-			try:
-				fidSpecies = open(speciesFile, 'r')
-			except:
-				print ' |- impossible to load ', speciesFile; sys.exit(1)
-			
-			# For each last species file
-			seq = []; conc = []; speciesConc = []; speciesConcNOINFLUX = []
-			for sp in fidSpecies:
-				tmpID, tmpSeq, tmpConc, tmpDiff, tmpSol, tmpCpxDiss, tmpCpxCut, tmpEval, tmpAge, tmpReb, tmpCatID, tmpSubID, tmpKpho, tmpLoadConc, tmpConcLock = sp.split()
-				if (int(tmpCpxCut) == 0) & (float(tmpConc) > 0):
-					seq.append(str(tmpSeq))
-					conc.append(float(tmpConc))
-					
-			# Check the presence of the species in the all common species list		
-			for key in allSortedSpecies:
-				try:
-					pos = seq.index(key)
-					speciesConc.append(conc[pos])
-				except:
-					speciesConc.append(0)
-			for key2 in allSortedSpeciesNOINFLUX:
-				try:
-					pos2 = seq.index(key2)
-					speciesConcNOINFLUX.append(conc[pos2])
-				except:
-					speciesConcNOINFLUX.append(0)
-			
-			# Add the concentration list in the concentrationS list
-			overallConcList.append(speciesConc)
-			overallConcListNOINFLUX.append(speciesConcNOINFLUX)		
-			
-			fidSpecies.close()	
+			for ngen in range(1,numberOfGen+1):
+			  
+			  numberOfFolders += 1
+			  
+			  strZeros = zeroBeforeStrNum(ngen, numberOfGen)
+			  strSpecies = 'species_' + strZeros + str(ngen) + '*'
+		  
+			  # Searching for files
+			  speciesFiles = sorted(glob.glob(os.path.join(resDirPath,strSpecies)))
+			  speciesFile = speciesFiles[-1]
+		  
+			  print " |- Species File: ", speciesFile
+			  # Open Catalysis File
+			  try:
+				  fidSpecies = open(speciesFile, 'r')
+			  except:
+				  print ' |- impossible to load ', speciesFile; sys.exit(1)
+			  
+			  # For each last species file
+			  seq = []; conc = []; speciesConc = []; speciesConcNOINFLUX = []
+			  for sp in fidSpecies:
+				  tmpID, tmpSeq, tmpConc, tmpDiff, tmpSol, tmpCpxDiss, tmpCpxCut, tmpEval, tmpAge, tmpReb, tmpCatID, tmpSubID, tmpKpho, tmpLoadConc, tmpConcLock = sp.split()
+				  if (int(tmpCpxCut) == 0) & (float(tmpConc) > 0):
+					  seq.append(str(tmpSeq))
+					  conc.append(float(tmpConc))
+					  
+			  # Check the presence of the species in the all common species list		
+			  for key in allSortedSpecies:
+				  try:
+					  pos = seq.index(key)
+					  speciesConc.append(conc[pos])
+				  except:
+					  speciesConc.append(0)
+			  for key2 in allSortedSpeciesNOINFLUX:
+				  try:
+					  pos2 = seq.index(key2)
+					  speciesConcNOINFLUX.append(conc[pos2])
+				  except:
+					  speciesConcNOINFLUX.append(0)
+			  
+			  # Add the concentration list in the concentrationS list
+			  overallConcList.append(speciesConc)
+			  overallConcListNOINFLUX.append(speciesConcNOINFLUX)		
+			  
+			  fidSpecies.close()	
 			
 print '|- STEP 3. Compute attractors differences (in term of different multi-dimensional angles)'	
 overallResMatrix = np.zeros((numberOfFolders,numberOfFolders))
