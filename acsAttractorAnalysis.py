@@ -36,6 +36,9 @@ except:
 	
 print "Simulation Results Path: ", StrPath
 
+# Convert path in absolute path
+StrPath = os.path.abspath(StrPath)
+
 today = dt.date.today()
 	
 tmpDirs = sort(os.listdir(StrPath))
