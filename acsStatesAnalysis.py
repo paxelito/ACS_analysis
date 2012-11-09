@@ -65,6 +65,8 @@ today = dt.date.today()
 StrPath = os.path.abspath(StrPath)
 	
 tmpDirs = sort(os.listdir(StrPath))
+
+os.chdir(StrPath)
  
 print ''
 print 'ACS STATES ANALYSER'
@@ -84,7 +86,7 @@ newSpecies_FID = open(newSpeciesFileName, 'w')
 newSpeciesFileName = 'livingSpecies.csv'
 livingSpecies_FID = open(newSpeciesFileName, 'w')
 for tmpDir in tmpDirs:
-	os.chdir(StrPath)
+
 	totDirName = os.path.join(StrPath,tmpDir)
 	if os.path.isdir(totDirName):
 		# Move to the directory 
@@ -100,10 +102,18 @@ for tmpDir in tmpDirs:
 			for ngen in range(1,numberOfGen+1):
 			  
 				  strZeros = zeroBeforeStrNum(ngen, numberOfGen)
-				  strSpecies = 'species_' + strZeros + str(ngen) + '*'
+				  
+				  if ngen == 1:
+				  	strSpeciesZero = 'species_' + strZeros + str(0) + '*'
+				  	speciesFilesZero = sorted(glob.glob(os.path.join(resDirPath,strSpeciesZero)))
+				  
+				  strSpecies = 'species_' + strZeros + str(ngen) + '*'  
 					  
 				  # Searching for files
 				  speciesFiles = sorted(glob.glob(os.path.join(resDirPath,strSpecies)))
+				  
+				  if ngen == 1:
+				  	strSpecies = speciesFilesZero + speciesFiles
 				  
 				  # FOR EACH FILE SPECIES
 				  seqOLD = []; seqOLDNOINFLUX = []; concOLD = []
@@ -147,6 +157,11 @@ for tmpDir in tmpDirs:
 					
 					# ------------------------------------------------------					
 					# PREVIOUS ONE Defining concentration of the two vectors
+					print seq
+					print conc
+					print seqOLD
+					print concOLD
+					raw_input("press enter to exit")
 					coseno = angleBetweenTwoLists(seq, conc, seqOLD, concOLD)
 					if idS != 0:
 						previousAngleList.append(coseno)

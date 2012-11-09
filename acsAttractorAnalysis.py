@@ -194,10 +194,14 @@ os.chdir(StrPath)
 print ' |- Saving species conentrations list...'
 outFnameStat = 'speciesVector.csv'
 saveFileStat = open(outFnameStat, 'w')
-for id, sngSimConc in enumerate(overallConcList):
+
+for sngSimConc in overallConcList:
 	strTypes = ''
+	for j in allSortedSpecies:
+		strTypes += j + '\t'
+	strTypes += '\n'
 	for j in sngSimConc:
-		strTypes += allSortedSpecies[id] + '\n' + str(j) + '\t'
+		strTypes += str(j) + '\t'
 	strTypes += '\n'
 	saveFileStat.write(strTypes)
 saveFileStat.close()
