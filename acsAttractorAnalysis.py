@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-'''Function to compute the different attractors emerging from a simulazione. The algorithm compares all the final states of the simulation computing 
+'''Function to compute the different attractors emerging from a simulation. The algorithm compares all the final states of the simulation computing 
 	The differences between those. test
 	https://help.github.com/articles/fork-a-repo
 '''
@@ -40,6 +40,8 @@ print "Simulation Results Path: ", StrPath
 StrPath = os.path.abspath(StrPath)
 
 today = dt.date.today()
+
+StrPath = os.path.abspath(StrPath)
 	
 tmpDirs = sort(os.listdir(StrPath))
 allSortedSpecies = [] 
@@ -56,7 +58,8 @@ for tmpDir in tmpDirs:
 	if os.path.isdir(totDirName):
 		# Move to the directory 
 		os.chdir(totDirName)
-		resDirPath = os.path.join(totDirName, "res")
+		resDirPath = os.path.abspath(os.path.join("./", "res"))
+		print " |- Results Folder: ", resDirPath
 		if os.path.isdir(resDirPath):
 			os.chdir(resDirPath)
 			
@@ -67,12 +70,11 @@ for tmpDir in tmpDirs:
 			  
 			  strZeros = zeroBeforeStrNum(ngen, numberOfGen)
 			  strSpecies = 'species_' + strZeros + str(ngen) + '*'
-		  
+				  
 			  # Searching for files
 			  speciesFiles = sorted(glob.glob(os.path.join(resDirPath,strSpecies)))
 			  speciesFile = speciesFiles[-1]
 		  
-			  print " |- Species File: ", speciesFile
 			  # Open Catalysis File
 			  try:
 				  fidSpecies = open(speciesFile, 'r')
@@ -96,6 +98,8 @@ for tmpDir in tmpDirs:
 			  allSortedSpeciesNOINFLUX.sort()	
 			  
 			  fidSpecies.close()	
+		else: 
+			  print " |- no result folder has been found"
 			
 print '|- STEP 2. Creating species concentration lists according to the overall sorted species list...'		
 overallConcList = []
@@ -157,8 +161,8 @@ for tmpDir in tmpDirs:
 			  
 			  # Add the concentration list in the concentrationS list
 			  overallConcList.append(speciesConc)
-			  overallConcListNOINFLUX.append(speciesConcNOINFLUX)		
-			  
+			  overallConcListNOINFLUX.append(speciesConcNOINFLUX)	
+			  			  
 			  fidSpecies.close()	
 			
 print '|- STEP 3. Compute attractors differences (in term of different multi-dimensional angles)'	
@@ -174,7 +178,7 @@ for idx, lx in enumerate(overallConcList):
 		# Compute coseno
 		tmpCos = np.dot(vecX,vecY) / (np.linalg.norm(vecX) * np.linalg.norm(vecY))
 		overallResMatrix[idx,idy] = tmpCos
-		overallResMatrix_angle[idx,idy] = np.arccos(tmpCos)
+		#overallResMatrix_angle[idx,idy] = np.arccos(tmpCos)
 for idx, lx in enumerate(overallConcListNOINFLUX):
 	for idy, ly in enumerate(overallConcListNOINFLUX):
 		vecX = np.array(lx)
@@ -182,11 +186,36 @@ for idx, lx in enumerate(overallConcListNOINFLUX):
 		# Compute coseno
 		tmpCos = np.dot(vecX,vecY) / (np.linalg.norm(vecX) * np.linalg.norm(vecY))
 		overallResMatrixNOINFLUX[idx,idy] = tmpCos
-		overallResMatrix_angleNOINFLUX[idx,idy] = np.arccos(tmpCos)
+		#overallResMatrix_angleNOINFLUX[idx,idy] = np.arccos(tmpCos)
 
 print '|- STEP 3. Save Files'
 os.chdir(StrPath)
+# ''' Save concentration vectors"
+print ' |- Saving species conentrations list...'
+outFnameStat = 'speciesVector.csv'
+saveFileStat = open(outFnameStat, 'w')
+for id, sngSimConc in enumerate(overallConcList):
+	strTypes = ''
+	for j in sngSimConc:
+		strTypes += allSortedSpecies[id] + '\n' + str(j) + '\t'
+	strTypes += '\n'
+	saveFileStat.write(strTypes)
+saveFileStat.close()
+
+# ''' Save concentration vectors (NO INFLUX)"
+print ' |- Saving species conentrations list (NO INFLUX)...'
+outFnameStat = 'speciesVectorNOINFLUX.csv'
+saveFileStat = open(outFnameStat, 'w')
+for id, sngSimConc in enumerate(overallConcListNOINFLUX):
+	strTypes = ''
+	for j in sngSimConc:
+		strTypes += allSortedSpeciesNOINFLUX[id] + '\t' + str(j) + '\t'
+	strTypes += '\n'
+	saveFileStat.write(strTypes)
+saveFileStat.close()
+
 # '''Function to save statistic on file'''
+print ' |- Saving coseno...'
 outFnameStat = 'acsAttractorsAnalysis.csv'
 saveFileStat = open(outFnameStat, 'w')
 cnt = 0
@@ -199,6 +228,7 @@ for i in range(numberOfFolders):
 	cnt += 1
 saveFileStat.close()	
 
+print ' |- Saving coseno (NO INFLUX)...'
 outFnameStat = 'acsAttractorsAnalysisNOINFLUX.csv'
 saveFileStat = open(outFnameStat, 'w')
 cnt = 0
