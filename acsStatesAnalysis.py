@@ -106,15 +106,15 @@ for tmpDir in tmpDirs:
 				  if ngen == 1:
 				  	strSpeciesZero = 'species_' + strZeros + str(0) + '*'
 				  	speciesFilesZero = sorted(glob.glob(os.path.join(resDirPath,strSpeciesZero)))
-				  
+				  				  
 				  strSpecies = 'species_' + strZeros + str(ngen) + '*'  
 					  
 				  # Searching for files
 				  speciesFiles = sorted(glob.glob(os.path.join(resDirPath,strSpecies)))
 				  
 				  if ngen == 1:
-				  	strSpecies = speciesFilesZero + speciesFiles
-				  
+				  	speciesFiles = speciesFilesZero + speciesFiles
+				  	
 				  # FOR EACH FILE SPECIES
 				  seqOLD = []; seqOLDNOINFLUX = []; concOLD = []
 				  previousAngleList = []
@@ -157,11 +157,6 @@ for tmpDir in tmpDirs:
 					
 					# ------------------------------------------------------					
 					# PREVIOUS ONE Defining concentration of the two vectors
-					print seq
-					print conc
-					print seqOLD
-					print concOLD
-					raw_input("press enter to exit")
 					coseno = angleBetweenTwoLists(seq, conc, seqOLD, concOLD)
 					if idS != 0:
 						previousAngleList.append(coseno)
