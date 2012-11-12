@@ -115,12 +115,12 @@ for tmpDir in tmpDirs:
 				  if ngen == 1:
 				  	speciesFiles = speciesFilesZero + speciesFiles
 				  	
-				  # FOR EACH FILE SPECIES
 				  seqOLD = []; seqOLDNOINFLUX = []; concOLD = []
 				  previousAngleList = []
 				  previousAngleListNOINFLUX = []
 				  seqSTART = []; seqSTART_NOINFLUX = []; concSTART = []
 				  oldNumberOfSpecies = 0
+				  # FOR EACH FILE SPECIES
 				  for idS, sngSpeciesFile in enumerate(speciesFiles):
 				  	
 				  	print '  |- Species File: ', sngSpeciesFile
@@ -162,6 +162,7 @@ for tmpDir in tmpDirs:
 						previousAngleList.append(coseno)
 						strtoW = str(coseno) + '\t'
 						previousFILE_FID.write(strtoW)
+					#raw_input('->')
 
 					# ------------------------------------------------------					
 					# START Defining concentration of the two vectors

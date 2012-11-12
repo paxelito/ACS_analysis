@@ -194,7 +194,6 @@ os.chdir(StrPath)
 print ' |- Saving species conentrations list...'
 outFnameStat = 'speciesVector.csv'
 saveFileStat = open(outFnameStat, 'w')
-
 for sngSimConc in overallConcList:
 	strTypes = ''
 	for j in allSortedSpecies:
@@ -210,10 +209,13 @@ saveFileStat.close()
 print ' |- Saving species conentrations list (NO INFLUX)...'
 outFnameStat = 'speciesVectorNOINFLUX.csv'
 saveFileStat = open(outFnameStat, 'w')
-for id, sngSimConc in enumerate(overallConcListNOINFLUX):
+for sngSimConcNOINFLUX in overallConcListNOINFLUX:
 	strTypes = ''
-	for j in sngSimConc:
-		strTypes += allSortedSpeciesNOINFLUX[id] + '\t' + str(j) + '\t'
+	for j in allSortedSpeciesNOINFLUX:
+		strTypes += j + '\t'
+	strTypes += '\n'
+	for j in sngSimConcNOINFLUX:
+		strTypes += str(j) + '\t'
 	strTypes += '\n'
 	saveFileStat.write(strTypes)
 saveFileStat.close()
