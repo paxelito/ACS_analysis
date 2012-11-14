@@ -32,6 +32,17 @@ def angleBetweenTwoLists(tmpSeqX, tmpConcX, tmpSeqY, tmpConcY):
 	tmpAllList.sort()	
 	speciesConcX = []
 	speciesConcY = []
+	#print ' '
+	#print 'ANALYSIS.......................................'
+	#print ' '
+	#print 'NEW SEQ -> ',tmpSeqX
+	#print ' '
+	#print 'NEW CONC -> ',tmpConcX
+	#print ' '
+	#print 'OLD SEQ -> ',tmpSeqY
+	#print ' '
+	#print 'OLD CONC ->',tmpConcY
+	#print ' '
 	for key in tmpAllList:
 		try:
 			posX = tmpSeqX.index(key)
@@ -46,8 +57,17 @@ def angleBetweenTwoLists(tmpSeqX, tmpConcX, tmpSeqY, tmpConcY):
 	 
 	vecX = np.array(speciesConcX)
 	vecY = np.array(speciesConcY)
+	#print 'ALL SEQ ', tmpAllList
+	#print ' '
+	#print 'NEW ',vecX
+	#print ' '
+	#print 'OLD ',vecY
+	#print ' '
 	# Compute coseno AND WRITE FILE
 	tmpCos = np.dot(vecX,vecY) / (np.linalg.norm(vecX) * np.linalg.norm(vecY))
+	#print tmpCos, np.arccos(tmpCos), np.arccos(tmpCos) * 360 / 6.28
+	raw_input('step successivo...')
+	
 	
 	return tmpCos
 	
@@ -157,6 +177,7 @@ for tmpDir in tmpDirs:
 					
 					# ------------------------------------------------------					
 					# PREVIOUS ONE Defining concentration of the two vectors
+					print '   |- T <-> T-1'
 					coseno = angleBetweenTwoLists(seq, conc, seqOLD, concOLD)
 					if idS != 0:
 						previousAngleList.append(coseno)
@@ -174,6 +195,7 @@ for tmpDir in tmpDirs:
 						  
 					# ------------------------------------------------------					
 					# PREVIOUS ONE (NO INFLUX) Defining concentration of the two vectors
+					print '   |- T <-> T-1 (NO INFLUX)'
 					coseno = angleBetweenTwoLists(seqNOINFLUX, conc, seqOLDNOINFLUX, concOLD)
 					if idS != 0:
 						previousAngleListNOINFLUX.append(coseno)	
