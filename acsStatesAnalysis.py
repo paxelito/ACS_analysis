@@ -16,65 +16,80 @@ try:
 except:
     pass
 
-#--------------------------------------------------------------------------------------
-# Function to create string zero string vector before graph filename. 
-# According to the total number of reactions N zeros will be add before the instant reaction number 
-# (e.g. reaction 130 of 10000 the string became '00130')
 def zeroBeforeStrNum(tmpl, tmpL):
+	''' Function to create string zero string vector before graph filename.
+	According to the total number of reactions N zeros will be add before the instant reaction number 
+	(e.g. reaction 130 of 10000 the string became '00130')'''
 	strZero = ''
 	nZeros = len(str(tmpL)) - len(str(tmpl))
 	if nZeros > 0:
 		for i in range(0,nZeros): strZero = strZero + '0'
 	return strZero
 
-def angleBetweenTwoLists(tmpSeqX, tmpConcX, tmpSeqY, tmpConcY):
-	tmpAllList = list(set(tmpSeqX) | set(tmpSeqY))
-	tmpAllList.sort()	
-	speciesConcX = []
-	speciesConcY = []
-	#print ' '
-	#print 'ANALYSIS.......................................'
-	#print ' '
-	#print 'NEW SEQ -> ',tmpSeqX
-	#print ' '
-	#print 'NEW CONC -> ',tmpConcX
-	#print ' '
-	#print 'OLD SEQ -> ',tmpSeqY
-	#print ' '
-	#print 'OLD CONC ->',tmpConcY
-	#print ' '
-	for key in tmpAllList:
-		try:
-			posX = tmpSeqX.index(key)
-			speciesConcX.append(tmpConcX[posX])
-		except:
-			speciesConcX.append(0)
-		try:
-			posY = tmpSeqY.index(key)
-			speciesConcY.append(tmpConcY[posY])
-		except:
-			speciesConcY.append(0)
-	 
-	vecX = np.array(speciesConcX)
-	vecY = np.array(speciesConcY)
-	#print 'ALL SEQ ', tmpAllList
-	#print ' '
-	#print 'NEW ',vecX
-	#print ' '
-	#print 'OLD ',vecY
-	#print ' '
-	# Compute coseno AND WRITE FILE
-	tmpCos = np.dot(vecX,vecY) / (np.linalg.norm(vecX) * np.linalg.norm(vecY))
-	#print tmpCos, np.arccos(tmpCos), np.arccos(tmpCos) * 360 / 6.28
-	raw_input('step successivo...')
+def returnZeroSpeciesList(tmpLastSpeciesFile):
+	'''Function to create a zero vector for each species (NO COMPLEXES)'''
+	try:
+		fidSpecies = open(tmpLastSpeciesFile, 'r')
+	except:
+		print ' |- impossible to load ', tmpLastSpeciesFile; sys.exit(1)
+	tmpZeroList = []
+	for s in fidSpecies:
+		tmpID, tmpSeq, tmpConc, tmpDiff, tmpSol, tmpCpxDiss, tmpCpxCut, tmpEval, tmpAge, tmpReb, tmpCatID, tmpSubID, tmpKpho, tmpLoadConc, tmpConcLock = s.split()
+		if (int(tmpCpxCut) == 0):
+			tmpZeroList.append(0)
+		
+	return tmpZeroList
+
+def distanceMisures(tmpSeqX, tmpConcX, tmpSeqY, tmpConcY, tmpIDs):
+	'''Function to compute the angle between two multidimensional vectors'''
+	strtoW = [0,0,0]
+	if tmpIDs != 0:
+		# COS BETWEEN VECTORS
+		tmpAllList = list(set(tmpSeqX) | set(tmpSeqY))
+		tmpAllList.sort()	
+		speciesConcX = []
+		speciesConcY = []
+		for key in tmpAllList:
+			try:
+				posX = tmpSeqX.index(key)
+				speciesConcX.append(tmpConcX[posX])
+			except:
+				speciesConcX.append(0)
+			try:
+				posY = tmpSeqY.index(key)
+				speciesConcY.append(tmpConcY[posY])
+			except:
+				speciesConcY.append(0)
+		 
+		vecX = np.array(speciesConcX)
+		vecY = np.array(speciesConcY)
+		tmpCos = np.dot(vecX,vecY) / (np.linalg.norm(vecX) * np.linalg.norm(vecY))	
+		
+		strtoW[0] = str(tmpCos) + '\t'
+		
+		# HAMMING DISTANCE and EUCLIDEAN DISTANCE
+		tmpHD = 0
+		tmpEU = 0
+		for pos, x in enumerate(speciesConcX):
+			if ((x > 0.0) & (speciesConcY[pos] == 0.0)) | ((x == 0.0) & (speciesConcY[pos] > 0.0)):
+				tmpHD += 1
+			tmpEU += pow(x - speciesConcY[pos],2)
+			
+		strtoW[1] = str(tmpHD) + '\t'
+		strtoW[2] = str(pow(tmpEU,0.5)) + '\t'
+					
+	else:
+		strtoW[0] = str(1) + '\t'
+		strtoW[1] = str(0) + '\t'
+		strtoW[2] = str(0) + '\t'
+		
+	return strtoW
 	
 	
-	return tmpCos
-	
-# get path for placing simulation
 try:
 	StrPath = sys.argv[1] # Here the path of the simulation output file
 	tmpMaxFluxL = int(sys.argv[2]) # Influx max length
+	tmpVolume = float(sys.argv[3])  
 except:
 	print "Usage:",sys.argv[0], "infile outfile"; sys.exit(1)
 	
@@ -92,19 +107,29 @@ print ''
 print 'ACS STATES ANALYSER'
 print ''
 print '|- STEP 1. Creating common sorted species list...'
+
 # Open File containing results 
-previousFILEname = 't_tminus_1.csv'
-previousFILE_FID = open(previousFILEname, 'w')
-previousNOINFLUX_FILEname = 't_tminus_1_NOINFLUX.csv'
-previousNOINFLUX_FILE_FID = open(previousNOINFLUX_FILEname, 'w')
-startFILEname = 't_start.csv'
-startFILE_FID = open(startFILEname, 'w')
-startNOINFLUX_FILEname = 't_start_NOINFLUX.csv'
-startNOINFLUX_FILE_FID = open(startNOINFLUX_FILEname, 'w')
-newSpeciesFileName = 'newSpecies.csv'
-newSpecies_FID = open(newSpeciesFileName, 'w')
-newSpeciesFileName = 'livingSpecies.csv'
-livingSpecies_FID = open(newSpeciesFileName, 'w')
+previousFILE_FID = open('STAT_t_tminus_1.csv', 'w')
+previousNOINFLUX_FILE_FID = open('STAT_t_tminus_1_NOINFLUX.csv', 'w')
+startFILE_FID = open('STAT_t_start.csv', 'w')
+startNOINFLUX_FILE_FID = open('STAT_t_start_NOINFLUX.csv', 'w')
+
+HAM_previousFILE_FID = open('STAT_HAM_t_tminus_1.csv', 'w')
+HAM_previousNOINFLUX_FILE_FID = open('STAT_HAM_t_tminus_1_NOINFLUX.csv', 'w')
+HAM_startFILE_FID = open('STAT_HAM_t_start.csv', 'w')
+HAM_startNOINFLUX_FILE_FID = open('STAT_HAM_t_start_NOINFLUX.csv', 'w')
+
+EUC_previousFILE_FID = open('STAT_EUC_t_tminus_1.csv', 'w')
+EUC_previousNOINFLUX_FILE_FID = open('STAT_EUC_t_tminus_1_NOINFLUX.csv', 'w')
+EUC_startFILE_FID = open('STAT_EUC_t_start.csv', 'w')
+EUC_startNOINFLUX_FILE_FID = open('STAT_EUC_t_start_NOINFLUX.csv', 'w')
+
+newSpecies_FID = open('STAT_newSpecies.csv', 'w')
+livingSpecies_FID = open('STAT_livingSpecies.csv', 'w')
+totMass_FID = open('STAT_overallMass.csv', 'w')
+evaluatedFID = open('STAT_evaluated.csv', 'w')
+zeroOneSpeciesFID = open('STAT_zeroOneSpecies.csv', 'w')
+
 for tmpDir in tmpDirs:
 
 	totDirName = os.path.join(StrPath,tmpDir)
@@ -132,27 +157,26 @@ for tmpDir in tmpDirs:
 				  # Searching for files
 				  speciesFiles = sorted(glob.glob(os.path.join(resDirPath,strSpecies)))
 				  
+				  zeroList = returnZeroSpeciesList(speciesFiles[-1])
+				  
 				  if ngen == 1:
 				  	speciesFiles = speciesFilesZero + speciesFiles
 				  	
 				  seqOLD = []; seqOLDNOINFLUX = []; concOLD = []
-				  previousAngleList = []
-				  previousAngleListNOINFLUX = []
 				  seqSTART = []; seqSTART_NOINFLUX = []; concSTART = []
+				  totMass = []; obsSpecies = [];
 				  oldNumberOfSpecies = 0
-				  # FOR EACH FILE SPECIES
+				  
+				  # FOR EACH FILE SPECIES ---------------------------
 				  for idS, sngSpeciesFile in enumerate(speciesFiles):
 				  	
-				  	print '  |- Species File: ', sngSpeciesFile
-						
-					# Open Catalysis File
+				  	print '  |- Species File: ', sngSpeciesFile	
 					try:
 						fidSpecies = open(sngSpeciesFile, 'r')
 					except:
 						print ' |- impossible to load ', sngSpeciesFile; sys.exit(1)
 						
-					# For each last species file
-					seq = []; conc = []; seqNOINFLUX = []; numberOfSpecies = 0;
+					seq = []; conc = []; seqNOINFLUX = []; numberOfSpecies = 0; tmpMass = 0; tmpObsSpecies = 0
 					for sp in fidSpecies:
 						tmpID, tmpSeq, tmpConc, tmpDiff, tmpSol, tmpCpxDiss, tmpCpxCut, tmpEval, tmpAge, tmpReb, tmpCatID, tmpSubID, tmpKpho, tmpLoadConc, tmpConcLock = sp.split()
 						if (int(tmpCpxCut) == 0) & (float(tmpConc) > 0):
@@ -165,64 +189,78 @@ for tmpDir in tmpDirs:
 								seqNOINFLUX.append(str(tmpSeq))	
 								if idS == 0:
 									seqSTART_NOINFLUX.append(str(tmpSeq))
+							# Set 1 in zeroList (species has been created at least once)
+							zeroList[numberOfSpecies] = 1
+							# Update systems mass
+							tmpMass += len(str(tmpSeq)) * int(round(float(tmpConc) * 6.022e23 * tmpVolume))
+						# If the species is not a complex, the number of species is updated	
 						if int(tmpCpxCut) == 0:
 							numberOfSpecies += 1	
-							
+						if int(tmpCpxCut) == 0 and int(tmpEval) == 1:
+							tmpObsSpecies += 1
+					
+					# Compute number of new species		
 					deltaNspecies = numberOfSpecies - oldNumberOfSpecies
 					oldNumberOfSpecies = numberOfSpecies 
 					strtoW = str(deltaNspecies) + '\t'
 					newSpecies_FID.write(strtoW)	
 					strtoW = str(len(conc)) + '\t'
-					livingSpecies_FID.write(strtoW)						
-					
+					livingSpecies_FID.write(strtoW)		
+					strtoW = str(tmpMass) + '\t'
+					totMass_FID.write(strtoW)	
+					strtoW = str(tmpObsSpecies) + '\t'
+					evaluatedFID.write(strtoW)	
 					# ------------------------------------------------------					
 					# PREVIOUS ONE Defining concentration of the two vectors
-					print '   |- T <-> T-1'
-					coseno = angleBetweenTwoLists(seq, conc, seqOLD, concOLD)
-					if idS != 0:
-						previousAngleList.append(coseno)
-						strtoW = str(coseno) + '\t'
-						previousFILE_FID.write(strtoW)
-					#raw_input('->')
-
-					# ------------------------------------------------------					
+					tmpMisure = distanceMisures(seq, conc, seqOLD, concOLD, idS)
+					previousFILE_FID.write(tmpMisure[0])
+					HAM_previousFILE_FID.write(tmpMisure[1])
+					EUC_previousFILE_FID.write(tmpMisure[2])					
 					# START Defining concentration of the two vectors
-					coseno = angleBetweenTwoLists(seq, conc, seqSTART, concSTART)
-					if idS != 0:
-						previousAngleList.append(coseno)
-						strtoW = str(coseno) + '\t'
-						startFILE_FID.write(strtoW)						
-						  
-					# ------------------------------------------------------					
+					tmpMisure = distanceMisures(seq, conc, seqSTART, concSTART, idS)
+					startFILE_FID.write(tmpMisure[0])
+					HAM_startFILE_FID.write(tmpMisure[1])
+					EUC_startFILE_FID.write(tmpMisure[2])				
 					# PREVIOUS ONE (NO INFLUX) Defining concentration of the two vectors
-					print '   |- T <-> T-1 (NO INFLUX)'
-					coseno = angleBetweenTwoLists(seqNOINFLUX, conc, seqOLDNOINFLUX, concOLD)
-					if idS != 0:
-						previousAngleListNOINFLUX.append(coseno)	
-						strtoW = str(coseno) + '\t'
-						previousNOINFLUX_FILE_FID.write(strtoW)		
-
-					# ------------------------------------------------------					
+					tmpMisure = distanceMisures(seqNOINFLUX, conc, seqOLDNOINFLUX, concOLD, idS)
+					previousNOINFLUX_FILE_FID.write(tmpMisure[0])
+					HAM_previousNOINFLUX_FILE_FID.write(tmpMisure[1])
+					EUC_previousNOINFLUX_FILE_FID.write(tmpMisure[2])				
 					# START (NO INFLUX) Defining concentration of the two vectors
-					coseno = angleBetweenTwoLists(seqNOINFLUX, conc, seqSTART_NOINFLUX, concSTART)
-					if idS != 0:
-						previousAngleList.append(coseno)
-						strtoW = str(coseno) + '\t'
-						startNOINFLUX_FILE_FID.write(strtoW)								
-						  
+					tmpMisure = distanceMisures(seqNOINFLUX, conc, seqSTART_NOINFLUX, concSTART, idS)
+					startNOINFLUX_FILE_FID.write(tmpMisure[0])
+					HAM_startNOINFLUX_FILE_FID.write(tmpMisure[1])
+					EUC_startNOINFLUX_FILE_FID.write(tmpMisure[2])
+							  
 					# the new lists becomes the old one
 					seqOLD = seq[:]
 					seqOLDNOINFLUX = seqNOINFLUX[:]
 					concOLD = conc[:]
-							  					  
+					# Close file species		  					  
 				  	fidSpecies.close()
-				  	
+				  
+				  # Write newline char on result files
 				  previousFILE_FID.write('\n')
 				  previousNOINFLUX_FILE_FID.write('\n')
 				  startFILE_FID.write('\n')
 				  startNOINFLUX_FILE_FID.write('\n')
 				  newSpecies_FID.write('\n')
 				  livingSpecies_FID.write('\n')
+				  totMass_FID.write('\n')
+				  evaluatedFID.write('\n')
+				  HAM_previousFILE_FID.write('\n')
+				  HAM_previousNOINFLUX_FILE_FID.write('\n')
+				  HAM_startFILE_FID.write('\n')
+				  HAM_startNOINFLUX_FILE_FID.write('\n')
+				  EUC_previousFILE_FID.write('\n')
+				  EUC_previousNOINFLUX_FILE_FID.write('\n')
+				  EUC_startFILE_FID.write('\n')
+				  EUC_startNOINFLUX_FILE_FID.write('\n')
+				  # Write zeroOneList on file
+				  for zol in zeroList:
+					strtoW = str(zol) + '\t'
+					zeroOneSpeciesFID.write(strtoW)
+				  zeroOneSpeciesFID.write('\n')
 		else: 
 			print " |- no result folder has been found"
 
@@ -231,23 +269,24 @@ previousFILE_FID.close()
 previousNOINFLUX_FILE_FID.close()
 startFILE_FID.close()
 startNOINFLUX_FILE_FID.close()
+
+HAM_previousFILE_FID.close()
+HAM_previousNOINFLUX_FILE_FID.close()
+HAM_startFILE_FID.close()
+HAM_startNOINFLUX_FILE_FID.close()
+
+EUC_previousFILE_FID.close()
+EUC_previousNOINFLUX_FILE_FID.close()
+EUC_startFILE_FID.close()
+EUC_startNOINFLUX_FILE_FID.close()
+
 newSpecies_FID.close()
 livingSpecies_FID.close()
+zeroOneSpeciesFID.close()
+totMass_FID.close()
+evaluatedFID.close()
 
-
-print '|- FINISHED... SEE YOU NEXT TIME'		
-			
-
-			
-					
-						
-				
-			
-			
-
-			
-    			
-
+print '|- FINISHED... SEE YOU NEXT TIME'
 
 					
 					
