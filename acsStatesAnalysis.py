@@ -108,7 +108,7 @@ print 'ACS STATES ANALYSER'
 print ''
 print '|- STEP 1. Creating common sorted species list...'
 
-ndn = '_0_new_allStatResults_'
+ndn = '_0_new_allStatResults'
 newdirAllResults = os.path.join(os.curdir, ndn)
 if not os.path.isdir(newdirAllResults):
 	try:
