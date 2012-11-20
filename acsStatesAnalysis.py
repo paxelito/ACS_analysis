@@ -65,7 +65,7 @@ def distanceMisures(tmpSeqX, tmpConcX, tmpSeqY, tmpConcY, tmpIDs):
 		vecY = np.array(speciesConcY)
 		tmpCos = np.dot(vecX,vecY) / (np.linalg.norm(vecX) * np.linalg.norm(vecY))	
 		
-		strtoW[0] = str(tmpCos) + '\t'
+		strtoW[0] = tmpCos
 		
 		# HAMMING DISTANCE and EUCLIDEAN DISTANCE
 		tmpHD = 0
@@ -75,13 +75,13 @@ def distanceMisures(tmpSeqX, tmpConcX, tmpSeqY, tmpConcY, tmpIDs):
 				tmpHD += 1
 			tmpEU += pow(x - speciesConcY[pos],2)
 			
-		strtoW[1] = str(tmpHD) + '\t'
-		strtoW[2] = str(pow(tmpEU,0.5)) + '\t'
+		strtoW[1] = tmpHD
+		strtoW[2] = pow(tmpEU,0.5)
 					
 	else:
-		strtoW[0] = str(1) + '\t'
-		strtoW[1] = str(0) + '\t'
-		strtoW[2] = str(0) + '\t'
+		strtoW[0] = 1
+		strtoW[1] = 0
+		strtoW[2] = 0
 		
 	return strtoW
 	
@@ -108,6 +108,16 @@ print 'ACS STATES ANALYSER'
 print ''
 print '|- STEP 1. Creating common sorted species list...'
 
+ndn = '_0_new_allStatResults_'
+newdirAllResults = os.path.join(os.curdir, ndn)
+if not os.path.isdir(newdirAllResults):
+	try:
+		os.mkdir(newdirAllResults)
+	except:
+		print "Impossible to create statistic directory", newdirAllResults; sys.exit(1)
+		
+os.chdir(newdirAllResults)
+
 # Open File containing results 
 previousFILE_FID = open('STAT_t_tminus_1.csv', 'w')
 previousNOINFLUX_FILE_FID = open('STAT_t_tminus_1_NOINFLUX.csv', 'w')
@@ -124,11 +134,28 @@ EUC_previousNOINFLUX_FILE_FID = open('STAT_EUC_t_tminus_1_NOINFLUX.csv', 'w')
 EUC_startFILE_FID = open('STAT_EUC_t_start.csv', 'w')
 EUC_startNOINFLUX_FILE_FID = open('STAT_EUC_t_start_NOINFLUX.csv', 'w')
 
+previousFILE_FID_group = open('STAT_t_tminus_1_group.csv', 'w')
+previousNOINFLUX_FILE_FID_group = open('STAT_t_tminus_1_NOINFLUX_group.csv', 'w')
+startFILE_FID_group = open('STAT_t_start_group.csv', 'w')
+startNOINFLUX_FILE_FID_group = open('STAT_t_start_NOINFLUX_group.csv', 'w')
+
+HAM_previousFILE_FID_group = open('STAT_HAM_t_tminus_1_group.csv', 'w')
+HAM_previousNOINFLUX_FILE_FID_group = open('STAT_HAM_t_tminus_1_NOINFLUX_group.csv', 'w')
+HAM_startFILE_FID_group = open('STAT_HAM_t_start_group.csv', 'w')
+HAM_startNOINFLUX_FILE_FID_group = open('STAT_HAM_t_start_NOINFLUX_group.csv', 'w')
+
+EUC_previousFILE_FID_group = open('STAT_EUC_t_tminus_1_group.csv', 'w')
+EUC_previousNOINFLUX_FILE_FID_group = open('STAT_EUC_t_tminus_1_NOINFLUX_group.csv', 'w')
+EUC_startFILE_FID_group = open('STAT_EUC_t_start_group.csv', 'w')
+EUC_startNOINFLUX_FILE_FID_group = open('STAT_EUC_t_start_NOINFLUX_group.csv', 'w')
+
 newSpecies_FID = open('STAT_newSpecies.csv', 'w')
 livingSpecies_FID = open('STAT_livingSpecies.csv', 'w')
 totMass_FID = open('STAT_overallMass.csv', 'w')
 evaluatedFID = open('STAT_evaluated.csv', 'w')
 zeroOneSpeciesFID = open('STAT_zeroOneSpecies.csv', 'w')
+
+os.chdir(StrPath)
 
 for tmpDir in tmpDirs:
 
@@ -143,6 +170,11 @@ for tmpDir in tmpDirs:
 			
 			# Find the number of generations
 			numberOfGen = len(glob.glob(os.path.join(resDirPath,'times_*')))
+			
+			group_A_prev = []; group_HAM_prev = []; group_EUC_prev = [];
+			group_A_start = []; group_HAM_start = []; group_EUC_start = [];
+			group_A_prev_NI = []; group_HAM_prev_NI = []; group_EUC_prev_NI = [];
+			group_A_start_NI = []; group_HAM_start_NI = []; group_EUC_start_NI = [];
 			
 			for ngen in range(1,numberOfGen+1):
 			  
@@ -162,9 +194,11 @@ for tmpDir in tmpDirs:
 				  if ngen == 1:
 				  	speciesFiles = speciesFilesZero + speciesFiles
 				  	
+				  # Initialize moving average lists
 				  seqOLD = []; seqOLDNOINFLUX = []; concOLD = []
 				  seqSTART = []; seqSTART_NOINFLUX = []; concSTART = []
 				  totMass = []; obsSpecies = [];
+				  
 				  oldNumberOfSpecies = 0
 				  
 				  # FOR EACH FILE SPECIES ---------------------------
@@ -210,27 +244,49 @@ for tmpDir in tmpDirs:
 					totMass_FID.write(strtoW)	
 					strtoW = str(tmpObsSpecies) + '\t'
 					evaluatedFID.write(strtoW)	
+					
 					# ------------------------------------------------------					
 					# PREVIOUS ONE Defining concentration of the two vectors
 					tmpMisure = distanceMisures(seq, conc, seqOLD, concOLD, idS)
-					previousFILE_FID.write(tmpMisure[0])
-					HAM_previousFILE_FID.write(tmpMisure[1])
-					EUC_previousFILE_FID.write(tmpMisure[2])					
+					previousFILE_FID.write(str(tmpMisure[0]) + '\t'); group_A_prev.append(tmpMisure[0])
+					HAM_previousFILE_FID.write(str(tmpMisure[1]) + '\t'); group_HAM_prev.append(tmpMisure[1])
+					EUC_previousFILE_FID.write(str(tmpMisure[2]) + '\t'); group_EUC_prev.append(tmpMisure[2])			
 					# START Defining concentration of the two vectors
 					tmpMisure = distanceMisures(seq, conc, seqSTART, concSTART, idS)
-					startFILE_FID.write(tmpMisure[0])
-					HAM_startFILE_FID.write(tmpMisure[1])
-					EUC_startFILE_FID.write(tmpMisure[2])				
+					startFILE_FID.write(str(tmpMisure[0]) + '\t'); group_A_start.append(tmpMisure[0])
+					HAM_startFILE_FID.write(str(tmpMisure[1]) + '\t'); group_HAM_start.append(tmpMisure[1])
+					EUC_startFILE_FID.write(str(tmpMisure[2]) + '\t'); group_EUC_start.append(tmpMisure[2])	
 					# PREVIOUS ONE (NO INFLUX) Defining concentration of the two vectors
 					tmpMisure = distanceMisures(seqNOINFLUX, conc, seqOLDNOINFLUX, concOLD, idS)
-					previousNOINFLUX_FILE_FID.write(tmpMisure[0])
-					HAM_previousNOINFLUX_FILE_FID.write(tmpMisure[1])
-					EUC_previousNOINFLUX_FILE_FID.write(tmpMisure[2])				
+					previousNOINFLUX_FILE_FID.write(str(tmpMisure[0]) + '\t'); group_A_prev_NI.append(tmpMisure[0])
+					HAM_previousNOINFLUX_FILE_FID.write(str(tmpMisure[1]) + '\t'); group_HAM_prev_NI.append(tmpMisure[1])
+					EUC_previousNOINFLUX_FILE_FID.write(str(tmpMisure[2]) + '\t'); group_EUC_prev_NI.append(tmpMisure[2])		
 					# START (NO INFLUX) Defining concentration of the two vectors
 					tmpMisure = distanceMisures(seqNOINFLUX, conc, seqSTART_NOINFLUX, concSTART, idS)
-					startNOINFLUX_FILE_FID.write(tmpMisure[0])
-					HAM_startNOINFLUX_FILE_FID.write(tmpMisure[1])
-					EUC_startNOINFLUX_FILE_FID.write(tmpMisure[2])
+					startNOINFLUX_FILE_FID.write(str(tmpMisure[0]) + '\t'); group_A_start_NI.append(tmpMisure[0])
+					HAM_startNOINFLUX_FILE_FID.write(str(tmpMisure[1]) + '\t'); group_HAM_start_NI.append(tmpMisure[1])
+					EUC_startNOINFLUX_FILE_FID.write(str(tmpMisure[2]) + '\t'); group_EUC_start_NI.append(tmpMisure[2])
+					
+					# Compute and save floating average values
+					if idS % 10 == 0:
+						if idS != 0:
+							previousFILE_FID_group.write(str(np.mean(group_A_prev)) + '\t')
+							previousNOINFLUX_FILE_FID_group.write(str(np.mean(group_A_prev_NI)) + '\t')
+							startFILE_FID_group.write(str(np.mean(group_A_start)) + '\t')
+							startNOINFLUX_FILE_FID_group.write(str(np.mean(group_A_start_NI)) + '\t')
+							HAM_previousFILE_FID_group.write(str(np.mean(group_HAM_prev)) + '\t')
+							HAM_previousNOINFLUX_FILE_FID_group.write(str(np.mean(group_HAM_prev_NI)) + '\t')
+							HAM_startFILE_FID_group.write(str(np.mean(group_HAM_start)) + '\t')
+							HAM_startNOINFLUX_FILE_FID_group.write(str(np.mean(group_HAM_start_NI)) + '\t')
+							EUC_previousFILE_FID_group.write(str(np.mean(group_EUC_prev)) + '\t')
+							EUC_previousNOINFLUX_FILE_FID_group.write(str(np.mean(group_EUC_prev_NI)) + '\t')
+							EUC_startFILE_FID_group.write(str(np.mean(group_EUC_start)) + '\t')
+							EUC_startNOINFLUX_FILE_FID_group.write(str(np.mean(group_EUC_start_NI)) + '\t')	
+							group_A_prev = []; group_HAM_prev = []; group_EUC_prev = [];
+							group_A_start = []; group_HAM_start = []; group_EUC_start = [];
+							group_A_prev_NI = []; group_HAM_prev_NI = []; group_EUC_prev_NI = [];
+							group_A_start_NI = []; group_HAM_start_NI = []; group_EUC_start_NI = [];
+							
 							  
 					# the new lists becomes the old one
 					seqOLD = seq[:]
@@ -256,6 +312,18 @@ for tmpDir in tmpDirs:
 				  EUC_previousNOINFLUX_FILE_FID.write('\n')
 				  EUC_startFILE_FID.write('\n')
 				  EUC_startNOINFLUX_FILE_FID.write('\n')
+				  previousFILE_FID_group.write('\n')
+				  previousNOINFLUX_FILE_FID_group.write('\n')
+				  startFILE_FID_group.write('\n')
+				  startNOINFLUX_FILE_FID_group.write('\n')
+				  HAM_previousFILE_FID_group.write('\n')
+				  HAM_previousNOINFLUX_FILE_FID_group.write('\n')
+				  HAM_startFILE_FID_group.write('\n')
+				  HAM_startNOINFLUX_FILE_FID_group.write('\n')
+				  EUC_previousFILE_FID_group.write('\n')
+				  EUC_previousNOINFLUX_FILE_FID_group.write('\n')
+				  EUC_startFILE_FID_group.write('\n')
+				  EUC_startNOINFLUX_FILE_FID_group.write('\n')
 				  # Write zeroOneList on file
 				  for zol in zeroList:
 					strtoW = str(zol) + '\t'
@@ -279,6 +347,21 @@ EUC_previousFILE_FID.close()
 EUC_previousNOINFLUX_FILE_FID.close()
 EUC_startFILE_FID.close()
 EUC_startNOINFLUX_FILE_FID.close()
+
+previousFILE_FID_group.close()
+previousNOINFLUX_FILE_FID_group.close()
+startFILE_FID_group.close()
+startNOINFLUX_FILE_FID_group.close()
+
+HAM_previousFILE_FID_group.close()
+HAM_previousNOINFLUX_FILE_FID_group.close()
+HAM_startFILE_FID_group.close()
+HAM_startNOINFLUX_FILE_FID_group.close()
+
+EUC_previousFILE_FID_group.close()
+EUC_previousNOINFLUX_FILE_FID_group.close()
+EUC_startFILE_FID_group.close()
+EUC_startNOINFLUX_FILE_FID_group.close()
 
 newSpecies_FID.close()
 livingSpecies_FID.close()
