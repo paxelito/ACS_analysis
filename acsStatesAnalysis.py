@@ -118,7 +118,7 @@ if not os.path.isdir(newdirAllResults):
 		
 os.chdir(newdirAllResults)
 
-# Open File containing results 
+# Open Files containing results 
 previousFILE_FID = open('STAT_t_tminus_1.csv', 'w')
 previousNOINFLUX_FILE_FID = open('STAT_t_tminus_1_NOINFLUX.csv', 'w')
 startFILE_FID = open('STAT_t_start.csv', 'w')
@@ -133,6 +133,10 @@ EUC_previousFILE_FID = open('STAT_EUC_t_tminus_1.csv', 'w')
 EUC_previousNOINFLUX_FILE_FID = open('STAT_EUC_t_tminus_1_NOINFLUX.csv', 'w')
 EUC_startFILE_FID = open('STAT_EUC_t_start.csv', 'w')
 EUC_startNOINFLUX_FILE_FID = open('STAT_EUC_t_start_NOINFLUX.csv', 'w')
+
+ANG_middlePreviousFILE_FID = open('STAT_ANG_t_middle_NOINFLUX.csv', 'w')
+HAM_middlePreviousFILE_FID = open('STAT_HAM_t_middle_NOINFLUX.csv', 'w')
+EUC_middlePreviousFILE_FID = open('STAT_EUC_t_middle_NOINFLUX.csv', 'w')
 
 previousFILE_FID_group = open('STAT_t_tminus_1_group.csv', 'w')
 previousNOINFLUX_FILE_FID_group = open('STAT_t_tminus_1_NOINFLUX_group.csv', 'w')
@@ -198,6 +202,7 @@ for tmpDir in tmpDirs:
 				  seqOLD = []; seqOLDNOINFLUX = []; concOLD = []
 				  seqSTART = []; seqSTART_NOINFLUX = []; concSTART = []
 				  totMass = []; obsSpecies = [];
+				  seqMIDDLE_NOINFLUX = []; concMIDDLE = [];
 				  
 				  oldNumberOfSpecies = 0
 				  
@@ -218,11 +223,15 @@ for tmpDir in tmpDirs:
 							conc.append(float(tmpConc))
 							if idS == 0:
 								seqSTART.append(str(tmpSeq))
-								concSTART.append(float(tmpConc))							
+								concSTART.append(float(tmpConc))
+							if idS == 50:
+								concMIDDLE.append(float(tmpConc))							
 							if len(str(tmpSeq)) > tmpMaxFluxL:
 								seqNOINFLUX.append(str(tmpSeq))	
 								if idS == 0:
 									seqSTART_NOINFLUX.append(str(tmpSeq))
+								if idS == 50:
+									seqMIDDLE_NOINFLUX.append(str(tmpSeq))
 							# Set 1 in zeroList (species has been created at least once)
 							zeroList[numberOfSpecies] = 1
 							# Update systems mass
@@ -266,7 +275,12 @@ for tmpDir in tmpDirs:
 					startNOINFLUX_FILE_FID.write(str(tmpMisure[0]) + '\t'); group_A_start_NI.append(tmpMisure[0])
 					HAM_startNOINFLUX_FILE_FID.write(str(tmpMisure[1]) + '\t'); group_HAM_start_NI.append(tmpMisure[1])
 					EUC_startNOINFLUX_FILE_FID.write(str(tmpMisure[2]) + '\t'); group_EUC_start_NI.append(tmpMisure[2])
-					
+					# MIDDLE (NO INFLUX) Defining concentration of the two vectors
+					if idS >= 50:
+						tmpMisure = distanceMisures(seqNOINFLUX, conc, seqMIDDLE_NOINFLUX, concMIDDLE, idS)
+						ANG_middlePreviousFILE_FID.write(str(tmpMisure[0]) + '\t')
+						HAM_middlePreviousFILE_FID.write(str(tmpMisure[1]) + '\t')
+				  		EUC_middlePreviousFILE_FID.write(str(tmpMisure[2]) + '\t')
 					# Compute and save floating average values
 					if idS % 10 == 0:
 						if idS != 0:
@@ -300,30 +314,42 @@ for tmpDir in tmpDirs:
 				  previousNOINFLUX_FILE_FID.write('\n')
 				  startFILE_FID.write('\n')
 				  startNOINFLUX_FILE_FID.write('\n')
+				  
 				  newSpecies_FID.write('\n')
 				  livingSpecies_FID.write('\n')
 				  totMass_FID.write('\n')
 				  evaluatedFID.write('\n')
+				  
 				  HAM_previousFILE_FID.write('\n')
 				  HAM_previousNOINFLUX_FILE_FID.write('\n')
 				  HAM_startFILE_FID.write('\n')
 				  HAM_startNOINFLUX_FILE_FID.write('\n')
+				  
 				  EUC_previousFILE_FID.write('\n')
 				  EUC_previousNOINFLUX_FILE_FID.write('\n')
 				  EUC_startFILE_FID.write('\n')
 				  EUC_startNOINFLUX_FILE_FID.write('\n')
+				  
+				  if idS >= 50:
+				  	ANG_middlePreviousFILE_FID.write('\n')
+				  	HAM_middlePreviousFILE_FID.write('\n')
+				  	EUC_middlePreviousFILE_FID.write('\n')
+				  
 				  previousFILE_FID_group.write('\n')
 				  previousNOINFLUX_FILE_FID_group.write('\n')
 				  startFILE_FID_group.write('\n')
 				  startNOINFLUX_FILE_FID_group.write('\n')
+				  
 				  HAM_previousFILE_FID_group.write('\n')
 				  HAM_previousNOINFLUX_FILE_FID_group.write('\n')
 				  HAM_startFILE_FID_group.write('\n')
 				  HAM_startNOINFLUX_FILE_FID_group.write('\n')
+				  
 				  EUC_previousFILE_FID_group.write('\n')
 				  EUC_previousNOINFLUX_FILE_FID_group.write('\n')
 				  EUC_startFILE_FID_group.write('\n')
 				  EUC_startNOINFLUX_FILE_FID_group.write('\n')
+				  
 				  # Write zeroOneList on file
 				  for zol in zeroList:
 					strtoW = str(zol) + '\t'
@@ -347,6 +373,10 @@ EUC_previousFILE_FID.close()
 EUC_previousNOINFLUX_FILE_FID.close()
 EUC_startFILE_FID.close()
 EUC_startNOINFLUX_FILE_FID.close()
+
+ANG_middlePreviousFILE_FID.close()
+HAM_middlePreviousFILE_FID.close()
+EUC_middlePreviousFILE_FID.close()
 
 previousFILE_FID_group.close()
 previousNOINFLUX_FILE_FID_group.close()

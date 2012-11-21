@@ -166,10 +166,13 @@ for tmpDir in tmpDirs:
 			  fidSpecies.close()	
 			
 print '|- STEP 3. Compute attractors differences (in term of different multi-dimensional angles)'	
-overallResMatrix = np.zeros((numberOfFolders,numberOfFolders))
-overallResMatrix_angle = np.zeros((numberOfFolders,numberOfFolders))
-overallResMatrixNOINFLUX = np.zeros((numberOfFolders,numberOfFolders))
-overallResMatrix_angleNOINFLUX = np.zeros((numberOfFolders,numberOfFolders))
+ANG_overallResMatrix = np.zeros((numberOfFolders,numberOfFolders))
+ANG_overallResMatrixNOINFLUX = np.zeros((numberOfFolders,numberOfFolders))
+HAM_overallResMatrix = np.zeros((numberOfFolders,numberOfFolders))
+HAM_overallResMatrixNOINFLUX = np.zeros((numberOfFolders,numberOfFolders))
+EUC_overallResMatrix = np.zeros((numberOfFolders,numberOfFolders))
+EUC_overallResMatrixNOINFLUX = np.zeros((numberOfFolders,numberOfFolders))
+
 # Angle between lists is now computed
 for idx, lx in enumerate(overallConcList):
 	for idy, ly in enumerate(overallConcList):
@@ -177,21 +180,49 @@ for idx, lx in enumerate(overallConcList):
 		vecY = np.array(ly)
 		# Compute coseno
 		tmpCos = np.dot(vecX,vecY) / (np.linalg.norm(vecX) * np.linalg.norm(vecY))
-		overallResMatrix[idx,idy] = tmpCos
-		#overallResMatrix_angle[idx,idy] = np.arccos(tmpCos)
+		ANG_overallResMatrix[idx,idy] = tmpCos
+		# HAMMING DISTANCE and EUCLIDEAN DISTANCE
+		tmpHD = 0
+		tmpEU = 0
+		for pos, x in enumerate(lx):
+			if ((x > 0.0) & (ly[pos] == 0.0)) | ((x == 0.0) & (ly[pos] > 0.0)):
+				tmpHD += 1
+			tmpEU += pow(x - ly[pos],2)
+			
+		HAM_overallResMatrix[idx,idy] = tmpHD
+		EUC_overallResMatrix[idx,idy] = pow(tmpEU,0.5)		
+		
 for idx, lx in enumerate(overallConcListNOINFLUX):
 	for idy, ly in enumerate(overallConcListNOINFLUX):
 		vecX = np.array(lx)
 		vecY = np.array(ly)
 		# Compute coseno
 		tmpCos = np.dot(vecX,vecY) / (np.linalg.norm(vecX) * np.linalg.norm(vecY))
-		overallResMatrixNOINFLUX[idx,idy] = tmpCos
-		#overallResMatrix_angleNOINFLUX[idx,idy] = np.arccos(tmpCos)
+		ANG_overallResMatrixNOINFLUX[idx,idy] = tmpCos
+		# HAMMING DISTANCE and EUCLIDEAN DISTANCE
+		tmpHD = 0
+		tmpEU = 0
+		for pos, x in enumerate(lx):
+			if ((x > 0.0) & (ly[pos] == 0.0)) | ((x == 0.0) & (ly[pos] > 0.0)):
+				tmpHD += 1
+			tmpEU += pow(x - ly[pos],2)
+			
+		HAM_overallResMatrixNOINFLUX[idx,idy] = tmpHD
+		EUC_overallResMatrixNOINFLUX[idx,idy] = pow(tmpEU,0.5)
 
 print '|- STEP 3. Save Files'
 os.chdir(StrPath)
+ndn = '_0_new_allStatResults'
+newdirAllResults = os.path.join(os.curdir, ndn)
+if not os.path.isdir(newdirAllResults):
+	try:
+		os.mkdir(newdirAllResults)
+	except:
+		print "Impossible to create statistic directory", newdirAllResults; sys.exit(1)
+		
+os.chdir(newdirAllResults)
 # ''' Save concentration vectors"
-print ' |- Saving species conentrations list...'
+print ' |- Saving species Concentrations list...'
 outFnameStat = 'speciesVector.csv'
 saveFileStat = open(outFnameStat, 'w')
 for sngSimConc in overallConcList:
@@ -206,7 +237,7 @@ for sngSimConc in overallConcList:
 saveFileStat.close()
 
 # ''' Save concentration vectors (NO INFLUX)"
-print ' |- Saving species conentrations list (NO INFLUX)...'
+print ' |- Saving species Concentrations list (NO INFLUX)...'
 outFnameStat = 'speciesVectorNOINFLUX.csv'
 saveFileStat = open(outFnameStat, 'w')
 for sngSimConcNOINFLUX in overallConcListNOINFLUX:
@@ -222,33 +253,85 @@ saveFileStat.close()
 
 # '''Function to save statistic on file'''
 print ' |- Saving coseno...'
-outFnameStat = 'acsAttractorsAnalysis.csv'
+outFnameStat = 'acsAttractorsAnalysis_COSENO.csv'
 saveFileStat = open(outFnameStat, 'w')
 cnt = 0
 for i in range(numberOfFolders):
 	strTypes = ''
 	for j in range(numberOfFolders):
-		strTypes += str(overallResMatrix[j,i]) + '\t'	
+		strTypes += str(ANG_overallResMatrix[j,i]) + '\t'	
 	strTypes += '\n'
 	saveFileStat.write(strTypes)
 	cnt += 1
 saveFileStat.close()	
 
 print ' |- Saving coseno (NO INFLUX)...'
-outFnameStat = 'acsAttractorsAnalysisNOINFLUX.csv'
+outFnameStat = 'acsAttractorsAnalysisNOINFLUX_COSENO.csv'
 saveFileStat = open(outFnameStat, 'w')
 cnt = 0
 for i in range(numberOfFolders):
 	strTypes = ''
 	for j in range(numberOfFolders):
-		strTypes += str(overallResMatrixNOINFLUX[j,i]) + '\t'	
+		strTypes += str(ANG_overallResMatrixNOINFLUX[j,i]) + '\t'	
 	strTypes += '\n'
 	saveFileStat.write(strTypes)
 	cnt += 1
 saveFileStat.close()	
 
+print ' |- Saving HAMMING DISTANCES...'
+outFnameStat = 'acsAttractorsAnalysis_HAMMING.csv'
+saveFileStat = open(outFnameStat, 'w')
+cnt = 0
+for i in range(numberOfFolders):
+	strTypes = ''
+	for j in range(numberOfFolders):
+		strTypes += str(HAM_overallResMatrix[j,i]) + '\t'	
+	strTypes += '\n'
+	saveFileStat.write(strTypes)
+	cnt += 1
+saveFileStat.close()	
+
+print ' |- Saving HAMMING DISTANCES (NO INFLUX)...'
+outFnameStat = 'acsAttractorsAnalysisNOINFLUX_HAMMING.csv'
+saveFileStat = open(outFnameStat, 'w')
+cnt = 0
+for i in range(numberOfFolders):
+	strTypes = ''
+	for j in range(numberOfFolders):
+		strTypes += str(HAM_overallResMatrixNOINFLUX[j,i]) + '\t'	
+	strTypes += '\n'
+	saveFileStat.write(strTypes)
+	cnt += 1
+saveFileStat.close()	
+
+print ' |- Saving EUCLIDEAN DISTANCES...'
+outFnameStat = 'acsAttractorsAnalysis_EUCLIDEAN.csv'
+saveFileStat = open(outFnameStat, 'w')
+cnt = 0
+for i in range(numberOfFolders):
+	strTypes = ''
+	for j in range(numberOfFolders):
+		strTypes += str(EUC_overallResMatrix[j,i]) + '\t'	
+	strTypes += '\n'
+	saveFileStat.write(strTypes)
+	cnt += 1
+saveFileStat.close()	
+
+print ' |- Saving HAMMING EUCLIDEAN (NO INFLUX)...'
+outFnameStat = 'acsAttractorsAnalysisNOINFLUX_EUCLIDEAN.csv'
+saveFileStat = open(outFnameStat, 'w')
+cnt = 0
+for i in range(numberOfFolders):
+	strTypes = ''
+	for j in range(numberOfFolders):
+		strTypes += str(EUC_overallResMatrixNOINFLUX[j,i]) + '\t'	
+	strTypes += '\n'
+	saveFileStat.write(strTypes)
+	cnt += 1
+saveFileStat.close()
 
 
+os.chdir(StrPath)
 print '|- FINISHED... SEE YOU NEXT TIME'		
 			
 
