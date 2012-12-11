@@ -42,6 +42,23 @@ os.chdir(StrPath)
 
 chemistry = 1
 
+# Create stas folders
+ndn = '_0_new_allStatResults'
+newdirAllResults = os.path.join(StrPath, ndn)
+if not os.path.isdir(newdirAllResults):
+	try:
+		os.mkdir(newdirAllResults)
+	except:
+		print "Impossible to create statistic directory", newdirAllResults; sys.exit(1)
+
+ndn = 'allSpeciesActivities'
+newdirAllResultsInner = os.path.join(StrPath,'_0_new_allStatResults',ndn)
+if not os.path.isdir(newdirAllResultsInner):
+	try:
+		os.mkdir(newdirAllResultsInner)
+	except:
+		print "Impossible to create all species acts directory", newdirAllResults; sys.exit(1)
+
 for tmpDir in tmpDirs:
 
 	totDirName = os.path.join(StrPath,tmpDir)
@@ -56,7 +73,19 @@ for tmpDir in tmpDirs:
 			# Find the number of generations
 			numberOfGen = len(glob.glob(os.path.join(resDirPath,'times_*')))
 			#ÊFor each generation
+			# Go into stat folders
+			os.chdir(newdirAllResults)	
+			os.chdir(newdirAllResultsInner)	
+			tmpSpeciesStatsSummaryName = 'speciesStatsSummary_'  + str(chemistry) + '.csv'
+			tmpSpeciesStatsSummaryNameFID = open(tmpSpeciesStatsSummaryName, 'w')
+			# Change Chemistry
+			tmpStr = '\n------- CHEMISTRY ' + str(chemistry) + '---------\n'
+			tmpSpeciesStatsSummaryNameFID.write(tmpStr)
+			os.chdir(resDirPath)
 			for ngen in range(1,numberOfGen+1):
+				
+				tmpStr = '\n- - - - Generation ' + str(ngen) + '- - - - -\n'
+				tmpSpeciesStatsSummaryNameFID.write(tmpStr)
 					
 				strZeros = zeroBeforeStrNum(ngen, numberOfGen)
 				if ngen == 1:
@@ -116,32 +145,32 @@ for tmpDir in tmpDirs:
 						counters[cat,0] += 1
 						#sub1
 						counters[S2,1] += 1
-						#sub2
+						#prod1
 						counters[S3,2] += 1
-						#prod
+						#prod2
 						counters[S1,2] += 1		
 				
-				ndn = '_0_new_allStatResults'
-				newdirAllResults = os.path.join(StrPath, ndn)
-				if not os.path.isdir(newdirAllResults):
-					try:
-						os.mkdir(newdirAllResults)
-					except:
-						print "Impossible to create statistic directory", newdirAllResults; sys.exit(1)
 				
-				os.chdir(newdirAllResults)		
-				tmpFileName = 'speciesStats_' + strZeros + str(ngen) + '_' + str(chemistry) + '.csv'
+				# Go into stat folders
+				os.chdir(newdirAllResults)	
+				os.chdir(newdirAllResultsInner)		
+				
+				
+				tmpFileName = 'speciesStats_'  + str(chemistry) + '_' + strZeros + str(ngen) + '.csv'
 				print '  |- Saving result file: : ', tmpFileName
 				tmpFileNameFID = open(tmpFileName, 'w')
 				ID = 0
 				for sngCnt in counters:
 					tmpStr = str(ID) + "\t" + str(sngCnt[0]) + "\t" + str(sngCnt[1]) + "\t" + str(sngCnt[2]) + "\n"
 					tmpFileNameFID.write(tmpStr)
+					if (sngCnt[0] > (sngCnt[1] * 100)) & (sngCnt[0] > 1000):
+						tmpSpeciesStatsSummaryNameFID.write(tmpStr)
 					ID += 1
 				tmpFileNameFID.close()
 				
 				os.chdir(resDirPath)	
-				
+			
+			tmpSpeciesStatsSummaryNameFID.close()
 			chemistry += 1	
 				
 			  	
