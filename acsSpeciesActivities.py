@@ -123,7 +123,7 @@ for tmpDir in tmpDirs:
 				except:
 					print ' |- impossible to load ', strRctPar; sys.exit(1)	
 				
-				for sngRct in fidRctPar: 
+				for idRct, sngRct in enumerate(fidRctPar): 
 					tmpRctId, tmpRctT, tmpRctType, tmpCat, tmpS1, tmpS2, tmpS3, tmpCM, \
 					tmpCC, tmpGil, tmpGilSD, tmpE, tmpNSP, tmpRatio = sngRct.split()
 					rctType = int(tmpRctType)
@@ -160,6 +160,8 @@ for tmpDir in tmpDirs:
 				print '  |- Saving result file: : ', tmpFileName
 				tmpFileNameFID = open(tmpFileName, 'w')
 				ID = 0
+				tmpStr = 'Total Number of Reactions: ' + str(idRct) + '\n'
+				tmpSpeciesStatsSummaryNameFID.write(tmpStr)
 				for sngCnt in counters:
 					tmpStr = str(ID) + "\t" + str(sngCnt[0]) + "\t" + str(sngCnt[1]) + "\t" + str(sngCnt[2]) + "\n"
 					tmpFileNameFID.write(tmpStr)
