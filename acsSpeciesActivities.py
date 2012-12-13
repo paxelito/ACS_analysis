@@ -160,7 +160,7 @@ for tmpDir in tmpDirs:
 				print '  |- Saving result file: : ', tmpFileName
 				tmpFileNameFID = open(tmpFileName, 'w')
 				ID = 0
-				tmpStr = 'Total Number of Reactions: ' + str(idRct) + '\n'
+				tmpStr = 'Total Number of Reactions\t\t\t\t' + str(idRct) + '\n'
 				tmpSpeciesStatsSummaryNameFID.write(tmpStr)
 				for sngCnt in counters:
 					tmpStr = str(ID) + "\t" + str(sngCnt[0]) + "\t" + str(sngCnt[1]) + "\t" + str(sngCnt[2]) + "\n"
