@@ -31,24 +31,26 @@ _CLEAVAGE_ = 25.0
 _CONDENSATION_ = 50.0
 _COMPLEXFORM_ = 50.0
 
-#ÊGo to the source folder
-os.chdir(strFrom)
+# Go to the source folder
+os.chdir(StrFrom)
 
 # Go into the result folder 
-sourceResFolder = os.path.join(strFrom,"res")
+sourceResFolder = os.path.join(StrFrom,"res")
 os.chdir(sourceResFolder)
 
 
 # Select last species, reactions and catalysis file
-lastSpeciesFile = sort(glob.glob('species_*'))
-lastReactionsFile = sort(glob.glob('reactions_*'))
-lastCatalysisFile = sort(glob.glob('catalysis_*'))
+lastSpeciesFile = sorted(glob.glob('species_*'))
+lastReactionsFile = sorted(glob.glob('reactions_*'))
+lastCatalysisFile = sorted(glob.glob('catalysis_*'))
 
 # Move files into the new folder
 fileDest = os.path.join(StrTo,"_acsinflux.csv")
 os.system ("cp %s %s" % ("_acsinflux.csv",fileDest));
 fileDest = os.path.join(StrTo,"_acsnrgbooleanfunctions.csv")
 os.system ("cp %s %s" % ("_acsnrgbooleanfunctions.csv",fileDest));
+fileDest = os.path.join(StrTo,"_acsinflux.csv")
+os.system ("cp %s %s" % ("_acsinflux.csv",fileDest));
 fileDest = os.path.join(StrTo,"acsm2s.conf")
 os.system ("cp %s %s" % ("acsm2s.conf",fileDest));
 
@@ -63,7 +65,7 @@ os.system ("cp %s %s" % (lastCatalysisFile,fileDest));
 
 #ÊGo into the new folder
 #ÊGo to the source folder
-os.chdir(strTo)
+os.chdir(StrTo)
 
 # Reset Config File
 # ACSCONF FILE
