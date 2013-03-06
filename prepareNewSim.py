@@ -41,7 +41,7 @@ os.chdir(sourceResFolder)
 
 # Select last species, reactions and catalysis file
 lastSpeciesFile = sorted(glob.glob('species_*'))
-lastReactionsFile = sorted(glob.glob('reactions_*'))
+lastReactionsFile = sorted(glob.glob('reactions_1*'))
 lastCatalysisFile = sorted(glob.glob('catalysis_*'))
 
 # Move files into the new folder
@@ -49,19 +49,22 @@ fileDest = os.path.join(StrTo,"_acsinflux.csv")
 os.system ("cp %s %s" % ("_acsinflux.csv",fileDest));
 fileDest = os.path.join(StrTo,"_acsnrgbooleanfunctions.csv")
 os.system ("cp %s %s" % ("_acsnrgbooleanfunctions.csv",fileDest));
-fileDest = os.path.join(StrTo,"_acsinflux.csv")
-os.system ("cp %s %s" % ("_acsinflux.csv",fileDest));
 fileDest = os.path.join(StrTo,"acsm2s.conf")
 os.system ("cp %s %s" % ("acsm2s.conf",fileDest));
 
+print "-> files _acsinflux.csv, _acsnrgbooleanfunctions.csv and acsm2s.conf have been copied...\n"
+
 fileDest = os.path.join(StrTo,"_acsspecies.csv")
-os.system ("cp %s %s" % (lastSpeciesFile,fileDest));
+os.system ("cp %s %s" % (lastSpeciesFile[-1],fileDest));
 
 fileDest = os.path.join(StrTo,"_acsreactions.csv")
-os.system ("cp %s %s" % (lastReactionsFile,fileDest));
+os.system ("cp %s %s" % (lastReactionsFile[-1],fileDest));
 
 fileDest = os.path.join(StrTo,"_acscatalysis.csv")
-os.system ("cp %s %s" % (lastCatalysisFile,fileDest));
+os.system ("cp %s %s" % (lastCatalysisFile[-1],fileDest));
+
+print "-> files\n\t", lastSpeciesFile[-1], "\n\t", lastReactionsFile[-1], "\n\t", lastCatalysisFile[-1], "\n"
+print "\thave been copied and renamed into the new folder" 
 
 #ÊGo into the new folder
 #ÊGo to the source folder
@@ -75,12 +78,12 @@ for line in mod:
 	if line[0] <> "#":
 		linesplitted = line.split("=")
 		if linesplitted[0] == 'randomSeed':
-			linesplitted[1] = '0'
+			linesplitted[1] = '0\n'
 		if _REVRCTS_ == 1:
 			if linesplitted[0] == 'reverseReactions':
-				linesplitted[1] = '1'
+				linesplitted[1] = '1\n'
 			if linesplitted[0] == 'revRctRatio':
-				linesplitted[1] = str(_RATIOREV_)		
+				linesplitted[1] = str(_RATIOREV_) + '\n'		
 		mod[id] = "=".join(linesplitted)
 	id += 1	 
 	
@@ -90,6 +93,8 @@ try:
 	file.close()
 except IOError:
 	print "Couldn't save configuration file"	
+	
+print "-> file acsm2s.conf has been processed for the new simulation..."
 
 # Reset Species File 
 mod = open("_acsspecies.csv").readlines()	
@@ -112,6 +117,8 @@ try:
 except IOError:
 	print "Couldn't save species file"
 	
+print "-> file _acsspecies.csv has been processed for the new simulation..."
+	
 #reset reactions file
 mod = open("_acsreactions.csv").readlines()	
 id = 0
@@ -126,22 +133,24 @@ try:
 	file.close()
 except IOError:
 	print "Couldn't save reactions file"
+
+print "-> file _acsreactions.csv has been processed for the new simulation..."
 	
 # reset and fix catalysis file
 mod = open("_acscatalysis.csv").readlines()	
 mod_rct = open("_acsreactions.csv").readlines()
 id = 0
-for line in mod_cat:
+for line in mod:
 	flag = 0
 	linesplitted = line.split("\t")
 	linesplitted[3] = '0' # counter
 	
 	# Extract reaction from reaction file
-	catRct = linecache.getline('_acsreactions.csv', int(linesplitted[2]))
+	catRct = linecache.getline('_acsreactions.csv', int(linesplitted[2])+1)
 	carRctSplit = catRct.split("\t")
 	
 	# Check whether condensation or cleavage
-	if carRctSplit[1] == 0:
+	if int(carRctSplit[1]) == 0:
 		linesplitted[4] = str(_CONDENSATION_) # K_cond
 		linesplitted[5] = str(_CLEAVAGE_ / _RATIOREV_) # K_cleavage
 		linesplitted[6] = str(_COMPLEXFORM_) + '\n' # K_complex
@@ -158,6 +167,10 @@ try:
 	file.close()
 except IOError:
 	print "Couldn't save catalysis file"
+	
+print "-> file _acscatalysis.csv has been processed for the new simulation..."
+
+print "NEW SIMULATION READY TO START"
 
 
 # Come back to the original folder
