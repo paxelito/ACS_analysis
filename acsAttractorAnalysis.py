@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-'''Function to compute the different attractors emerging from a simulation. The algorithm compares all the final states of the simulation computing 
-	The differences between those. test
+'''Function to compute the different attractors emerging from a simulation.
+   The algorithm compares all the final states of the simulations
 	https://help.github.com/articles/fork-a-repo
 '''
 

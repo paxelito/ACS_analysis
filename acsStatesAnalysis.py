@@ -1,6 +1,7 @@
 #!/usr/bin/env python
-'''Function to compute the different attractors emerging from a simulation. The algorithm compares all the final states of the simulation computing 
-	The differences between those. test
+'''Function to compute the distance between different state of the same simulation. 
+	comparison between t0 and t, t-1 and t adopting three different distance misure:
+	angle, euclidian distance and hamming distance. 
 	https://help.github.com/articles/fork-a-repo
 '''
 
