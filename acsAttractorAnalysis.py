@@ -1,7 +1,9 @@
 #!/usr/bin/env python
-'''Function to compute the different attractors emerging from a simulation.
-   The algorithm compares all the final states of the simulations
-	https://help.github.com/articles/fork-a-repo
+# -*- coding: latin-1 -*-
+
+'''Function to analyse the different attractors emerging from different simulations (finale states).
+   The algorithm compares all the final states of the simulations contained in StrPath. 
+   If there are both several generations and simulations the script will process everything. 
 '''
 
 import sys, os # Standard library

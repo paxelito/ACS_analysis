@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: latin-1 -*-
-'''Function to evaluate the activity of each species during the simulation, catalyst substrate product or nothing
-	https://help.github.com/articles/fork-a-repo
+'''Function to evaluate the activity of each species during the simulation, 
+   catalyst substrate product or nothing
 '''
 
 import sys, os # Standard library
