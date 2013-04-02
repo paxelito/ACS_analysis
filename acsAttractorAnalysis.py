@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: latin-1 -*-
 
-'''Function to analyse the different attractors emerging from different simulations (finale states).
+'''Function to analyse the different attractors emerging from different simulations (final states).
    The algorithm compares all the final states of the simulations contained in StrPath. 
    If there are both several generations and simulations the script will process everything. 
 '''

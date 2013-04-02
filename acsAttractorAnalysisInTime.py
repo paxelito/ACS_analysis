@@ -42,8 +42,6 @@ StrPath = os.path.abspath(StrPath)
 
 today = dt.date.today()
 
-StrPath = os.path.abspath(StrPath)
-
 print ''
 print 'ACS ATTRACTORS ANALYSER IN TIME'
 print ''
