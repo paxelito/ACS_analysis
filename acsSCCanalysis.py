@@ -10,14 +10,12 @@ import glob
 import numpy as np # Scientific library
 from numpy import * 
 import networkx as nx
-#import filisettiLibrary as fl # FIlisetti library to create graphs
 
 try:
     from pylab import *
 except:
     pass
 
-#--------------------------------------------------------------------------------------
 # Function to create string zero string vector before graph filename. 
 # According to the total number of reactions N zeros will be add before the instant reaction number 
 # (e.g. reaction 130 of 10000 the string became '00130')
@@ -28,26 +26,7 @@ def zeroBeforeStrNum(tmpl, tmpL):
 		for i in range(0,nZeros): strZero = strZero + '0'
 	return strZero
 #eof
-
-#--------------------------------------------------------------------------------------
-#Function to check if the graph has already been computed
-def checkIfGraphAlreadyExist():
-	os.chdir(StrPath)
-	os.chdir(os.path.join(StrPath,folderCat))
-	outFname = '_iGraph_CAT' + filextPre + "*"
-	files = [];
-	files = sort(glob.glob(outFname))
-	print "\t net Files..."
-	#print files
-	#print len(files)
-	flag = 0
-	if len(files) > 0:
-		flag = 1	
-		
-	os.chdir(StrPath)
-	return flag
 	
-#--------------------------------------------------------------------------------------
 #Function to load the reaction graph
 def loadReactionGraph():
 	os.chdir(StrPath)
@@ -81,7 +60,6 @@ def loadReactionGraph():
 	
 	return graph
 	
-#--------------------------------------------------------------------------------------
 #Function to load a specific reaction graph (defined as a parameter)
 def loadSpecificReactionGraph():
 	os.chdir(StrPath)
@@ -111,7 +89,6 @@ def loadSpecificReactionGraph():
 	
 	return graph
 	
-#--------------------------------------------------------------------------------------
 #Function to load a specific reaction SUBgraph (defined as a parameter)
 def loadSpecificReactionSubGraph():
 	os.chdir(StrPath)
@@ -141,8 +118,6 @@ def loadSpecificReactionSubGraph():
 	
 	return graphSUB
 	
-
-#--------------------------------------------------------------------------------------
 #Function to save graphs to file (Considering that all variables all global in reading)
 def saveGraphToFile():
 	os.chdir(StrPath)
@@ -153,9 +128,7 @@ def saveGraphToFile():
 	np.savetxt(saveFile, graph, '%d\t%d\t%10.5f\t%10.5f\t%10.5f\t%d')
 	saveFile.close()
 	os.rename(outFname, os.path.join(folderCat,outFname))
-#eof
 
-#--------------------------------------------------------------------------------------
 #Function to save graphs SUB->PRO to file (Considering that all variables all global in reading)
 def saveGraphSUBToFile():
 	os.chdir(StrPath)
@@ -166,9 +139,7 @@ def saveGraphSUBToFile():
 	np.savetxt(saveFile, graphSUB, '%d\t%d\t%10.5f\t%10.5f\t%10.5f\t%d')
 	saveFile.close()
 	os.rename(outFname, os.path.join(folderSub,outFname))
-#eof	
 
-#--------------------------------------------------------------------------------------
 #Function to save energy file 
 def saveNrgToFile():
 	os.chdir(StrPath)
@@ -178,9 +149,7 @@ def saveNrgToFile():
 	np.savetxt(saveFile, nrgTimeSeries, '%10.5f\t%10.5f\t%d')
 	saveFile.close()
 	os.rename(outFname, os.path.join(tmpDir,outFname))
-#eof	
 
-#--------------------------------------------------------------------------------------
 #Function to save gillespie information files
 def saveGillToFile():
 	os.chdir(StrPath)
@@ -190,7 +159,6 @@ def saveGillToFile():
 	np.savetxt(saveFile, gillTimeSeries, '%10.5f\t%10.5f\t%10.5f\t%10.5f')
 	saveFile.close()
 	os.rename(outFname, os.path.join(tmpDir,outFname))
-#eof					
 
 # get path for placing simulation
 # INPUT PARAMETERS
@@ -208,6 +176,7 @@ print "Simulation Results Path: ", StrPath
 # Create absolute path 
 StrPath = os.path.abspath(StrPath)
 today = dt.date.today()
+mswindows = (sys.platform == "win32")
 
 # Create summary file
 cmdFileName = StrPath + '/' + str(today) + '_' + str(threshold) + '_convOverThreshold_' + str(decayTime) + '.csv'
@@ -254,6 +223,7 @@ for tmpDir in tmpDirs:
 		resDirPath = os.path.abspath(os.path.join("./", "res"))
 		print "  |- Results Folder: ", resDirPath
 		if os.path.isdir(resDirPath):
+			
 			os.chdir(resDirPath)
 			
 			# Find the number of generations contained in this simulation folder
@@ -261,6 +231,8 @@ for tmpDir in tmpDirs:
 			
 			# FOR EACH GENERATION
 			for nGen in range(1,numberOfGen+1):
+				
+				os.chdir(resDirPath)
 				
 				# select zero chars to insert before the generation number according to the folder structure.
 				strZeros = zeroBeforeStrNum(nGen, numberOfGen)
@@ -291,15 +263,15 @@ for tmpDir in tmpDirs:
 						influx_rate = float(strLine[1])
 					if strLine[0] == "maxLOut":
 						maxLOut = float(strLine[1])
+				
+				# analysisTimeInterval is 1/10 of the total decay time
+				_ANALTIMEINTERAVAL_ = totTimes / 10
+				_ANALTIMEINTERAVALNOSAVE_ = totTimes / 100
 						
 				if nrgType < 2:
 					nrg = 1
 				else:
 					nrg = 0
-					
-				# analysisTimeInterval is 1/10 of the total decay time
-				analysisTimeInterval = totTimes / 10
-				analysisTimeIntervalNoSave = totTimes / 10
 						
 				# Influx in Protocell 
 				if (influx_rate == 0) and (maxLOut > 0):
@@ -336,7 +308,7 @@ for tmpDir in tmpDirs:
 				try:
 					fidSpecies = open(speciesFile, 'r')
 				except:
-					print 'impossible to load ', speciesFile; sys.exit(1)
+					print '   |- !!!impossible to load ', speciesFile; sys.exit(1)
 				
 				# For each last species file
 				ok = 0
@@ -370,27 +342,30 @@ for tmpDir in tmpDirs:
 	
 								
 				# If there are species over threshold network analysis is performed	
-				print "   |- Graph Creation"
+				print "    |- Graph Creation"
 				folderCat = '__0_iGraph_CAT_' + str(decayTime)
 				folderSub = '__0_iGraph_SUB_' + str(decayTime)
 				
 				# Move to the root directory directory 
 				os.chdir(StrPath)
+				
 				# Create iGraph directory where iGraph_CAT file will be stored
+				# If the folder has been already create, it is removed
 				newdir = os.path.join(os.curdir, folderCat)
 				if not os.path.isdir(newdir):
 					try:
 						os.mkdir(newdir)
 					except:
-						print "Impossible to create iGraph directory"; sys.exit(1)
+						print "   |- !!! Impossible to create iGraph directory"; sys.exit(1)
 			
-				# Create iGraph directory where iGraph_SUB file will be stored
+				# Create iGraph directory where iGraph_SUB file will be stored. 
+				# If the folder has been already create, it is removed
 				newdirSUB = os.path.join(os.curdir, folderSub)
 				if not os.path.isdir(newdirSUB):
 					try:
 						os.mkdir(newdirSUB)
 					except:
-						print "Impossible to create iGraph directory"; sys.exit(1)
+						print "   |- !!! Impossible to create iGraph directory"; sys.exit(1)
 				
 				if os.path.isdir(os.path.join(tmpDir, "res")):
 					os.chdir(os.path.join(tmpDir, "res"))		
@@ -414,196 +389,172 @@ for tmpDir in tmpDirs:
 					endo_cleavage_counter = 0;
 					cleavage_counter = 0;
 					
-					print "File ", file, " processing..."
+					print "   |- File ", rctParamFile[0], " processing..."
+										
+					if nrg == 1:
+						nrgTimeSeries = np.array([[0,0,0]])
+						
+					gillTimeSeries = np.array([[0,0,0,0]])
 					
-					pe = checkIfGraphAlreadyExist()
-					
-					if checkIfGraphAlreadyExist() == 0:
-	
+					tmpFlagLastRctSaved = 0 # Flag var to save the last reaction
+					for line in fid:
+											
+						# Load single reaction parameters
+						tmpReaction, tmpTime, tmpcc, tmpCat, tmpMol_I, tmpMol_II, tmpMol_III, tmpLoadedMols,\
+						 tmpLoadedMolsConc, tmpGillMean, tmpGillSD, tmpGillEntropy, tmpNSCprob, tmpRevProb = line.split()
+						 
+						reaction = int(tmpReaction) + initRctId
+						rtime = float(tmpTime) + initTime
+						cc = int(tmpcc) 
+						cat = int(tmpCat)
+						mol_I = int(tmpMol_I)
+						mol_II = int(tmpMol_II)
+						mol_III = int(tmpMol_III)
+						loadedMolsConc = float(tmpLoadedMolsConc)
+						loadedMols = int(tmpLoadedMols)
+						gillMean = float(tmpGillMean)
+						gillSD = float(tmpGillSD)
+						gillEntropy = float(tmpGillEntropy)
+						newSpeciesCreationProb = float(tmpNSCprob)
+						reverseProbability = float(tmpRevProb)
+		
 						if nrg == 1:
-							nrgTimeSeries = np.array([[0,0,0]])
+							nrgTimeSeries = np.vstack([nrgTimeSeries,(rtime, loadedMolsConc, loadedMols)])
 							
-						gillTimeSeries = np.array([[0,0,0,0]])
-						
-						for line in fid:
-												
-							# Load single reaction parameters
-							tmpReaction, tmpTime, tmpcc, tmpCat, tmpMol_I, tmpMol_II, tmpMol_III, tmpLoadedMols,\
-							 tmpLoadedMolsConc, tmpGillMean, tmpGillSD, tmpGillEntropy, tmpNSCprob, tmpRevProb = line.split()
+						gillTimeSeries = np.vstack([gillTimeSeries,(rtime, gillMean, gillSD, gillEntropy)])
+													
+						printTemporalMessage = 1
+						# If the time is right save iGraph structures to file
+						if (rtime >= rctIDshow * _ANALTIMEINTERAVAL_):
+							print "- ", tmpDir, " | Gen", nGen, " | Reaction ", reaction, " - time: ", rtime, " - Save structures"
+							saveGraphToFile()
+							saveGraphSUBToFile()
+							rctIDshow = rctIDshow + 1
+							printTemporalMessage = 0
+							
+						# If the system is close to the end graphs are saved.
+# 						if (tmpFlagLastRctSaved == 0) and (rtime > (totTimes - 1)) and (rtime < totTimes):
+# 							print "- ", tmpDir, " | Gen", nGen, " | Reaction ", reaction, " - time: ", totTimes, " - Save structures"
+# 							saveGraphToFile()
+# 							saveGraphSUBToFile()
+# 							tmpFlagLastRctSaved = 1
 							 
-							reaction = int(tmpReaction) + initRctId
-							rtime = float(tmpTime) + initTime
-							cc = int(tmpcc) 
-							cat = int(tmpCat)
-							mol_I = int(tmpMol_I)
-							mol_II = int(tmpMol_II)
-							mol_III = int(tmpMol_III)
-							loadedMolsConc = float(tmpLoadedMolsConc)
-							loadedMols = int(tmpLoadedMols)
-							gillMean = float(tmpGillMean)
-							gillSD = float(tmpGillSD)
-							gillEntropy = float(tmpGillEntropy)
-							newSpeciesCreationProb = float(tmpNSCprob)
-							reverseProbability = float(tmpRevProb)
 			
-							if nrg == 1:
-								nrgTimeSeries = np.vstack([nrgTimeSeries,(rtime, loadedMolsConc, loadedMols)])
+						# If the prompt time is right a message on the screen indicating the reaction number and the time is shown
+						if ((rtime > rctIDshowNoSave * _ANALTIMEINTERAVALNOSAVE_) and (printTemporalMessage == 1)):
+							print "- ", tmpDir, " | Gen", nGen, " | Reaction ", reaction, " - time: ", rtime
+							rctIDshowNoSave = rctIDshowNoSave + 1
+			
+						# update time intervals 
+						timeInterval = rtime - previousTime
+						previousTime = rtime
+		
+						# Increment the time of each reaction present in the system
+						# If the time of some reactions overcome the decay time the reaction is removed from the igraph structure
+						if rctID > 1:
+							# CATALYST -> PRODUCT
+							if shape(graph)[0] > 1:
+								graph[:,3] = graph[:,3] + timeInterval
+								graph[:,4] = graph[:,2] - graph[:,3]
+								graph = graph[graph[:,4]>0,:]
+							# SUBSTRATE -> PRODUCT
+							if shape(graphSUB)[0] > 1:
+								graphSUB[:,3] = graphSUB[:,3] + timeInterval
+								graphSUB[:,4] = graphSUB[:,2] - graphSUB[:,3]
+								graphSUB = graphSUB[graphSUB[:,4]>0,:]
+				
+						if (cc == 0)|(cc == 7): # CONDENSATION and ENDO CONDENSATION
+							if cc == 0:
+								condensation_counter += 1
+							else:
+								endo_condensation_counter +=  1
 								
-							gillTimeSeries = np.vstack([gillTimeSeries,(rtime, gillMean, gillSD, gillEntropy)])
-														
-							printTemporalMessage = 1
-								# If the time is righe save iGraph structures to file
-							if (rtime > rctIDshow * analysisTimeInterval):
-								print "- ", tmpDir, " | Gen", nGen, " | Reaction ", reaction, " - time: ", rtime, " - Save structures"
-								saveGraphToFile()
-								saveGraphSUBToFile()
-								rctIDshow = rctIDshow + 1
-								printTemporalMessage = 0
-				
-							# If the prompt time is righe a message on the screen indicating the reaction number and the time is shown
-							if ((rtime > rctIDshowNoSave * analysisTimeIntervalNoSave) & (printTemporalMessage == 1)):
-								print "- ", tmpDir, " | Gen", nGen, " | Reaction ", reaction, " - time: ", rtime
-								rctIDshowNoSave = rctIDshowNoSave + 1
-				
-							# update time intervals 
-							timeInterval = rtime - previousTime
-							previousTime = rtime
-			
-							# Increment the time of each reaction present in the system
-							# If the time of some reactions overcome the decay time the reaction is removed from the igraph structure
-							if rctID > 1:
-								# CATALYST -> PRODUCT
-								if shape(graph)[0] > 1:
-									graph[:,3] = graph[:,3] + timeInterval
-									graph[:,4] = graph[:,2] - graph[:,3]
-									graph = graph[graph[:,4]>0,:]
-								# SUBSTRATE -> PRODUCT
-								if shape(graphSUB)[0] > 1:
-									graphSUB[:,3] = graphSUB[:,3] + timeInterval
-									graphSUB[:,4] = graphSUB[:,2] - graphSUB[:,3]
-									graphSUB = graphSUB[graphSUB[:,4]>0,:]
+							if rctID == 1: #If it is the first reaction nparray (matrix) is created
+								graph = np.array([[cat, mol_I, decayTime, 0, decayTime, 1]])
+								graphSUB = np.array([[mol_II, mol_I, decayTime, 0, decayTime, 1]])
+								if mol_II != mol_III:
+									graphSUB = np.vstack([graphSUB,(mol_III, mol_I, decayTime, 0, decayTime, 1)]) # Substrate 2 (If different from 1)
+							else: 
+								# CAT -> PRO, Otherwise if the reaction is already present its parameters are updated
+								if sum((graph[:,0] == cat) & (graph[:,1] == mol_I)) == 1:
+									position = ((graph[:,0] == cat) & (graph[:,1] == mol_I))
+									graph[position] = [cat, mol_I, decayTime, 0, decayTime, graph[position,5]+1]
+								else:
+									# Otherwise a new reaction is added at the end of the matrix
+									graph = np.vstack([graph,(cat, mol_I, decayTime, 0, decayTime, 1)])
 					
-							if (cc == 0)|(cc == 7): # CONDENSATION and ENDO CONDENSATION
-								if cc == 0:
-									condensation_counter += 1
+								# SUB -> PRO, Otherwise if the reaction is already present its parameters are updated
+								if sum((graphSUB[:,0] == mol_II) & (graphSUB[:,1] == mol_I)) == 1:
+									position = ((graphSUB[:,0] == mol_II) & (graphSUB[:,1] == mol_I))
+									graphSUB[position] = [mol_II, mol_I, decayTime, 0, decayTime, graphSUB[position,5]+1]
 								else:
-									endo_condensation_counter +=  1
-									
-								if rctID == 1: #If it is the first reaction nparray (matrix) is created
-									graph = np.array([[cat, mol_I, decayTime, 0, decayTime, 1]])
-									graphSUB = np.array([[mol_II, mol_I, decayTime, 0, decayTime, 1]])
-									if mol_II != mol_III:
-										graphSUB = np.vstack([graphSUB,(mol_III, mol_I, decayTime, 0, decayTime, 1)]) # Substrate 2 (If different from 1)
-								else: 
-									# CAT -> PRO, Otherwise if the reaction is already present its parameters are updated
-									if sum((graph[:,0] == cat) & (graph[:,1] == mol_I)) == 1:
-										position = ((graph[:,0] == cat) & (graph[:,1] == mol_I))
-										graph[position] = [cat, mol_I, decayTime, 0, decayTime, graph[position,5]+1]
+									# Otherwise a new reaction is added at the end of the matrix
+									graphSUB = np.vstack([graphSUB,(mol_II, mol_I, decayTime, 0, decayTime, 1)])
+								if mol_II != mol_III:
+									if sum((graphSUB[:,0] == mol_III) & (graphSUB[:,1] == mol_I)) == 1:
+										position = ((graphSUB[:,0] == mol_III) & (graphSUB[:,1] == mol_I))
+										graphSUB[position] = [mol_III, mol_I, decayTime, 0, decayTime, graphSUB[position,5]+1]
 									else:
-										# Otherwise a new reaction is added at the end of the matrix
-										graph = np.vstack([graph,(cat, mol_I, decayTime, 0, decayTime, 1)])
-						
-									# SUB -> PRO, Otherwise if the reaction is already present its parameters are updated
-									if sum((graphSUB[:,0] == mol_II) & (graphSUB[:,1] == mol_I)) == 1:
-										position = ((graphSUB[:,0] == mol_II) & (graphSUB[:,1] == mol_I))
-										graphSUB[position] = [mol_II, mol_I, decayTime, 0, decayTime, graphSUB[position,5]+1]
-									else:
-										# Otherwise a new reaction is added at the end of the matrix
-										graphSUB = np.vstack([graphSUB,(mol_II, mol_I, decayTime, 0, decayTime, 1)])
-									if mol_II != mol_III:
-										if sum((graphSUB[:,0] == mol_III) & (graphSUB[:,1] == mol_I)) == 1:
-											position = ((graphSUB[:,0] == mol_III) & (graphSUB[:,1] == mol_I))
-											graphSUB[position] = [mol_III, mol_I, decayTime, 0, decayTime, graphSUB[position,5]+1]
-										else:
-											graphSUB = np.vstack([graphSUB,(mol_III, mol_I, decayTime, 0, decayTime, 1)])						
-									
-							else: # CLEAVAGE (The same of condensation expected for the double computation due to the presence of two products
-								if cc == 6:
-									endo_cleavage_counter += 1
+										graphSUB = np.vstack([graphSUB,(mol_III, mol_I, decayTime, 0, decayTime, 1)])						
+								
+						else: # CLEAVAGE (The same of condensation expected for the double computation due to the presence of two products
+							if cc == 6:
+								endo_cleavage_counter += 1
+							else:
+								cleavage_counter +=  1
+								
+							if rctID == 1: # If it is the first reaction nparray is created
+								# CAT -> PROD
+								graph = np.array([[cat, mol_II, decayTime, 0, decayTime, 1]]) # Product 1
+								if mol_II != mol_III:
+									graph = np.vstack([graph,(cat, mol_III, decayTime, 0, decayTime, 1)]) # Product 2 (If different from 1)
+								# SUB -> PRO
+								graphSUB = np.array([[mol_I, mol_II, decayTime, 0, decayTime, 1]])
+								if mol_II != mol_III:
+									graphSUB = np.vstack([graphSUB,(mol_I, mol_III, decayTime, 0, decayTime, 1)]) # Sub 2 (If different from 1)					
+							else:
+								if sum((graph[:,0] == cat) & (graph[:,1] == mol_II)) == 1:
+									position = ((graph[:,0] == cat) & (graph[:,1] == mol_II))
+									graph[position] = [cat, mol_II, decayTime, 0, decayTime, graph[position,5]+1]
 								else:
-									cleavage_counter +=  1
-									
-								if rctID == 1: # If it is the first reaction nparray is created
-									# CAT -> PROD
-									graph = np.array([[cat, mol_II, decayTime, 0, decayTime, 1]]) # Product 1
-									if mol_II != mol_III:
-										graph = np.vstack([graph,(cat, mol_III, decayTime, 0, decayTime, 1)]) # Product 2 (If different from 1)
-									# SUB -> PRO
-									graphSUB = np.array([[mol_I, mol_II, decayTime, 0, decayTime, 1]])
-									if mol_II != mol_III:
-										graphSUB = np.vstack([graphSUB,(mol_I, mol_III, decayTime, 0, decayTime, 1)]) # Sub 2 (If different from 1)					
+									graph = np.vstack([graph,(cat, mol_II, decayTime, 0, decayTime, 1)])				
+								if mol_II != mol_III:
+									if sum((graph[:,0] == cat) & (graph[:,1] == mol_III)) == 1:
+										position = ((graph[:,0] == cat) & (graph[:,1] == mol_III))
+										graph[position] = [cat, mol_III, decayTime, 0, decayTime, graph[position,5]+1]
+									else:
+										graph = np.vstack([graph,(cat, mol_III, decayTime, 0, decayTime, 1)])
+								# SUB -> PRO, Otherwise if the reaction is already present its parameters are updated
+								if sum((graphSUB[:,0] == mol_I) & (graphSUB[:,1] == mol_II)) == 1:
+									position = ((graphSUB[:,0] == mol_I) & (graphSUB[:,1] == mol_II))
+									graphSUB[position] = [mol_I, mol_II, decayTime, 0, decayTime, graphSUB[position,5]+1]
 								else:
-									if sum((graph[:,0] == cat) & (graph[:,1] == mol_II)) == 1:
-										position = ((graph[:,0] == cat) & (graph[:,1] == mol_II))
-										graph[position] = [cat, mol_II, decayTime, 0, decayTime, graph[position,5]+1]
+									# Otherwise a new reaction is added at the end of the matrix
+									graphSUB = np.vstack([graphSUB,(mol_I, mol_II, decayTime, 0, decayTime, 1)])
+								if mol_II != mol_III:
+									if sum((graphSUB[:,0] == mol_I) & (graphSUB[:,1] == mol_III)) == 1:
+										position = ((graphSUB[:,0] == mol_I) & (graphSUB[:,1] == mol_III))
+										graphSUB[position] = [mol_I, mol_III, decayTime, 0, decayTime, graphSUB[position,5]+1]
 									else:
-										graph = np.vstack([graph,(cat, mol_II, decayTime, 0, decayTime, 1)])				
-									if mol_II != mol_III:
-										if sum((graph[:,0] == cat) & (graph[:,1] == mol_III)) == 1:
-											position = ((graph[:,0] == cat) & (graph[:,1] == mol_III))
-											graph[position] = [cat, mol_III, decayTime, 0, decayTime, graph[position,5]+1]
-										else:
-											graph = np.vstack([graph,(cat, mol_III, decayTime, 0, decayTime, 1)])
-									# SUB -> PRO, Otherwise if the reaction is already present its parameters are updated
-									if sum((graphSUB[:,0] == mol_I) & (graphSUB[:,1] == mol_II)) == 1:
-										position = ((graphSUB[:,0] == mol_I) & (graphSUB[:,1] == mol_II))
-										graphSUB[position] = [mol_I, mol_II, decayTime, 0, decayTime, graphSUB[position,5]+1]
-									else:
-										# Otherwise a new reaction is added at the end of the matrix
-										graphSUB = np.vstack([graphSUB,(mol_I, mol_II, decayTime, 0, decayTime, 1)])
-									if mol_II != mol_III:
-										if sum((graphSUB[:,0] == mol_I) & (graphSUB[:,1] == mol_III)) == 1:
-											position = ((graphSUB[:,0] == mol_I) & (graphSUB[:,1] == mol_III))
-											graphSUB[position] = [mol_I, mol_III, decayTime, 0, decayTime, graphSUB[position,5]+1]
-										else:
-											graphSUB = np.vstack([graphSUB,(mol_I, mol_III, decayTime, 0, decayTime, 1)])							
-							
-							# Reactions counters is updated			
-							rctID = rctID + 1	
-			
-#						if nrg == 1:
-#						
-#							filename = '21_loadMols_CONC_' + str(nGen) + '.eps'
-#							tmpFolder = os.path.join(os.getcwd(),tmpDir,tmpResFold)
-#							fl.PlotMatrixML(filename, nrgTimeSeries[:,0], nrgTimeSeries[:,1], 'time', 'Concentration', None,tmpFolder)
-#							
-#							filename = '22_loadMols_' + str(nGen) + '.eps'
-#							tmpFolder = os.path.join(os.getcwd(),tmpDir,tmpResFold)
-#							fl.PlotMatrixML(filename, nrgTimeSeries[:,0], nrgTimeSeries[:,2], 'time', 'Total Amount', None,tmpFolder)
-#	
-#							saveNrgToFile()
-#												
-#						filename = '23_GillMean_' + str(nGen) + '.eps'
-#						tmpFolder = os.path.join(os.getcwd(),tmpDir,tmpResFold)
-#						fl.PlotMatrixML(filename, gillTimeSeries[:,0], gillTimeSeries[:,1], 'time', 'Gillespie Scores (mean)', None, tmpFolder)
-#						
-#						filename = '24_GillSD_' + str(nGen) + '.eps'
-#						tmpFolder = os.path.join(os.getcwd(),tmpDir,tmpResFold)
-#						fl.PlotMatrixML(filename, gillTimeSeries[:,0], gillTimeSeries[:,2], 'time', 'SD Gillspie Scores', None,tmpFolder)
-#						
-#						filename = '25_Gillentropy_' + str(nGen) + '.eps'
-#						tmpFolder = os.path.join(os.getcwd(),tmpDir,tmpResFold)
-#						fl.PlotMatrixML(filename, gillTimeSeries[:,0], gillTimeSeries[:,3], 'time', 'Entropy', None,tmpFolder)
+										graphSUB = np.vstack([graphSUB,(mol_I, mol_III, decayTime, 0, decayTime, 1)])							
 						
-						saveGillToFile()
-							
-					else: #if checkIfGraphAlreadyExist() == 0:
+						# Reactions counters is updated			
+						rctID = rctID + 1	
+					# Save Gillespie structure on file 	
+					saveGillToFile()
 						
-						print "\t Reactions of this simulation have been already converted in graph format"
-						graph = loadReactionGraph()
-						
-					print "\n ------- NetworkX analysis ---------"
+					print "\n |-  ------- NetworkX analysis ---------"
 								
 					# Network analysis
 					# Initialize graph
 
-					print " - digraph creation... "
+					print "   |- digraph creation... "
 					realSccs = 0
 					Gcatpro = nx.DiGraph()
 					for sngRct in graph:
 						Gcatpro.add_weighted_edges_from([(sngRct[0],sngRct[1],sngRct[5])])
 
-					print " - Strongly connected components analysis... "
+					print "   |- Strongly connected components analysis... "
 					
 					scc = nx.strongly_connected_components(Gcatpro)
 					sccN= nx.number_strongly_connected_components(Gcatpro)
@@ -637,12 +588,10 @@ for tmpDir in tmpDirs:
 							print c
 							realSccs += 1
 
-					print " - Number of ACS:", realSccs - selfLoops
-					print " - Number of ACS(length 1):", selfLoops, "..."
-					print selfLoopsEgdes
+					print "   |- Number of ACS:", realSccs - selfLoops
+					print "   |- Number of ACS(length 1):", selfLoops, "..."
 					
-					print "<> IDs over threshold"
-					print IDsOverThreshold
+					print "    <> IDs over threshold -> ", IDsOverThreshold
 					
 					if len(IDsOverThreshold) > 0: # If there are species over threshold SOT
 						for IdsOT in IDsOverThreshold: # For each species over threshold
@@ -706,51 +655,49 @@ for tmpDir in tmpDirs:
 							prod_overlap_weight += min(prod_inSCC_weight, prod_bySCC_weight, prod_chain_weight)
 									
 									
-					print "<> Number of Structural Autocatalytic set of molecules:", realSccs
-					print "<> -----------------------------------------------"
-					print "<> Species over threshold produced by a CHAIN:", prod_chain
+					print "   |- <> Number of Structural Autocatalytic set of molecules:", realSccs
+					print "   |- <> -----------------------------------------------"
+					print "   |- <> Species over threshold produced by a CHAIN:", prod_chain
 					if realSccs > 0:
-						print "<> Species over threshold produced INTO an ACS:", prod_inSCC
-						print "<> Species over threshold produced INTO an ACS (weigthed):", prod_inSCC_weight
-						print "<> Species over threshold produced BY an ACS:", prod_bySCC
-						print "<> Species over threshold produced BY an ACS (weigthed):", prod_bySCC_weight
-						print "<> Species over threshold produced by an overlap:", prod_overlap
-						print "<> Species over threshold produced by an overlap (weigthed):", prod_overlap_weight
-						print "<> Species over threshold produced by itself:", autocatalysis
-						print "<> Species over threshold produced by itself (weigthed):", self_loop_weight
-						print "<> Concentration in ACSs:", conc_inSCC
-						print "<> Concentration in ACSs leaves:", conc_bySCC
-						print "<> Concentration in chains:", conc_chain
-						print "<> Concentration of autocatalyst:", conc_selfCat
-						print "<> Number of endo condensations:", endo_condensation_counter
-						print "<> Number of condensations:", condensation_counter
-						print "<> Number of endo cleavages:", endo_cleavage_counter
-						print "<> Number of cleavages:", cleavage_counter
-					print "<> -----------------------------------------------"						
+						print "   |- <> Species over threshold produced INTO an ACS:", prod_inSCC
+						print "   |- <> Species over threshold produced INTO an ACS (weigthed):", prod_inSCC_weight
+						print "   |- <> Species over threshold produced BY an ACS:", prod_bySCC
+						print "   |- <> Species over threshold produced BY an ACS (weigthed):", prod_bySCC_weight
+						print "   |- <> Species over threshold produced by an overlap:", prod_overlap
+						print "   |- <> Species over threshold produced by an overlap (weigthed):", prod_overlap_weight
+						print "   |- <> Species over threshold produced by itself:", autocatalysis
+						print "   |- <> Species over threshold produced by itself (weigthed):", self_loop_weight
+						print "   |- <> Concentration in ACSs:", conc_inSCC
+						print "   |- <> Concentration in ACSs leaves:", conc_bySCC
+						print "   |- <> Concentration in chains:", conc_chain
+						print "   |- <> Concentration of autocatalyst:", conc_selfCat
+						print "   |- <> Number of endo condensations:", endo_condensation_counter
+						print "   |- <> Number of condensations:", condensation_counter
+						print "   |- <> Number of endo cleavages:", endo_cleavage_counter
+						print "   |- <> Number of cleavages:", cleavage_counter
+					print "      <> -----------------------------------------------"						
 							
 					inDegreeMean = mean(Gcatpro.in_degree().values())
 							
-					print "<> Mean IN-DEGREE:", inDegreeMean
+					print "   |- <> Mean IN-DEGREE:", inDegreeMean
 			
 					#print graph at the end of the analysis (the final situation is always stored)
-					print "<> File ", file, " has been processed. Final Dimension: ", graph.shape[0]
+					print "   |- <> File ", rctParamFile[0], " has been processed. Final Dimension: ", graph.shape[0]
 					
-					if checkIfGraphAlreadyExist() == 0:
-					
-						fid.close()
-						saveGraphToFile()
-						saveGraphSUBToFile()
+					fid.close()
+					saveGraphToFile()
+					saveGraphSUBToFile()
 							
 			     				
 					
 				# Close species file
 				fidSpecies.close()
 					
-				print "<> ID over threshold (influx is not taken into account)"
+				print "   |- <> ID over threshold (influx is not taken into account)"
 				print IDsOverThreshold
 				print overThreshold
 				print overThresholdTOT
-				print "Species file length", float(len(speciesFiles))
+				print "   |- Species file length", float(len(speciesFiles))
 				meanOverThreshold = float(overThreshold) / float(len(speciesFiles))
 											
 				strToWrite = tmpDir + "\t" + str(rp) + "\t" + str(nrgConc) + "\t" +  str(meanOverThreshold) + "\t" + str(overThresholdTOT) + "\t" 
@@ -761,6 +708,6 @@ for tmpDir in tmpDirs:
 				
 				cmdFileFid.write(strToWrite)
 				
-				print "\n ANALYSIS of the SIMULATION",  str(tmpDir), " IS FINISHED\n"
+			print "\n****\n\n ANALYSIS of the SIMULATION",  str(tmpDir), " IS FINISHED\n"
 			
 cmdFileFid.close()
