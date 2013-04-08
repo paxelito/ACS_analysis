@@ -1,7 +1,8 @@
 #!/usr/bin/env python
-'''Function to compute the distance between different state of the same simulation. 
+'''Script to compute the distance between different state of the same simulation. 
 	comparison between t0 and t, t-1 and t adopting three different distance misure:
 	angle, euclidian distance and hamming distance. 
+	Moreover the script make an analysis of all the aggregative variables. 
 	https://help.github.com/articles/fork-a-repo
 '''
 
@@ -109,7 +110,9 @@ print 'ACS STATES ANALYSER'
 print ''
 print '|- STEP 1. Creating common sorted species list...'
 
-ndn = '_0_new_allStatResults'
+#currentDir = StrPath.split("/")[-1]
+currentDir = ''
+ndn = currentDir + '_0_new_allStatResults'
 newdirAllResults = os.path.join(os.curdir, ndn)
 if not os.path.isdir(newdirAllResults):
 	try:
@@ -154,11 +157,12 @@ EUC_previousNOINFLUX_FILE_FID_group = open('STAT_EUC_t_tminus_1_NOINFLUX_group.c
 EUC_startFILE_FID_group = open('STAT_EUC_t_start_group.csv', 'w')
 EUC_startNOINFLUX_FILE_FID_group = open('STAT_EUC_t_start_NOINFLUX_group.csv', 'w')
 
-newSpecies_FID = open('STAT_newSpecies.csv', 'w')
-livingSpecies_FID = open('STAT_livingSpecies.csv', 'w')
-totMass_FID = open('STAT_overallMass.csv', 'w')
-evaluatedFID = open('STAT_evaluated.csv', 'w')
-zeroOneSpeciesFID = open('STAT_zeroOneSpecies.csv', 'w')
+newSpecies_FID = open('STAT_GENERAL_newSpecies.csv', 'w')
+livingSpecies_FID = open('STAT_GENERAL_livingSpecies.csv', 'w')
+mols_FID = open('STAT_GENERAL_mols.csv', 'w')
+totMass_FID = open('STAT_GENERAL_overallMass.csv', 'w')
+evaluatedFID = open('STAT_GENERAL_evaluated.csv', 'w')
+zeroOneSpeciesFID = open('STAT_GENERAL_zeroOneSpecies.csv', 'w')
 
 os.chdir(StrPath)
 
@@ -217,6 +221,7 @@ for tmpDir in tmpDirs:
 						print ' |- impossible to load ', sngSpeciesFile; sys.exit(1)
 						
 					seq = []; conc = []; seqNOINFLUX = []; numberOfSpecies = 0; tmpMass = 0; tmpObsSpecies = 0
+					tmpMols = 0
 					for sp in fidSpecies:
 						tmpID, tmpSeq, tmpConc, tmpDiff, tmpSol, tmpCpxDiss, tmpCpxCut, tmpEval, tmpAge, tmpReb, tmpCatID, tmpSubID, tmpKpho, tmpLoadConc, tmpConcLock = sp.split()
 						if (int(tmpCpxCut) == 0) & (float(tmpConc) > 0):
@@ -237,6 +242,7 @@ for tmpDir in tmpDirs:
 							zeroList[numberOfSpecies] = 1
 							# Update systems mass
 							tmpMass += len(str(tmpSeq)) * int(round(float(tmpConc) * 6.022e23 * tmpVolume))
+							tmpMols += int(round(float(tmpConc) * 6.022e23 * tmpVolume))
 						# If the species is not a complex, the number of species is updated	
 						if int(tmpCpxCut) == 0:
 							numberOfSpecies += 1	
@@ -252,6 +258,8 @@ for tmpDir in tmpDirs:
 					livingSpecies_FID.write(strtoW)		
 					strtoW = str(tmpMass) + '\t'
 					totMass_FID.write(strtoW)	
+					strtoW = str(tmpMols) + '\t'
+					mols_FID.write(strtoW)
 					strtoW = str(tmpObsSpecies) + '\t'
 					evaluatedFID.write(strtoW)	
 					
@@ -399,6 +407,7 @@ livingSpecies_FID.close()
 zeroOneSpeciesFID.close()
 totMass_FID.close()
 evaluatedFID.close()
+mols_FID.close()
 
 print '|- FINISHED... SEE YOU NEXT TIME'
 
