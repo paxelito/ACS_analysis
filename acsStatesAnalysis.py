@@ -327,6 +327,7 @@ for tmpDir in tmpDirs:
 				  newSpecies_FID.write('\n')
 				  livingSpecies_FID.write('\n')
 				  totMass_FID.write('\n')
+				  mols_FID.write('\n')
 				  evaluatedFID.write('\n')
 				  
 				  HAM_previousFILE_FID.write('\n')

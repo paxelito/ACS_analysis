@@ -31,7 +31,7 @@ def zeroBeforeStrNum(tmpl, tmpL):
 try:
 	StrPath = sys.argv[1] # Here the path of the simulation output file
 	tmpMaxFluxL = int(sys.argv[2]) # Influx max length
-	tmpNOF = int(sys.argv[3])
+	tmpNOF = int(sys.argv[3]) # Number of file species for each generation
 except:
 	print "Usage:",sys.argv[0], "infile outfile"; sys.exit(1)
 	
