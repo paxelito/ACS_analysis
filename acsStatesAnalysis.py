@@ -163,6 +163,7 @@ mols_FID = open('STAT_GENERAL_mols.csv', 'w')
 totMass_FID = open('STAT_GENERAL_overallMass.csv', 'w')
 evaluatedFID = open('STAT_GENERAL_evaluated.csv', 'w')
 zeroOneSpeciesFID = open('STAT_GENERAL_zeroOneSpecies.csv', 'w')
+biodeversityFID = open('STAT_GENERAL_bioDiversity.csv', 'w')
 
 os.chdir(StrPath)
 
@@ -247,7 +248,7 @@ for tmpDir in tmpDirs:
 						if int(tmpCpxCut) == 0:
 							numberOfSpecies += 1	
 						if int(tmpCpxCut) == 0 and int(tmpEval) == 1:
-							tmpObsSpecies += 1
+							tmpObsSpecies += 1		
 					
 					# Compute number of new species		
 					deltaNspecies = numberOfSpecies - oldNumberOfSpecies

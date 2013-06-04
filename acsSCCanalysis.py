@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: latin-1 -*-
 
-'''Function to analyze the different attractors emerging from different simulations in time. 
+'''script to analyze the emerging strongly connected components. 
 '''
 
 import sys, os # Standard library
@@ -236,6 +236,7 @@ for tmpDir in tmpDirs:
 				
 				# select zero chars to insert before the generation number according to the folder structure.
 				strZeros = zeroBeforeStrNum(nGen, numberOfGen)
+				
 				# Open Parameter File
 				paramFile = "acsm2s.conf"
 				simFolder = 0
@@ -297,6 +298,7 @@ for tmpDir in tmpDirs:
 				# initialize stat variables 
 				overThreshold = float(0)
 				overThresholdTOT = float(0)
+				
 				# Searching for the Species files related to the nGen-th generation
 				tmpFilesToSearch = 'species_' + strZeros + str(nGen) + '_*'
 				speciesFiles = sorted(glob.glob(os.path.join(resDirPath,tmpFilesToSearch)))
