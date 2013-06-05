@@ -250,6 +250,12 @@ for tmpDir in tmpDirs:
 						if int(tmpCpxCut) == 0 and int(tmpEval) == 1:
 							tmpObsSpecies += 1		
 					
+					# Compute biodiversity index
+					bioDivInd = 0
+					for sngConc in conc:
+						bioDivInd += pow(float(round(float(sngConc) * 6.022e23 * tmpVolume) / tmpMols),2)
+					bioDivInd = float(1 / bioDivInd)
+					
 					# Compute number of new species		
 					deltaNspecies = numberOfSpecies - oldNumberOfSpecies
 					oldNumberOfSpecies = numberOfSpecies 
@@ -263,6 +269,8 @@ for tmpDir in tmpDirs:
 					mols_FID.write(strtoW)
 					strtoW = str(tmpObsSpecies) + '\t'
 					evaluatedFID.write(strtoW)	
+					strtoW = str(bioDivInd) + '\t'
+					biodeversityFID.write(strtoW)
 					
 					# ------------------------------------------------------					
 					# PREVIOUS ONE Defining concentration of the two vectors
@@ -330,6 +338,7 @@ for tmpDir in tmpDirs:
 				  totMass_FID.write('\n')
 				  mols_FID.write('\n')
 				  evaluatedFID.write('\n')
+				  biodeversityFID.write('\n')
 				  
 				  HAM_previousFILE_FID.write('\n')
 				  HAM_previousNOINFLUX_FILE_FID.write('\n')
@@ -410,6 +419,7 @@ zeroOneSpeciesFID.close()
 totMass_FID.close()
 evaluatedFID.close()
 mols_FID.close()
+biodeversityFID.close()
 
 print '|- FINISHED... SEE YOU NEXT TIME'
 
