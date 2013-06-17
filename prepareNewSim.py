@@ -81,11 +81,11 @@ for line in mod:
 		if linesplitted[0] == 'randomSeed':
 			linesplitted[1] = '0\n'
 		if linesplitted[0] == 'K_diss':
-			linesplitted[1] = str(_CLEAVAGE_)
+			linesplitted[1] = str(_CLEAVAGE_) + '\n'
 		if linesplitted[0] == 'K_ass':
-			linesplitted[1] = str(_CONDENSATION_)
+			linesplitted[1] = str(_CONDENSATION_) + '\n'
 		if linesplitted[0] == 'K_cpx':
-			linesplitted[1] = str(_COMPLEXFORM_)		
+			linesplitted[1] = str(_COMPLEXFORM_) + '\n'		
 		if _REVRCTS_ == 1:
 			if linesplitted[0] == 'reverseReactions':
 				linesplitted[1] = '1\n'
