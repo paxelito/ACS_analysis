@@ -41,7 +41,8 @@ os.chdir(sourceResFolder)
 
 # Select last species, reactions and catalysis file
 lastSpeciesFile = sorted(glob.glob('species_*'))
-lastReactionsFile = sorted(glob.glob('reactions_*'))
+# the substring is reaction_1 in order to avoid the reaction_parameters file...
+lastReactionsFile = sorted(glob.glob('reactions_1*'))
 lastCatalysisFile = sorted(glob.glob('catalysis_*'))
 
 # Move files into the new folder
@@ -79,6 +80,12 @@ for line in mod:
 		linesplitted = line.split("=")
 		if linesplitted[0] == 'randomSeed':
 			linesplitted[1] = '0\n'
+		if linesplitted[0] == 'K_diss':
+			linesplitted[1] = str(_CLEAVAGE_)
+		if linesplitted[0] == 'K_ass':
+			linesplitted[1] = str(_CONDENSATION_)
+		if linesplitted[0] == 'K_cpx':
+			linesplitted[1] = str(_COMPLEXFORM_)		
 		if _REVRCTS_ == 1:
 			if linesplitted[0] == 'reverseReactions':
 				linesplitted[1] = '1\n'
