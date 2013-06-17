@@ -41,7 +41,7 @@ os.chdir(sourceResFolder)
 
 # Select last species, reactions and catalysis file
 lastSpeciesFile = sorted(glob.glob('species_*'))
-lastReactionsFile = sorted(glob.glob('reactions_1*'))
+lastReactionsFile = sorted(glob.glob('reactions_*'))
 lastCatalysisFile = sorted(glob.glob('catalysis_*'))
 
 # Move files into the new folder
