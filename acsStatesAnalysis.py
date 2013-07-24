@@ -161,6 +161,9 @@ newSpecies_FID = open('STAT_GENERAL_newSpecies.csv', 'w')
 livingSpecies_FID = open('STAT_GENERAL_livingSpecies.csv', 'w')
 mols_FID = open('STAT_GENERAL_mols.csv', 'w')
 totMass_FID = open('STAT_GENERAL_overallMass.csv', 'w')
+totOverallMass_FID = open('STAT_GENERAL_overallTotMass.csv', 'w')
+complex_FID = open('STAT_GENERAL_complex.csv', 'w')
+complexMols_FID = open('STAT_GENERAL_complexMols.csv', 'w')
 evaluatedFID = open('STAT_GENERAL_evaluated.csv', 'w')
 zeroOneSpeciesFID = open('STAT_GENERAL_zeroOneSpecies.csv', 'w')
 biodeversityFID = open('STAT_GENERAL_bioDiversity.csv', 'w')
@@ -222,7 +225,7 @@ for tmpDir in tmpDirs:
 						print ' |- impossible to load ', sngSpeciesFile; sys.exit(1)
 						
 					seq = []; conc = []; seqNOINFLUX = []; numberOfSpecies = 0; tmpMass = 0; tmpObsSpecies = 0
-					tmpMols = 0
+					tmpMols = 0; tmpCpx = 0; tmpCpxMols = 0; tmpTotMass = 0
 					for sp in fidSpecies:
 						tmpID, tmpSeq, tmpConc, tmpDiff, tmpSol, tmpCpxDiss, tmpCpxCut, tmpEval, tmpAge, tmpReb, tmpCatID, tmpSubID, tmpKpho, tmpLoadConc, tmpConcLock = sp.split()
 						if (int(tmpCpxCut) == 0) & (float(tmpConc) > 0):
@@ -244,6 +247,11 @@ for tmpDir in tmpDirs:
 							# Update systems mass
 							tmpMass += len(str(tmpSeq)) * int(round(float(tmpConc) * 6.022e23 * tmpVolume))
 							tmpMols += int(round(float(tmpConc) * 6.022e23 * tmpVolume))
+						if (int(tmpCpxCut) > 0) & (float(tmpConc) > 0):
+							tmpCpx += 1
+							tmpCpxMols += int(round(float(tmpConc) * 6.022e23 * tmpVolume))
+						if (float(tmpConc) > 0):
+							tmpTotMass += len(str(tmpSeq)) * int(round(float(tmpConc) * 6.022e23 * tmpVolume))
 						# If the species is not a complex, the number of species is updated	
 						if int(tmpCpxCut) == 0:
 							numberOfSpecies += 1	
@@ -271,6 +279,12 @@ for tmpDir in tmpDirs:
 					evaluatedFID.write(strtoW)	
 					strtoW = str(bioDivInd) + '\t'
 					biodeversityFID.write(strtoW)
+					strtoW = str(tmpCpx) + '\t'
+					complex_FID.write(strtoW)
+					strtoW = str(tmpCpxMols) + '\t'
+					complexMols_FID.write(strtoW)
+					strtoW = str(tmpTotMass) + '\t'
+					totOverallMass_FID.write(strtoW)			
 					
 					# ------------------------------------------------------					
 					# PREVIOUS ONE Defining concentration of the two vectors
@@ -339,6 +353,9 @@ for tmpDir in tmpDirs:
 				  mols_FID.write('\n')
 				  evaluatedFID.write('\n')
 				  biodeversityFID.write('\n')
+				  complex_FID.write('\n')
+				  complexMols_FID.write('\n')
+				  totOverallMass_FID.write('\n')
 				  
 				  HAM_previousFILE_FID.write('\n')
 				  HAM_previousNOINFLUX_FILE_FID.write('\n')
@@ -420,6 +437,9 @@ totMass_FID.close()
 evaluatedFID.close()
 mols_FID.close()
 biodeversityFID.close()
+complex_FID.close()
+complexMols_FID.close()
+totOverallMass_FID.close()
 
 print '|- FINISHED... SEE YOU NEXT TIME'
 

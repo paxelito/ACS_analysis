@@ -89,10 +89,10 @@ for tmpDir in tmpDirs:
 					
 				strZeros = zeroBeforeStrNum(ngen, numberOfGen)
 				if ngen == 1:
-			  		strSpeciesZero = 'species_' + strZeros + str(0) + '*'
+			  		strSpeciesZero = 'species_0' + strZeros + str(0) + '*'
 			  		speciesFilesZero = sorted(glob.glob(os.path.join(resDirPath,strSpeciesZero)))
 
-				strSpecies = 'species_' + strZeros + str(ngen) + '*'  
+				strSpecies = 'species_0' + strZeros + str(ngen) + '*'  
 				  
 			  	# Searching for files
 			  	speciesFiles = sorted(glob.glob(os.path.join(resDirPath,strSpecies)))
@@ -161,6 +161,8 @@ for tmpDir in tmpDirs:
 				tmpFileNameFID = open(tmpFileName, 'w')
 				ID = 0
 				tmpStr = 'Total Number of Reactions\t\t\t\t' + str(idRct) + '\n'
+				tmpSpeciesStatsSummaryNameFID.write(tmpStr)
+				tmpStr = 'ID\tCat\tSub\tProd\n'
 				tmpSpeciesStatsSummaryNameFID.write(tmpStr)
 				for sngCnt in counters:
 					tmpStr = str(ID) + "\t" + str(sngCnt[0]) + "\t" + str(sngCnt[1]) + "\t" + str(sngCnt[2]) + "\n"
