@@ -25,6 +25,8 @@ if __name__ == '__main__':
 	parser.add_argument('-i', '--influxRate', help='Influx Rate (for fixed concentrations)', default='0')
 	parser.add_argument('-m', '--maxLout', help='Max L out (if 0 open system, if > 0 set the fixed concentrations', default='3')
 	parser.add_argument('-s','--FileSpeciesToGetConc', help='Species file where concentrations to use are stored', default='')
+	parser.add_argument('-r','--revRct', help='Reverse Reaction on (1) or off (0)', default='0')
+	parser.add_argument('-k','--k_revRct', help='Reverse Reaction ration', default='1')
 	args = parser.parse_args()
 
 # Create absolute paths
@@ -38,8 +40,8 @@ print '-> StrFileSpeciesToGetConc: ', StrFileSpeciesToGetConc, '\n'
 
 origin = os.getcwd()
 _LASTSPECIES_ = 29 
-_REVRCTS_ = 1
-_RATIOREV_ = 1000
+_REVRCTS_ = int(args.revRct)
+_RATIOREV_ = int(args.k_revRct)
 _CLEAVAGE_ = 25.0
 _CONDENSATION_ = 50.0
 _COMPLEXFORM_ = 50.0
