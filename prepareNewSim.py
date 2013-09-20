@@ -203,11 +203,11 @@ for line in mod:
 	if int(carRctSplit[1]) == 0:
 		linesplitted[4] = str(_CONDENSATION_) # K_cond
 		linesplitted[5] = str(_CLEAVAGE_ / _RATIOREV_) # K_cleavage
-		linesplitted[6] = str(_COMPLEXFORM_) + '\n' # K_complex
+		linesplitted[6] = str(_COMPLEXFORM_) # K_complex
 	else:
 		linesplitted[4] = str(_CONDENSATION_ / _RATIOREV_) # K_cond
 		linesplitted[5] = str(_CLEAVAGE_) # K_cleavage
-		linesplitted[6] = str(_COMPLEXFORM_ / _RATIOREV_) + '\n' # K_complex
+		linesplitted[6] = str(_COMPLEXFORM_ / _RATIOREV_) # K_complex
 
 	mod[id] = "\t".join(linesplitted)
 	id += 1	 
