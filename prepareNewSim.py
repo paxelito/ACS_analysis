@@ -201,13 +201,13 @@ for line in mod:
 	
 	# Check whether condensation or cleavage
 	if int(carRctSplit[1]) == 0:
-		linesplitted[4] = str(_CONDENSATION_) # K_cond
-		linesplitted[5] = str(_CLEAVAGE_ / _RATIOREV_) # K_cleavage
-		linesplitted[6] = str(_COMPLEXFORM_) # K_complex
+		linesplitted[4] = str(float(_CONDENSATION_)) # K_cond
+		linesplitted[5] = str(_CLEAVAGE_ / float(_RATIOREV_)) # K_cleavage
+		linesplitted[6] = str(float(_COMPLEXFORM_)) # K_complex
 	else:
-		linesplitted[4] = str(_CONDENSATION_ / _RATIOREV_) # K_cond
-		linesplitted[5] = str(_CLEAVAGE_) # K_cleavage
-		linesplitted[6] = str(_COMPLEXFORM_ / _RATIOREV_) # K_complex
+		linesplitted[4] = str(_CONDENSATION_ / float(_RATIOREV_)) # K_cond
+		linesplitted[5] = str(float(_CLEAVAGE_)) # K_cleavage
+		linesplitted[6] = str(_COMPLEXFORM_ / float(_RATIOREV_)) # K_complex
 
 	mod[id] = "\t".join(linesplitted)
 	id += 1	 
