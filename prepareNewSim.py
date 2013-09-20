@@ -151,7 +151,7 @@ for line in mod:
 	linesplitted[9] = '0' # reborn
 	# IF concentrations are fixed and influx is 0 set the fixed concentrations
 	if(args.influxRate == '0'):
-			if(len(linesplitted[1]) > int(args.maxLout)):
+			if(len(linesplitted[1]) < int(args.maxLout)):
 				linesplitted[14] = '1\n'
 			else:
 				linesplitted[14] = '0\n'
