@@ -61,7 +61,7 @@ os.chdir(sourceResFolder)
 # Select last species, reactions and catalysis file
 lastSpeciesFile = sorted(glob.glob('species_*'))
 # the substring is reaction_1 in order to avoid the reaction_parameters file...
-lastReactionsFile = sorted(glob.glob('reactions_0*'))
+lastReactionsFile = sorted(glob.glob('reactions_1*'))
 lastCatalysisFile = sorted(glob.glob('catalysis_*'))
 
 fileDest = os.path.join(StrTo,"acsm2s.conf")
@@ -150,11 +150,11 @@ for line in mod:
 	# IF concentrations are fixed and influx is 0 set the fixed concentrations
 	if(args.influxRate == '0'):
 			if(len(linesplitted[1]) > int(args.maxLout)):
-				linesplitted[14] = '1'
+				linesplitted[14] = '1\n'
 			else:
-				linesplitted[14] = '0'
+				linesplitted[14] = '0\n'
 	else:
-		linesplitted[14] = '0'
+		linesplitted[14] = '0\n'
 		
 	mod[id] = "\t".join(linesplitted)
 	id += 1	 
