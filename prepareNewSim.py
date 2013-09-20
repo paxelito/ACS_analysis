@@ -22,6 +22,8 @@ if __name__ == '__main__':
 				, epilog='''Species concentration are initilized according to the sequence uploaded, pay attention to the file selected. ''') 
 	parser.add_argument('-f', '--StrFrom', help='Path of simulation files.', default='./')
 	parser.add_argument('-t', '--StrTo', help='Path where new simulation init file will be stored', default='./')
+	parser.add_argument('-i', '--influxRate', help='Influx Rate (for fixed concentrations)', default='0')
+	parser.add_argument('-m', '--maxLout', help='Max L out (if 0 open system, if > 0 set the fixed concentrations', default='3')
 	parser.add_argument('-s','--FileSpeciesToGetConc', help='Species file where concentrations to use are stored', default='')
 	args = parser.parse_args()
 
@@ -97,7 +99,11 @@ for line in mod:
 		if linesplitted[0] == 'K_ass':
 			linesplitted[1] = str(_CONDENSATION_) + '\n'
 		if linesplitted[0] == 'K_cpx':
-			linesplitted[1] = str(_COMPLEXFORM_) + '\n'		
+			linesplitted[1] = str(_COMPLEXFORM_) + '\n'	
+		if linesplitted[0] == 'influx_rate':
+			linesplitted[1] = str(args.influxRate) + '\n'	
+		if linesplitted[0] == 'maxLOut':
+			linesplitted[1] = str(args.maxLout) + '\n'		
 		if _REVRCTS_ == 1:
 			if linesplitted[0] == 'reverseReactions':
 				linesplitted[1] = '1\n'
@@ -141,6 +147,15 @@ for line in mod:
 			linesplitted[2] = '0'
 	linesplitted[8] = '0' # age
 	linesplitted[9] = '0' # reborn
+	# IF concentrations are fixed and influx is 0 set the fixed concentrations
+	if(args.influxRate == '0'):
+			if(len(linesplitted[1]) > int(args.maxLout)):
+				linesplitted[14] = '1'
+			else:
+				linesplitted[14] = '0'
+	else:
+		linesplitted[14] = '0'
+		
 	mod[id] = "\t".join(linesplitted)
 	id += 1	 
 try:
