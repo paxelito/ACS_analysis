@@ -218,9 +218,10 @@ for tmpDir in tmpDirs:
 				  oldNumberOfSpecies = 0
 				  
 				  # FOR EACH FILE SPECIES ---------------------------
+				  print len(speciesFiles), " Species files will be evaluated..."
 				  for idS, sngSpeciesFile in enumerate(speciesFiles):
 				  	
-				  	print '  |- Species File: ', sngSpeciesFile	
+				  	#print '  |- Species File: ', sngSpeciesFile	
 					try:
 						fidSpecies = open(sngSpeciesFile, 'r')
 					except:
