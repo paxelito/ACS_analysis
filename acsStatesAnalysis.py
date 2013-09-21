@@ -196,7 +196,7 @@ for tmpDir in tmpDirs:
 				  strZeros = zeroBeforeStrNum(ngen, numberOfGen)
 				  
 				  if ngen == 1:
-				  	strSpeciesZero = 'species_' + strZeros + str(ngen) + '*'
+				  	strSpeciesZero = 'species_' + strZeros + str(0) + '*'
 				  	speciesFilesZero = sorted(glob.glob(os.path.join(resDirPath,strSpeciesZero)))
 				  				  
 				  strSpecies = 'species_' + strZeros + str(ngen) + '*'  
