@@ -28,6 +28,7 @@ if __name__ == '__main__':
 	parser.add_argument('-r','--revRct', help='Reverse Reaction on (1) or off (0)', default='0')
 	parser.add_argument('-k','--k_revRct', help='Reverse Reaction ration', default='1')
 	parser.add_argument('-t','--overallTime', help='Simulation Time', default='1000')
+	parser.add_argument('-c','--singleInitConc', help='Single initial concentration', default='0.00110924')
 	args = parser.parse_args()
 
 # Create absolute paths
@@ -46,7 +47,7 @@ _RATIOREV_ = int(args.k_revRct)
 _CLEAVAGE_ = 25.0
 _CONDENSATION_ = 50.0
 _COMPLEXFORM_ = 50.0
-_INITSPECIESCONC_ = 0.00110924
+_INITSPECIESCONC_ = args.singleInitConc
 
 # Go to the source folder
 os.chdir(StrFrom)
@@ -98,7 +99,7 @@ for line in mod:
 		if linesplitted[0] == 'randomSeed':
 			linesplitted[1] = '0\n'
 		if linesplitted[0] == 'nSeconds':
-			linesplitted[1] = str(overallTime) + '\n'
+			linesplitted[1] = str(args.overallTime) + '\n'
 		if linesplitted[0] == 'K_diss':
 			linesplitted[1] = str(_CLEAVAGE_) + '\n'
 		if linesplitted[0] == 'K_ass':
