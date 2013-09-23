@@ -27,7 +27,7 @@ if __name__ == '__main__':
 	parser.add_argument('-s','--FileSpeciesToGetConc', help='Species file where concentrations to use are stored', default='')
 	parser.add_argument('-r','--revRct', help='Reverse Reaction on (1) or off (0)', default='0')
 	parser.add_argument('-k','--k_revRct', help='Reverse Reaction ration', default='1')
-	parser.add_argument('-t','--overallTime', help='Simulation Time', default='1000')
+	parser.add_argument('-l','--overallTime', help='Simulation Time', default='1000')
 	parser.add_argument('-c','--singleInitConc', help='Single initial concentration', default='0.00110924')
 	args = parser.parse_args()
 
