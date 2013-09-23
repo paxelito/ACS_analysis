@@ -29,6 +29,7 @@ if __name__ == '__main__':
 	parser.add_argument('-k','--k_revRct', help='Reverse Reaction ration', default='1')
 	parser.add_argument('-l','--overallTime', help='Simulation Time', default='1000')
 	parser.add_argument('-c','--singleInitConc', help='Single initial concentration', default='0.00110924')
+	parser.add_argument('-k','--kDiss', help='Complex Dissociation Constant', default='1')
 	args = parser.parse_args()
 
 # Create absolute paths
@@ -47,6 +48,7 @@ _RATIOREV_ = int(args.k_revRct)
 _CLEAVAGE_ = 25.0
 _CONDENSATION_ = 50.0
 _COMPLEXFORM_ = 50.0
+_COMPLEXDISS_ = float(args.kDiss)
 _INITSPECIESCONC_ = float(args.singleInitConc)
 
 # Go to the source folder
@@ -109,7 +111,9 @@ for line in mod:
 		if linesplitted[0] == 'influx_rate':
 			linesplitted[1] = str(args.influxRate) + '\n'	
 		if linesplitted[0] == 'maxLOut':
-			linesplitted[1] = str(args.maxLout) + '\n'		
+			linesplitted[1] = str(args.maxLout) + '\n'
+		if linesplitted[0] == 'K_cpxDiss':
+			linesplitted[1] = str(_COMPLEXDISS_) + '\n'					
 		if _REVRCTS_ == 1:
 			if linesplitted[0] == 'reverseReactions':
 				linesplitted[1] = '1\n'
@@ -151,6 +155,10 @@ for line in mod:
 			linesplitted[2] = str(concs[id])
 		else:
 			linesplitted[2] = '0'
+	# IF complex set k_diss
+	if(int(linesplitted[6]) > 0):
+		linesplitted[5] = str(_COMPLEXDISS_)
+	# Set age e number of reborns	
 	linesplitted[8] = '0' # age
 	linesplitted[9] = '0' # reborn
 	# IF concentrations are fixed and influx is 0 set the fixed concentrations
