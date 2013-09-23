@@ -29,7 +29,7 @@ if __name__ == '__main__':
 	parser.add_argument('-k','--k_revRct', help='Reverse Reaction ration', default='1')
 	parser.add_argument('-l','--overallTime', help='Simulation Time', default='1000')
 	parser.add_argument('-c','--singleInitConc', help='Single initial concentration', default='0.00110924')
-	parser.add_argument('-k','--kDiss', help='Complex Dissociation Constant', default='1')
+	parser.add_argument('-d','--kDiss', help='Complex Dissociation Constant', default='1')
 	args = parser.parse_args()
 
 # Create absolute paths
