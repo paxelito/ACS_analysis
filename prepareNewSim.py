@@ -47,7 +47,7 @@ _RATIOREV_ = int(args.k_revRct)
 _CLEAVAGE_ = 25.0
 _CONDENSATION_ = 50.0
 _COMPLEXFORM_ = 50.0
-_INITSPECIESCONC_ = args.singleInitConc
+_INITSPECIESCONC_ = float(args.singleInitConc)
 
 # Go to the source folder
 os.chdir(StrFrom)
