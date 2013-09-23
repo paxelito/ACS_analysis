@@ -27,6 +27,7 @@ if __name__ == '__main__':
 	parser.add_argument('-s','--FileSpeciesToGetConc', help='Species file where concentrations to use are stored', default='')
 	parser.add_argument('-r','--revRct', help='Reverse Reaction on (1) or off (0)', default='0')
 	parser.add_argument('-k','--k_revRct', help='Reverse Reaction ration', default='1')
+	parser.add_argument('-t','--overallTime', help='Simulation Time', default='1000')
 	args = parser.parse_args()
 
 # Create absolute paths
@@ -96,6 +97,8 @@ for line in mod:
 		linesplitted = line.split("=")
 		if linesplitted[0] == 'randomSeed':
 			linesplitted[1] = '0\n'
+		if linesplitted[0] == 'nSeconds':
+			linesplitted[1] = str(overallTime) + '\n'
 		if linesplitted[0] == 'K_diss':
 			linesplitted[1] = str(_CLEAVAGE_) + '\n'
 		if linesplitted[0] == 'K_ass':
