@@ -30,6 +30,7 @@ if __name__ == '__main__':
 	parser.add_argument('-l','--overallTime', help='Simulation Time', default='1000')
 	parser.add_argument('-c','--singleInitConc', help='Single initial concentration', default='0.00110924')
 	parser.add_argument('-d','--kDiss', help='Complex Dissociation Constant', default='1')
+	parser.add_argument('-u','--timeStructSavInt', help='Time from one structures storing and the next one', default='10')
 	args = parser.parse_args()
 
 # Create absolute paths
@@ -102,6 +103,8 @@ for line in mod:
 			linesplitted[1] = '0\n'
 		if linesplitted[0] == 'nSeconds':
 			linesplitted[1] = str(args.overallTime) + '\n'
+		if linesplitted[0] == 'timeStructuresSavingInterval':
+			linesplitted[1] = str(args.timeStructSavInt) + '\n'			
 		if linesplitted[0] == 'K_diss':
 			linesplitted[1] = str(_CLEAVAGE_) + '\n'
 		if linesplitted[0] == 'K_ass':
