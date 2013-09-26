@@ -44,19 +44,18 @@ for n, fileToAnal in enumerate(filesToAnal):
 	# Store values in the overall matrix
 	pos = 0
 	chem = 1
+	tmpHead = ''
 	for row in range(0,xsize[0]):
 		for col in range(row,run4Chem*chem):
 			y[n,pos] = np.arccos(x[row,col]) * 360.00 / 6.28
-			#print n, " ", pos, " ", row, " ", col, " ", run4Chem*chem, " ", numOfTraj
-			#raw_input("Press enter to continue")
+			if (n == 0):
+				tmpHead += str(chem) + '.' + str(row) + '-' + str(chem) + '.' + str(col) + '\t'
 			pos += 1
 		if (row == run4Chem*chem-1):
 			chem += 1
+			
 	
 filename = "_arranged_" + args.SubStr + ".csv"
+#np.savetxt(filename, y, delimiter='\t', fmt='%.5f', header=tmpHead) (To use with numpy > 1.7.0)
 np.savetxt(filename, y, delimiter='\t', fmt='%.5f')
 print "File saved, see you next time..."
-		
-	
-	
-	
