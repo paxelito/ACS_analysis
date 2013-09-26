@@ -65,7 +65,7 @@ def distanceMisures(tmpSeqX, tmpConcX, tmpSeqY, tmpConcY, tmpIDs):
 		 
 		vecX = np.array(speciesConcX)
 		vecY = np.array(speciesConcY)
-		tmpCos = np.dot(vecX,vecY) / (np.linalg.norm(vecX) * np.linalg.norm(vecY))	
+		tmpCos = float(np.dot(vecX,vecY) / (np.linalg.norm(vecX) * np.linalg.norm(vecY)))	
 		
 		strtoW[0] = np.arccos(tmpCos)  * 360.00 / 6.28
 		
