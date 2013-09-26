@@ -67,7 +67,7 @@ def distanceMisures(tmpSeqX, tmpConcX, tmpSeqY, tmpConcY, tmpIDs):
 		vecY = np.array(speciesConcY)
 		tmpCos = np.dot(vecX,vecY) / (np.linalg.norm(vecX) * np.linalg.norm(vecY))	
 		
-		strtoW[0] = tmpCos
+		strtoW[0] = np.arccos(tmpCos)  * 360.00 / 6.28
 		
 		# HAMMING DISTANCE and EUCLIDEAN DISTANCE
 		tmpHD = 0
