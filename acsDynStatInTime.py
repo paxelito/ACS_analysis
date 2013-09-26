@@ -51,7 +51,7 @@ for n, fileToAnal in enumerate(filesToAnal):
 			if args.computeAngle == 1:
 				y[n,pos] = np.arccos(x[row,col]) * 360.00 / 6.28
 			else:
-				y[n,pos] = np.arccos(x[row,col])
+				y[n,pos] = x[row,col]
 			if (n == 0):
 				tmpHead += str(chem) + '.' + str(row) + '-' + str(chem) + '.' + str(col) + '\t'
 			pos += 1
