@@ -20,6 +20,7 @@ if __name__ == '__main__':
 	parser.add_argument('-p', '--StrPath', help='Path where files are stored', default='./')
 	parser.add_argument('-c', '--StrChems', help='Number of chemistries', default='4', type=int)
 	parser.add_argument('-s', '--SubStr', help='Substring of the filenames to analyze', default='acsAttractorsAnalysis_COSENO')
+	parser.add_argument('-x', '--computeAngle', help='Select if the cos must be converted in angle', default=0, type=int)
 	args = parser.parse_args()
 	
 # Create absolute paths
@@ -47,7 +48,10 @@ for n, fileToAnal in enumerate(filesToAnal):
 	tmpHead = ''
 	for row in range(0,xsize[0]):
 		for col in range(row,run4Chem*chem):
-			y[n,pos] = np.arccos(x[row,col]) * 360.00 / 6.28
+			if args.computeAngle == 1:
+				y[n,pos] = np.arccos(x[row,col]) * 360.00 / 6.28
+			else:
+				y[n,pos] = np.arccos(x[row,col])
 			if (n == 0):
 				tmpHead += str(chem) + '.' + str(row) + '-' + str(chem) + '.' + str(col) + '\t'
 			pos += 1
