@@ -407,7 +407,7 @@ for tmpDir in tmpDirs:
 				  # clean concentrations matrix from always zero species
 				  speciesConcs = speciesConcs[:,speciesConcs.sum(0)!=0]
 				  # Save concentrations matrix
-				  filename = "__" + STAT_species_Concentrations + "_"  + nGen + ".csv"
+				  filename = "__STAT_species_Concentrations_"  + nGen + ".csv"
 				  np.savetxt(filename, y, delimiter='\t', fmt='%.5f')
 		else: 
 			print " |- no result folder has been found"
