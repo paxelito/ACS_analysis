@@ -206,12 +206,12 @@ for tmpDir in tmpDirs:
 				  # Create a 0 list containing the present species
 				  zeroList = returnZeroSpeciesList(speciesFiles[-1])
 				  
-				  # Create matrix with dimension (NumberOfFileSpecies X Number of species (not complexes) )
-				  print len(speciesFiles)
-				  speciesConcs = np.zeros((len(speciesFiles)+1,len(zeroList)))
-				  
 				  if ngen == 1:
 				  	speciesFiles = speciesFilesZero + speciesFiles
+				  	
+				  # Create matrix with dimension (NumberOfFileSpecies X Number of species (not complexes) )
+				  # print len(speciesFiles)
+				  speciesConcs = np.zeros((len(speciesFiles)+1,len(zeroList)))
 				  	
 				  # Initialize moving average lists
 				  seqOLD = []; seqOLDNOINFLUX = []; concOLD = []
