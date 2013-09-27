@@ -207,6 +207,7 @@ for tmpDir in tmpDirs:
 				  zeroList = returnZeroSpeciesList(speciesFiles[-1])
 				  
 				  # Create matrix with dimension (NumberOfFileSpecies X Number of species (not complexes) )
+				  print len(speciesFiles)
 				  speciesConcs = np.zeros((len(speciesFiles)+1,len(zeroList)))
 				  
 				  if ngen == 1:
