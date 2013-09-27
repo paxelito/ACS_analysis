@@ -182,7 +182,8 @@ for idx, lx in enumerate(overallConcList):
 		vecY = np.array(ly)
 		# Compute coseno
 		tmpCos = float(np.dot(vecX,vecY) / (np.linalg.norm(vecX) * np.linalg.norm(vecY)))
-		ANG_overallResMatrix[idx,idy] = np.arccos(tmpCos)  * 360.00 / 6.28
+		#ANG_overallResMatrix[idx,idy] = np.arccos(tmpCos)  * 360.00 / 6.28
+		ANG_overallResMatrix[idx,idy] = tmpCos
 		# HAMMING DISTANCE and EUCLIDEAN DISTANCE
 		tmpHD = 0
 		tmpEU = 0
@@ -200,7 +201,8 @@ for idx, lx in enumerate(overallConcListNOINFLUX):
 		vecY = np.array(ly)
 		# Compute coseno
 		tmpCos = float(np.dot(vecX,vecY) / (np.linalg.norm(vecX) * np.linalg.norm(vecY)))
-		ANG_overallResMatrixNOINFLUX[idx,idy] = np.arccos(tmpCos)  * 360.00 / 6.28
+		#ANG_overallResMatrixNOINFLUX[idx,idy] = np.arccos(tmpCos)  * 360.00 / 6.28
+		ANG_overallResMatrixNOINFLUX[idx,idy] = tmpCos
 		# HAMMING DISTANCE and EUCLIDEAN DISTANCE
 		tmpHD = 0
 		tmpEU = 0
