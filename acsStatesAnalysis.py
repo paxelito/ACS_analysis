@@ -409,8 +409,8 @@ for IDdir, tmpDir in enumerate(tmpDirs):
 				  # Save concentrations matrix
 				  filename = "__STAT_species_Concentrations_"  + str(IDdir), "_", str(ngen) + ".csv"
 				  print ndn
-				  print os.path.join(ndn,filename)
-				  np.savetxt(os.path.join(ndn,filename), speciesConcs, delimiter='\t', fmt='%.5f')
+				  print os.path.join(strPath,ndn,filename)
+				  np.savetxt(os.path.join(strPath,ndn,filename), speciesConcs, delimiter='\t', fmt='%.5f')
 		else: 
 			print " |- no result folder has been found"
 
