@@ -408,6 +408,7 @@ for IDdir, tmpDir in enumerate(tmpDirs):
 				  speciesConcs = speciesConcs[:,speciesConcs.sum(0)!=0]
 				  # Save concentrations matrix
 				  filename = "__STAT_species_Concentrations_"  + str(IDdir), "_", str(ngen) + ".csv"
+				  print ndn
 				  print os.path.join(ndn,filename)
 				  np.savetxt(os.path.join(ndn,filename), speciesConcs, delimiter='\t', fmt='%.5f')
 		else: 
