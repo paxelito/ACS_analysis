@@ -168,7 +168,7 @@ zeroOneSpeciesFID = open('STAT_GENERAL_zeroOneSpecies.csv', 'w')
 biodeversityFID = open('STAT_GENERAL_bioDiversity.csv', 'w')
 
 os.chdir(StrPath)
-
+validDir = 1
 for IDdir, tmpDir in enumerate(tmpDirs):
 
 	totDirName = os.path.join(StrPath,tmpDir)
@@ -252,8 +252,8 @@ for IDdir, tmpDir in enumerate(tmpDirs):
 							# Set 1 in zeroList (species has been created at least once)
 							zeroList[numberOfSpecies] = 1
 							# Update species concentrations matrix
-							if idS == 0:
-								speciesConcs[idS, numberOfSpecies] = tmpID
+							if idS == 0: speciesConcs[idS, numberOfSpecies] = tmpID
+							if speciesConcs[0, numberOfSpecies] == 0: speciesConcs[0, numberOfSpecies] = tmpID
 							speciesConcs[idS+1, numberOfSpecies] = tmpConc
 							# Update systems mass
 							tmpMass += len(str(tmpSeq)) * int(round(float(tmpConc) * 6.022e23 * tmpVolume))
@@ -407,12 +407,13 @@ for IDdir, tmpDir in enumerate(tmpDirs):
 				  # clean concentrations matrix from always zero species
 				  speciesConcs = speciesConcs[:,speciesConcs.sum(0)!=0]
 				  # Save concentrations matrix
-				  filename = "STAT_species_Concentrations_"  + str(IDdir) + "_" + str(ngen) + ".csv"
+				  filename = "STAT_species_Concentrations_"  + str(validDir) + "_" + str(ngen) + ".csv"
 				  print ndn
 				  print StrPath
 				  print filename
 				  print os.path.join(StrPath,ndn,filename)
 				  np.savetxt(os.path.join(StrPath,ndn,filename), speciesConcs, delimiter='\t', fmt='%.5f')
+			validDir += 1
 		else: 
 			print " |- no result folder has been found"
 
