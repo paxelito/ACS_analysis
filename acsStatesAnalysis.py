@@ -86,8 +86,7 @@ def distanceMisures(tmpSeqX, tmpConcX, tmpSeqY, tmpConcY, tmpIDs):
 		strtoW[2] = 0
 		
 	return strtoW
-	
-	
+
 try:
 	StrPath = sys.argv[1] # Here the path of the simulation output file
 	tmpMaxFluxL = int(sys.argv[2]) # Influx max length
@@ -204,7 +203,11 @@ for tmpDir in tmpDirs:
 				  # Searching for files
 				  speciesFiles = sorted(glob.glob(os.path.join(resDirPath,strSpecies)))
 				  
+				  # Create a 0 list containing the present species
 				  zeroList = returnZeroSpeciesList(speciesFiles[-1])
+				  
+				  # Create matrix with dimension (NumberOfFileSpecies X Number of species (not complexes) )
+				  speciesConcs = np.zeros((len(speciesFiles)+1,len(zeroList)))
 				  
 				  if ngen == 1:
 				  	speciesFiles = speciesFilesZero + speciesFiles
@@ -247,6 +250,10 @@ for tmpDir in tmpDirs:
 									seqMIDDLE_NOINFLUX.append(str(tmpSeq))
 							# Set 1 in zeroList (species has been created at least once)
 							zeroList[numberOfSpecies] = 1
+							# Update species concentrations matrix
+							if idS == 0:
+								speciesConcs[idS, numberOfSpecies] = tmpID
+							speciesConcs[idS+1, numberOfSpecies] = tmpConc
 							# Update systems mass
 							tmpMass += len(str(tmpSeq)) * int(round(float(tmpConc) * 6.022e23 * tmpVolume))
 							tmpMols += int(round(float(tmpConc) * 6.022e23 * tmpVolume))
@@ -395,6 +402,12 @@ for tmpDir in tmpDirs:
 					strtoW = str(zol) + '\t'
 					zeroOneSpeciesFID.write(strtoW)
 				  zeroOneSpeciesFID.write('\n')
+				  
+				  # clean concentrations matrix from always zero species
+				  speciesConcs = speciesConcs[:,speciesConcs.sum(0)!=0]
+				  # Save concentrations matrix
+				  filename = "__" + STAT_species_Concentrations + "_"  + nGen + ".csv"
+				  np.savetxt(filename, y, delimiter='\t', fmt='%.5f')
 		else: 
 			print " |- no result folder has been found"
 

@@ -19,7 +19,7 @@ if __name__ == '__main__':
 				, epilog='''File with angle trajectories are created. ''') 
 	parser.add_argument('-p', '--StrPath', help='Path where files are stored', default='./')
 	parser.add_argument('-c', '--StrChems', help='Number of chemistries', default='4', type=int)
-	parser.add_argument('-s', '--SubStr', help='Substring of the filenames to analyze', default='acsAttractorsAnalysis_COSENO')
+	parser.add_argument('-s', '--SubStr', help='Substring of the filenames to analyze', default='acsAttractorsAnalysisNOINFLUX_COSENO')
 	parser.add_argument('-x', '--computeAngle', help='Select if the cos must be converted in angle', default=0, type=int)
 	args = parser.parse_args()
 	
@@ -50,6 +50,10 @@ for n, fileToAnal in enumerate(filesToAnal):
 		for col in range(row,run4Chem*chem):
 			if args.computeAngle == 1:
 				y[n,pos] = np.arccos(x[row,col]) * 360.00 / 6.28
+				#if y[n,pos] > 0:
+					#print fileToAnal
+					#print row, " ", col, " ", x[row,col], " ", np.arccos(float(x[row,col])), " ", np.arccos(x[row,col]) * 360.00 / 6.28
+					#raw_input("test")
 			else:
 				y[n,pos] = x[row,col]
 			if (n == 0):
