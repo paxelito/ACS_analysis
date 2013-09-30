@@ -206,7 +206,8 @@ for timeFileID in range(0,tmpNOF):
 			vecY = np.array(ly)
 			# Compute coseno
 			tmpCos = float(np.dot(vecX,vecY) / (np.linalg.norm(vecX) * np.linalg.norm(vecY)))
-			ANG_overallResMatrix[idx,idy] = np.arccos(tmpCos)  * 360.00 / 6.28
+			if tmpCos >= 1.0: tmpCos = 1.0
+			ANG_overallResMatrixNOINFLUX[idx,idy] = np.arccos(tmpCos)  * 360.00 / 6.28
 			# HAMMING DISTANCE and EUCLIDEAN DISTANCE
 			tmpHD = 0
 			tmpEU = 0
@@ -224,6 +225,7 @@ for timeFileID in range(0,tmpNOF):
 			vecY = np.array(ly)
 			# Compute coseno
 			tmpCos = float(np.dot(vecX,vecY) / (np.linalg.norm(vecX) * np.linalg.norm(vecY)))
+			if tmpCos >= 1.0: tmpCos = 1.0
 			ANG_overallResMatrixNOINFLUX[idx,idy] = np.arccos(tmpCos)  * 360.00 / 6.28
 			# HAMMING DISTANCE and EUCLIDEAN DISTANCE
 			tmpHD = 0
