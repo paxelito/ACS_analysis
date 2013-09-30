@@ -58,7 +58,7 @@ if __name__ == '__main__':
 		# If cleavage
 		if rctType == 1:
 			# Select species to cleave
-			
+			print "To be continued..."
 		
 		print rnd, " ", totRcts, " ", totCleavage, " ", rctType
 	
