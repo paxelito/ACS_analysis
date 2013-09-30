@@ -225,8 +225,6 @@ for timeFileID in range(0,tmpNOF):
 			# Compute coseno
 			tmpCos = float(np.dot(vecX,vecY) / (np.linalg.norm(vecX) * np.linalg.norm(vecY)))
 			ANG_overallResMatrixNOINFLUX[idx,idy] = np.arccos(tmpCos)  * 360.00 / 6.28
-			print tmpCos, " ", np.arccos(tmpCos)," ",ANG_overallResMatrixNOINFLUX[idx,idy] 
-			raw_input("")
 			# HAMMING DISTANCE and EUCLIDEAN DISTANCE
 			tmpHD = 0
 			tmpEU = 0
