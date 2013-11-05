@@ -6,6 +6,7 @@ import sys, os # Standard librar
 import glob
 import numpy as np # Scientific library
 import itertools as it
+import random
 from numpy import * 
 from argparse import ArgumentParser
 try:
