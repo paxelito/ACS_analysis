@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: latin-1 -*-
 
+# To copy the most recent file `ls -tr c* | tail -1`
+
 import sys, os # Standard librar
 import glob
 import linecache
