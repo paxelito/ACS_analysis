@@ -17,7 +17,6 @@ from lib.IO import readfiles as rf
 from lib.dyn import dynamics as dm
 from lib.graph import raf 
 
-
 #ÊInput parameters definition 
 if __name__ == '__main__':
 	parser = ArgumentParser(
@@ -71,7 +70,7 @@ if __name__ == '__main__':
 			RAFlpost = len(RAF)
 	
 	print "|- CLOSURE -> ", closure
-	print "|- RA set -> ",  RA
+	#print "|- RA set -> ",  RA
 	print "|- RAF set -> ",  RAF
 	
 	catalists = raf.findCatforRAF(cats, RAF, closure)

@@ -42,8 +42,10 @@ def readConfFile(tmpPath):
 			maxLOut = int(strLine[1])
 		if strLine[0] == "lastFiringDiskSpeciesID":
 			lfdsID = int(strLine[1])
+		if strLine[0] == "reactionProbability":
+			rctProb = float(strLine[1])	
 			
-	return (ngen,nsim,totTimes,nrgType,totalRcts,nrgConc,influx_rate,maxLOut,lfdsID)
+	return (ngen,nsim,totTimes,nrgType,totalRcts,nrgConc,influx_rate,maxLOut,lfdsID,rctProb)
 
 # Return Buffered species IDs
 def readBufferedID(tmpPath):
@@ -80,7 +82,6 @@ def readCSTRflux(tmpPath):
 def loadAllData(tmpPath, tmpFname):
 	
 	fileName = os.path.join(tmpPath,tmpFname)
-	print fileName
 	data = np.loadtxt(fileName, dtype=float)
 	return data
 
