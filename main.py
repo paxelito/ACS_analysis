@@ -37,9 +37,9 @@ if __name__ == '__main__':
 				, epilog='''ACS ANALYSIS Main File. ''') 
 	parser.add_argument('-i', '--initanal', type=int, help='Analysis of the initial structures', choices=[0,1], default=0)
 	parser.add_argument('-e', '--exhaustive', type=int, help='Analysis of the simulation', choices=[0,1], default=1)
+	parser.add_argument('-m', '--maxDim', help='Max Dimension of the system', default='4', type=int)
 	parser.add_argument('-p', '--strPath', help='Path where files are stored', default='./')
 	parser.add_argument('-r', '--resFolder', help='Name of the result folder', default='res')
-	
 	
 	args = parser.parse_args()
 	
@@ -72,7 +72,7 @@ if __name__ == '__main__':
 		fid_initRafRes = open(fname_initRafRes, 'w')
 		fid_initRafResLIST = open(fname_initRafResLIST, 'w')
 		fid_initRafResALL = open(fname_initRafResALL, 'w')
-		strToWrite = "Folder\tP\tRAFsize\tClosure\tCats\n"
+		strToWrite = "Folder\tP\tM\tRAFsize\tClosure\tCats\n"
 		fid_initRafRes.write(strToWrite)
 	
 	for tmpDir in tmpDirs:
@@ -94,17 +94,14 @@ if __name__ == '__main__':
 				elif (conf[6] > 0) & (conf[7] == 0): sysType = _CSTR_
 				elif (conf[6] == 0) & (conf[7] == 0): sysType = _CLOSE_
 				foodList = dm.generateFluxList(totDirName, sysType)
-				
+								
 				# Initial Analysis are turned ON (RAF ANALYSIS)
 				if args.initanal == 1:
 					print "   |- LOADING init structures..."
 					rcts = readfiles.loadAllData(totDirName,'_acsreactions.csv') # reaction file upload
 					cats = readfiles.loadAllData(totDirName,'_acscatalysis.csv') # catalysis file upload
-					init_raf = raf.rafsearch(conf, rcts, cats, foodList) # RAF search 
-					strToWrite = tmpDir + "\t" + str(float(conf[9])) + "\t" + str(len(init_raf[2])) + "\t" + str(len(init_raf[0]))+ "\t" + str(len(init_raf[3])) + "\n"
-					fid_initRafRes.write(strToWrite)
-					writefiles.write_init_raf_list(fid_initRafResLIST, init_raf, tmpDir)
-					writefiles.write_init_raf_all(fid_initRafResALL, init_raf, tmpDir, rcts, cats)
+					# REAL RAF COMPUTATION (!!!!!! 1 is average connectivity)
+					raf.rafComputation(fid_initRafRes, fid_initRafResALL, fid_initRafResLIST, tmpDir, conf[9], 1, rcts, cats, foodList, args.maxDim)
 					
 				os.chdir(resDirPath)
 				print "  \-Folder ", resDirPath

@@ -27,3 +27,10 @@ def generateFluxList(tmpPath, tmpSysType, tmpLastID=None):
 		tempFood = rf.readCSTRflux(tmpPath)
 	
 	return tempFood
+
+def rangeFloat(start, step, stop):
+	r = start
+	while r <= stop:
+		yield r
+		r += step
+		

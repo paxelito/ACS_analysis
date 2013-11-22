@@ -47,6 +47,42 @@ def readConfFile(tmpPath):
 			
 	return (ngen,nsim,totTimes,nrgType,totalRcts,nrgConc,influx_rate,maxLOut,lfdsID,rctProb)
 
+def readInitConfFile(tmpPath):
+	#Open Parameter File
+	paramFile = os.path.join(tmpPath,"acsm2s.conf")
+	try:
+		fid = open(paramFile, 'r')
+	except:
+		print 'impossible to load ', paramFile; sys.exit(1)
+					
+	# Read reaction probability from configuration file
+	for line in fid:
+		strLine = line.split('=')
+		if strLine[0] == "nGEN":
+			ngen = int(strLine[1])
+		if strLine[0] == "nSIM":
+			nsim = int(strLine[1])
+		if strLine[0] == "reactionProbability":
+			rp = float(strLine[1])
+		if strLine[0] == "nSeconds":
+			totTimes = int(strLine[1])
+		if strLine[0] == "energy":
+			nrgType = int(strLine[1])
+		if strLine[0] == "nReactions":
+			totalRcts = int(strLine[1])
+		if strLine[0] == "ECConcentration":
+			nrgConc = float(strLine[1])
+		if strLine[0] == "influx_rate":
+			influx_rate = float(strLine[1])
+		if strLine[0] == "maxLOut":
+			maxLOut = int(strLine[1])
+		if strLine[0] == "lastFiringDiskSpeciesID":
+			lfdsID = int(strLine[1])
+		if strLine[0] == "reactionProbability":
+			rctProb = float(strLine[1])	
+			
+	return (ngen,nsim,totTimes,nrgType,totalRcts,nrgConc,influx_rate,maxLOut,lfdsID,rctProb)
+
 # Return Buffered species IDs
 def readBufferedID(tmpPath):
 	speciesFile = os.path.join(tmpPath,"_acsspecies.csv")

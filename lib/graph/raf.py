@@ -13,32 +13,39 @@ except:
     pass
 
 # Persona Libraries
-from ..IO import readfiles as rf
+from ..IO import *
 from ..dyn import dynamics as dm
    
+# GENERATE CLOSURE ACCORDING TO THE FOODSET AND THE SPECIFIC SUBSET OF REACTIONS
 def generateClosure(tmpF,rcts):
 	closure = tmpF
 	for sngf in closure:
+		#print "|- MOL IN CLO: ", sngf
 		# Find reduced rct matrix where the species is a reactant 
-		reducedR = rcts[((rcts[:,1] == 1)&(rcts[:,2] == sngf))|((rcts[:,1] == 0)&(rcts[:,3] == sngf)),:]
+		reducedR = rcts[((rcts[:,1] == 1)&(rcts[:,2] == sngf))|(((rcts[:,1] == 0)&(rcts[:,3] == sngf))|((rcts[:,1] == 0)&(rcts[:,4] == sngf))),:]
 		# Append product from cleavage reaction
 		if reducedR.shape[0] > 0:
 			for r in reducedR: 
+				#print "\t|- rct: ",  r
 				if int(r[1]) == 1: 
 					if int(r[3]) not in closure: closure.append(int(r[3]))
 					if int(r[4]) not in closure: closure.append(int(r[4]))
 				else:
 					if (int(r[3]) in closure) & (int(r[4]) in closure):
-						if int(r[2]) not in closure: closure.append(int(r[2]))			
-		
+						if int(r[2]) not in closure: closure.append(int(r[2]))	
+				#print "\t|- closure: ",   closure
+			#raw_input("...")	
+
 	return sorted(closure)
 
+# COMPUTE RA CONDITION
 def RAcondition(tmpCL, rcts, cats):
 	RAset = []
 	for cat in cats:
 		if int(cat[1]) in tmpCL: RAset.append(int(cat[2]))
 	return RAset
 
+# COMPUTE F CONDITION
 def Fcondition(tmpCL, tmpRA, rcts):
 	RAFset = []
 	for r in tmpRA:
@@ -48,6 +55,7 @@ def Fcondition(tmpCL, tmpRA, rcts):
 			if (int(rcts[r,3]) in tmpCL) & (int(rcts[r,4]) in tmpCL): RAFset.append(r)
 	return RAFset
 
+# FIND CATALYSTS OF THE RAF SET
 def findCatforRAF(tmpCat, tmpRAF, tmpClosure):
 	catalysts = []
 	for c in tmpCat:
@@ -57,23 +65,11 @@ def findCatforRAF(tmpCat, tmpRAF, tmpClosure):
 	return catalysts
 
 # FUNCTION TO FIND RAF IN INIT STRUCTURES 
-def rafsearch(conf, rcts, cats, closure):
+def rafsearch(rcts, cats, closure):
 	
-	# Read the param file and define the environment (Close, Protocell, CSTR)
-	print "   |- RAF searching step..."
-	_CLOSE_ = 0
-	_PROTO_ = 1
-	_CSTR_ = 2
-	# System type recognition
-	if (conf[6] == 0) & (conf[7] > 0): sysType = _PROTO_
-	elif (conf[6] > 0) & (conf[7] == 0): sysType = _CSTR_
-	elif (conf[6] == 0) & (conf[7] == 0): sysType = _CLOSE_
-
 	# Food list creation (first closure of F)
 	foodSet = deepcopy(closure)
-	# Load reaction and catalysis structures
-	# Generate cluser to Food
-	# Check RA condition
+	closure = generateClosure(closure,rcts)
 	RA = RAcondition(closure,rcts,cats)
 	# Check F condition
 	RAF = Fcondition(closure,RA,rcts)
@@ -86,15 +82,25 @@ def rafsearch(conf, rcts, cats, closure):
 		RAFlpost = 0
 		while (len(RAF) > 0) & (RAFlpre > RAFlpost):
 			RAFlpre = len(RAF)
-			closure = generateClosure(foodSet,redRcts)
-			#print "CLOSURE ->", closure
+			foodCopy = deepcopy(foodSet)
+			closure = generateClosure(foodCopy,redRcts)
 			RA = RAcondition(closure,rcts,cats)
-			#print "RA SET ->", RA
 			RAF = Fcondition(closure,RA,rcts)
-			#print "RAF set ->", RAF
 			redRcts = rcts[RAF,:]
 			RAFlpost = len(RAF)
 	
 	catalists = findCatforRAF(cats, RAF, closure)
-	return closure, RA, RAF, catalists
+	return closure, RA, RAF, catalists, len(list(set(RAF)))
+
+# BRIDGE FUNCTION TO DETECT RAFs
+def rafComputation(fid_initRafRes, fid_initRafResALL, fid_initRafResLIST, tmpDir, rctProb, avgCon, rcts, cats, foodList, maxDim):
+	rafset = rafsearch(rcts, cats, foodList) # RAF search 
+	ErctP = "%.4g" % rctProb
+	strToWrite = tmpDir + "\t" + str(ErctP) + "\t" + str(avgCon) + "\t" + str(maxDim) + "\t" + str(len(rafset[2])) + "\t" + str(len(rafset[0])) + "\t" + str(len(rafset[3])) + "\t" + str(rafset[4]) + "\n"
+	fid_initRafRes.write(strToWrite)
+	writefiles.write_init_raf_list(fid_initRafResLIST, rafset, tmpDir)
+	writefiles.write_init_raf_all(fid_initRafResALL, rafset, tmpDir, rcts, cats)
+	return rafset
+
+	
 	
