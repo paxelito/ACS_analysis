@@ -29,8 +29,8 @@ if __name__ == '__main__':
 				, epilog='''ACS ANALYSIS Main File. ''') 
 	parser.add_argument('-i', '--initanal', type=int, help='Analysis of the initial structures (def: 0)', choices=[0,1], default=0)
 	parser.add_argument('-e', '--exhaustive', type=int, help='Analysis of the dynamic structures (def: 1)', choices=[0,1], default=1)
-	parser.add_argument('-d', '--decay', type=int, help='Decay time (def: 0)', default=0)
-	parser.add_argument('-t', '--timeWindow', type=int, help='Dynamical time window (def: 10 seconds)', default=10)
+	parser.add_argument('-d', '--decay', type=float, help='Decay time (def: 0)', default=0)
+	parser.add_argument('-t', '--timeWindow', type=float, help='Dynamical time window (def: 10 seconds)', default=10)
 	parser.add_argument('-m', '--maxDim', help='Max Dimension of the system (def: 4)', default='4', type=int)
 	parser.add_argument('-p', '--strPath', help='Path where files are stored (def: ./)', default='./')
 	parser.add_argument('-r', '--resFolder', help='Name of the result folder (def: res)', default='res')
@@ -262,6 +262,7 @@ if __name__ == '__main__':
 								# RAF ANALYSIS	
 								if rtime > float((args.timeWindow * nAnal)):
 									print "\t\t\t|- RAF analysis...", " ", rtime
+									foodList = dm.generateFluxList(totDirName, sysType)
 									R = raf.rafDynamicComputation(fid_dynRafRes, tmpTime, onrcts[:,0:5], oncats[:,0:5], foodList, False)
 									nAnal += 1
 								
