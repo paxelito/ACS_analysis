@@ -23,8 +23,8 @@ if __name__ == '__main__':
 	parser = ArgumentParser(
 				description='This script re-arrange results in a more friendly way from the angle analysis in time.'
 				, epilog='''File with angle trajectories are created. ''') 
-	parser.add_argument('-a', '--sysType', help='System Architecture [1:CLOSE, 2:PROTO, 3:CSTR]', default='1')
-	parser.add_argument('-f', '--lastFood', type=int, help='Last food species ID', default='29')
+	parser.add_argument('-a', '--sysType', help='System Architecture [1:CLOSE, 2:PROTO, 3:CSTR], deafult: 1', default='1')
+	parser.add_argument('-f', '--lastFood', type=int, help='Last food species ID (deafult: 5)', default='5')
 	parser.add_argument('-s', '--strPath', help='Path where files are stored', default='./')
 	parser.add_argument('-o', '--strOut', help='Path for output file storing', default='./')
 	parser.add_argument('-m', '--maxDim', help='Max Dimension of the systems (Default: 6)', default='6', type=int)
@@ -73,6 +73,7 @@ if __name__ == '__main__':
 			for averageConn in avgCon: # For each average connectivity
 				raffound = 0
 				for instanceID, instance in enumerate(range(args.iteration)): # For each instance of network
+					sys.stdout.flush() # Force save data on file
 					# Create all the the species starting from the alphabet
 					alphabet = ['A', 'B']
 					species = []

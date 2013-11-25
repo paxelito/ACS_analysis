@@ -44,8 +44,10 @@ def readConfFile(tmpPath):
 			lfdsID = int(strLine[1])
 		if strLine[0] == "reactionProbability":
 			rctProb = float(strLine[1])	
+		if strLine[0] == "newSpeciesProbMinThreshold":
+			newSpeciesProbMinThreshold = float(strLine[1])	
 			
-	return (ngen,nsim,totTimes,nrgType,totalRcts,nrgConc,influx_rate,maxLOut,lfdsID,rctProb)
+	return (ngen,nsim,totTimes,nrgType,totalRcts,nrgConc,influx_rate,maxLOut,lfdsID,rctProb,newSpeciesProbMinThreshold)
 
 def readInitConfFile(tmpPath):
 	#Open Parameter File

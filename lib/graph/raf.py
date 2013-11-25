@@ -48,6 +48,8 @@ def RAcondition(tmpCL, rcts, cats):
 # COMPUTE F CONDITION
 def Fcondition(tmpCL, tmpRA, rcts):
 	RAFset = []
+	#print rcts
+	#print tmpRA
 	for r in tmpRA:
 		if rcts[r,1] == 1:
 			if int(rcts[r,2]) in tmpCL: RAFset.append(r)
@@ -106,13 +108,16 @@ def rafComputation(fid_initRafRes, fid_initRafResALL, fid_initRafResLIST, tmpDir
 	return rafset
 
 # BRIDGE FUNCTION TO DETECT RAFs in DYNAMICS
-def rafDynamicComputation(fid_dynRafRes, tmpTime, rcts, cats, foodList):
+def rafDynamicComputation(fid_dynRafRes, tmpTime, rcts, cats, foodList, growth=False, rctsALL=None, catsALL=None):
+	#print rcts
+	#print cats
 	rafset = rafsearch(rcts, cats, foodList) # RAF search
+	if growth == True: rafsetALL = rafsearch(rctsALL, catsALL, foodList) # RAF search
 	strRAF = '' 
 	if len(rafset[2]) > 0: 		
-		for x in rafset[2]: strRAF += str(x) + '\t'
-		
-	strToWrite = str(tmpTime) + "\t" + str(len(rafset[0])) + "\t" + str(rafset[4]) + "\t" + strRAF + "\n"
+		for x in rafset[2]: strRAF += str(x) + '\t'	
+	if growth == False: strToWrite = str(tmpTime) + "\t" + str(len(rafset[0])) + "\t" + str(rafset[4]) + "\t" + strRAF + "\n"
+	else: strToWrite = str(tmpTime) + "\t" + str(len(rafset[0])) + "\t" + str(rafset[4]) + str(len(rafsetALL[0])) + "\t" + str(rafsetALL[4]) + "\t" + strRAF + "\n"
 	fid_dynRafRes.write(strToWrite)
 	return rafset
 
