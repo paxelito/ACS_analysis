@@ -67,9 +67,9 @@ if __name__ == '__main__':
 	# Create food list
 	foodList = range(args.lastFood+1)
 	
-	for maxlength in range(3,args.maxDim+1): # For each dimension
+	for maxlength in range(5,args.maxDim+1): # For each dimension
 		avgCon = dn.rangeFloat(float(args.avgCon[0]), float(args.avgCon[1]), float(args.avgCon[2]))
-		sys.stdout.flush() # Force save data on file
+		#sys.stdout.flush() # Force save data on file
 		if args.rctProb == 0: # if reaction probability is 0
 			for averageConn in avgCon: # For each average connectivity
 				raffound = 0
