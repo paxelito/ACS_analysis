@@ -69,11 +69,11 @@ if __name__ == '__main__':
 	
 	for maxlength in range(3,args.maxDim+1): # For each dimension
 		avgCon = dn.rangeFloat(float(args.avgCon[0]), float(args.avgCon[1]), float(args.avgCon[2]))
+		sys.stdout.flush() # Force save data on file
 		if args.rctProb == 0: # if reaction probability is 0
 			for averageConn in avgCon: # For each average connectivity
 				raffound = 0
 				for instanceID, instance in enumerate(range(args.iteration)): # For each instance of network
-					sys.stdout.flush() # Force save data on file
 					# Create all the the species starting from the alphabet
 					alphabet = ['A', 'B']
 					species = []
