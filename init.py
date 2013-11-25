@@ -66,7 +66,7 @@ if __name__ == '__main__':
 	foodList = range(args.lastFood+1)
 	
 	for maxlength in range(3,args.maxDim+1): # For each dimension
-		avgCon = dn.rangeFloat(0.5, 0.05, 4.05)
+		avgCon = dn.rangeFloat(0.5, 0.05, 2.01)
 		for averageConn in avgCon: # For each average connectivity
 			raffound = 0
 			for instanceID, instance in enumerate(range(args.iteration)): # For each instance of network
@@ -170,9 +170,6 @@ if __name__ == '__main__':
 	fid_initRafRes.close()
 	fid_initRafResLIST.close()
 	fid_initRafResALL.close()
-	fid_initRafResSUM.close()
-	
-	#print species
-	
+	fid_initRafResSUM.close()	
 	
 		

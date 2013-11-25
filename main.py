@@ -7,6 +7,7 @@
 import sys, os # Standard library
 import datetime as dt
 import linecache as lc
+from copy import deepcopy
 import glob
 from argparse import ArgumentParser
 import numpy as np # Scientific library
@@ -20,15 +21,6 @@ except:
 from lib.IO import * 
 from lib.graph import raf
 from lib.dyn import dynamics as dm
-   
-#--------------------------------------------------------------------------------------
-def zeroBeforeStrNum(tmpl, tmpL):
-	strZero = ''
-	nZeros = len(str(tmpL)) - len(str(tmpl))
-	if nZeros > 0:
-		for i in range(0,nZeros): strZero = strZero + '0'
-	return strZero
-#--------------------------------------------------------------------------------------
 
 #ÊInput parameters definition 
 if __name__ == '__main__':
@@ -37,6 +29,7 @@ if __name__ == '__main__':
 				, epilog='''ACS ANALYSIS Main File. ''') 
 	parser.add_argument('-i', '--initanal', type=int, help='Analysis of the initial structures', choices=[0,1], default=0)
 	parser.add_argument('-e', '--exhaustive', type=int, help='Analysis of the simulation', choices=[0,1], default=1)
+	parser.add_argument('-d', '--decay', type=int, help='Decay time', default=0)
 	parser.add_argument('-m', '--maxDim', help='Max Dimension of the system', default='4', type=int)
 	parser.add_argument('-p', '--strPath', help='Path where files are stored', default='./')
 	parser.add_argument('-r', '--resFolder', help='Name of the result folder', default='res')
@@ -54,11 +47,8 @@ if __name__ == '__main__':
 	ndn = '_0_new_allStatResults'
 	newdirAllResults = os.path.join(strPath, ndn)
 	if not os.path.isdir(newdirAllResults):
-		try:
-			os.mkdir(newdirAllResults)
-		except:
-			print "Impossible to create statistic directory", newdirAllResults; sys.exit(1)
-	
+		try: os.mkdir(newdirAllResults)
+		except: print "Impossible to create statistic directory", newdirAllResults; sys.exit(1)
 	print "|- Simulation Folder: ", strPath
 	# System Type
 	_CLOSE_ = 0
@@ -72,7 +62,7 @@ if __name__ == '__main__':
 		fid_initRafRes = open(fname_initRafRes, 'w')
 		fid_initRafResLIST = open(fname_initRafResLIST, 'w')
 		fid_initRafResALL = open(fname_initRafResALL, 'w')
-		strToWrite = "Folder\tP\tM\tRAFsize\tClosure\tCats\n"
+		strToWrite = "Folder\tP\tM\tRAFsize\tClosure\tCats\tuRAF\n"
 		fid_initRafRes.write(strToWrite)
 	
 	for tmpDir in tmpDirs:
@@ -109,8 +99,54 @@ if __name__ == '__main__':
 				numberOfGen = len(glob.glob(os.path.join(resDirPath,'times_*')))
 				# For each generation
 				os.chdir(resDirPath)
-				for ngen in range(1,numberOfGen+1):
-					print "\t\t\tGeneration ", ngen	
+				
+				# Analysis of the dynamics
+				if args.exhaustive == 1:
+					for ngen in range(1,numberOfGen+1):
+						print "\t\t\tGeneration ", ngen
+						strZeros = readfiles.zeroBeforeStrNum(ngen, numberOfGen)
+						# Saving File Creation
+						if args.exhaustive == 1:
+							fName = 'RAF_dynamics_analysis_gen_' + strZeros + str(ngen) + '.csv'
+							fname_dynRafRes = os.path.join(newdirAllResults, fName)
+							fid_initRafRes = open(fname_dynRafRes, 'w')
+							strToWrite = "t\t#CL\t#RAF\tRAF\n"
+							fid_initRafRes.write(strToWrite)
+						# reactions file loading
+						if ngen == 1:
+					  		strRctZero = 'reactions_' + strZeros + str(0) + '*'
+					  		strCatZero = 'catalysis_' + strZeros + str(0) + '*'
+					  		rctFilesZero = sorted(glob.glob(os.path.join(resDirPath,strRctZero)))
+					  		catFilesZero = sorted(glob.glob(os.path.join(resDirPath,strCatZero)))
+						strRct = 'reactions_' + strZeros + str(ngen) + '*'  
+						strCat = 'catalysis_' + strZeros + str(ngen) + '*'  
+					  	# Searching for files
+					  	rctFiles = sorted(glob.glob(os.path.join(resDirPath,strRct)))
+					  	catFiles = sorted(glob.glob(os.path.join(resDirPath,strCat)))
+					  	
+					  	if ngen == 1: # If the generation is the first one the 0000 files must be uploaded too
+				  			rctFiles = rctFilesZero + rctFiles
+				  			catFiles = catFilesZero + catFiles
+				  		
+				  		sngTime = conf[2] / (float(len(rctFiles)) - 1)
+					  	actTime = 0
+				  		
+				  		for id, sngFile in enumerate(rctFiles):
+				  			# Load files
+				  			rcts = readfiles.loadAllData(totDirName,sngFile) # reaction file upload
+							cats = readfiles.loadAllData(totDirName,catFiles[id]) # catalysis file upload
+							foodList = dm.generateFluxList(totDirName, sysType)
+							# Reshape rcts according to the reactions really occurred
+							procrcts = rcts[rcts[:,5] > 0,:]
+							proccats = cats[cats[:,3] > 0,:]
+							R = raf.rafDynamicComputation(fid_initRafRes, actTime, procrcts[:,0:5], proccats[:,0:5], foodList)
+							#print R
+							actTime += sngTime
+						
+						# If decay analysis is TURNED ON (rections are added step by step to the graph and they are removed 
+						# if they do not occur twice within the decay time
+						
+					
 					
 	if args.initanal == 1: 
 		fid_initRafRes.close()

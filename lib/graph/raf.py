@@ -67,32 +67,35 @@ def findCatforRAF(tmpCat, tmpRAF, tmpClosure):
 # FUNCTION TO FIND RAF IN INIT STRUCTURES 
 def rafsearch(rcts, cats, closure):
 	
-	# Food list creation (first closure of F)
-	foodSet = deepcopy(closure)
-	closure = generateClosure(closure,rcts)
-	RA = RAcondition(closure,rcts,cats)
-	# Check F condition
-	RAF = Fcondition(closure,RA,rcts)
-	RAFlpre = len(RAF)
-	# Temporary RAF set
-	redRcts = rcts[RAF,:]
-	
-	# If RAF set is not empty the iterative procedure can start
-	if len(RAF) > 1:
-		RAFlpost = 0
-		while (len(RAF) > 0) & (RAFlpre > RAFlpost):
-			RAFlpre = len(RAF)
-			foodCopy = deepcopy(foodSet)
-			closure = generateClosure(foodCopy,redRcts)
-			RA = RAcondition(closure,rcts,cats)
-			RAF = Fcondition(closure,RA,rcts)
-			redRcts = rcts[RAF,:]
-			RAFlpost = len(RAF)
-	
-	catalists = findCatforRAF(cats, RAF, closure)
-	return closure, RA, RAF, catalists, len(list(set(RAF)))
+	if rcts.shape[0] > 0:
+		# Food list creation (first closure of F)
+		foodSet = deepcopy(closure)
+		closure = generateClosure(closure,rcts)
+		RA = RAcondition(closure,rcts,cats)
+		# Check F condition
+		RAF = Fcondition(closure,RA,rcts)
+		RAFlpre = len(RAF)
+		# Temporary RAF set
+		redRcts = rcts[RAF,:]
+		
+		# If RAF set is not empty the iterative procedure can start
+		if len(RAF) > 1:
+			RAFlpost = 0
+			while (len(RAF) > 0) & (RAFlpre > RAFlpost):
+				RAFlpre = len(RAF)
+				foodCopy = deepcopy(foodSet)
+				closure = generateClosure(foodCopy,redRcts)
+				RA = RAcondition(closure,rcts,cats)
+				RAF = Fcondition(closure,RA,rcts)
+				redRcts = rcts[RAF,:]
+				RAFlpost = len(RAF)
+		
+		catalists = findCatforRAF(cats, RAF, closure)
+		return closure, RA, RAF, catalists, len(list(set(RAF)))
+	else:
+		return [], [], [], [], 0
 
-# BRIDGE FUNCTION TO DETECT RAFs
+# BRIDGE FUNCTION TO DETECT RAFs in INITIAL SETS
 def rafComputation(fid_initRafRes, fid_initRafResALL, fid_initRafResLIST, tmpDir, rctProb, avgCon, rcts, cats, foodList, maxDim):
 	rafset = rafsearch(rcts, cats, foodList) # RAF search 
 	ErctP = "%.4g" % rctProb
@@ -100,6 +103,17 @@ def rafComputation(fid_initRafRes, fid_initRafResALL, fid_initRafResLIST, tmpDir
 	fid_initRafRes.write(strToWrite)
 	writefiles.write_init_raf_list(fid_initRafResLIST, rafset, tmpDir)
 	writefiles.write_init_raf_all(fid_initRafResALL, rafset, tmpDir, rcts, cats)
+	return rafset
+
+# BRIDGE FUNCTION TO DETECT RAFs in DYNAMICS
+def rafDynamicComputation(fid_dynRafRes, tmpTime, rcts, cats, foodList):
+	rafset = rafsearch(rcts, cats, foodList) # RAF search
+	strRAF = '' 
+	if len(rafset[2]) > 0: 		
+		for x in rafset[2]: strRAF += str(x) + '\t'
+		
+	strToWrite = str(tmpTime) + "\t" + str(len(rafset[0])) + "\t" + str(rafset[4]) + "\t" + strRAF + "\n"
+	fid_dynRafRes.write(strToWrite)
 	return rafset
 
 	

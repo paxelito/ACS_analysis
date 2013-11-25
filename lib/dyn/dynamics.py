@@ -34,3 +34,6 @@ def rangeFloat(start, step, stop):
 		yield r
 		r += step
 		
+def fluxAnalysis(tmpDir, resDirPath, strZeros, ngen):
+	print "ciao"
+		

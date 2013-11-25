@@ -121,6 +121,13 @@ def loadAllData(tmpPath, tmpFname):
 	data = np.loadtxt(fileName, dtype=float)
 	return data
 
+# Fixing the name of the file to create the generation number according to the total number of generations
+def zeroBeforeStrNum(tmpl, tmpL):
+	strZero = ''
+	nZeros = len(str(tmpL)) - len(str(tmpl))
+	if nZeros > 0:
+		for i in range(0,nZeros): strZero = strZero + '0'
+	return strZero
 	
 		
 
