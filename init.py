@@ -27,7 +27,8 @@ if __name__ == '__main__':
 	parser.add_argument('-f', '--lastFood', type=int, help='Last food species ID (deafult: 5)', default='5')
 	parser.add_argument('-s', '--strPath', help='Path where files are stored', default='./')
 	parser.add_argument('-o', '--strOut', help='Path for output file storing', default='./')
-	parser.add_argument('-m', '--maxDim', help='Max Dimension of the systems (Default: 6)', default='6', type=int)
+	parser.add_argument('-M', '--maxDim', help='Max Dimension of the systems (Default: 10)', default='10', type=int)
+	parser.add_argument('-m', '--minDim', help='min Dimension of the systems (Default: 5)', default='5', type=int)
 	parser.add_argument('-i', '--iteration', help='How many network instances per dimension are created (Default: 10)', default='10', type=int)
 	parser.add_argument('-p', '--rctProb', help='Reaction Probability, if 0 args.avgCon will be used', default='0', type=float)
 	#parser.add_argument('-v', '--avgCon', help='Tuple containing the average connectivity range', default=[0.5, 0.05, 1], type=tuple) nargs=2, metavar=('bar', 'baz')
@@ -67,7 +68,7 @@ if __name__ == '__main__':
 	# Create food list
 	foodList = range(args.lastFood+1)
 	
-	for maxlength in range(5,args.maxDim+1): # For each dimension
+	for maxlength in range(args.minDim,args.maxDim+1): # For each dimension
 		avgCon = dn.rangeFloat(float(args.avgCon[0]), float(args.avgCon[1]), float(args.avgCon[2]))
 		#sys.stdout.flush() # Force save data on file
 		if args.rctProb == 0: # if reaction probability is 0

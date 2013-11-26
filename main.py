@@ -65,7 +65,7 @@ if __name__ == '__main__':
 		fid_initRafRes = open(fname_initRafRes, 'w')
 		fid_initRafResLIST = open(fname_initRafResLIST, 'w')
 		fid_initRafResALL = open(fname_initRafResALL, 'w')
-		strToWrite = "Folder\tP\tM\tRAFsize\tClosure\tCats\tuRAF\n"
+		strToWrite = "Folder\tP\tAC\tM\tRAFsize\tClosureSize\tCatsSize\tuRAF\n"
 		fid_initRafRes.write(strToWrite)
 	
 	for tmpDir in tmpDirs:
