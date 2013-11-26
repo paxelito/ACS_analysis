@@ -35,7 +35,10 @@ def generateClosure(tmpF,rcts):
 						if int(r[2]) not in closure: closure.append(int(r[2]))	
 				#print "\t|- closure: ",   closure
 			#raw_input("...")	
-
+	print rcts
+	print tmpF
+	print sorted(closure)
+	raw_input("cioa")
 	return sorted(closure)
 
 # COMPUTE RA CONDITION
@@ -50,12 +53,18 @@ def Fcondition(tmpCL, tmpRA, rcts):
 	RAFset = []
 	#print rcts
 	#print tmpRA
-	for r in tmpRA:
-		if rcts[r,1] == 1:
-			if int(rcts[r,2]) in tmpCL: RAFset.append(r)
-		else:
-			if (int(rcts[r,3]) in tmpCL) & (int(rcts[r,4]) in tmpCL): RAFset.append(r)
-	return RAFset
+	try:
+		for r in tmpRA:
+			if rcts[rcts[:,0]==r,1] == 1:
+				if int(rcts[rcts[:,0]==r,2]) in tmpCL: RAFset.append(r)
+			else:
+				if (int(rcts[rcts[:,0]==r,3]) in tmpCL) & (int(rcts[rcts[:,0]==r,4]) in tmpCL): RAFset.append(r)
+		return RAFset
+	except: 
+		print rcts
+		print tmpRA
+		sys.exit(1)
+		
 
 # FIND CATALYSTS OF THE RAF SET
 def findCatforRAF(tmpCat, tmpRAF, tmpClosure):
@@ -70,6 +79,7 @@ def findCatforRAF(tmpCat, tmpRAF, tmpClosure):
 def rafsearch(rcts, cats, closure):
 	
 	if rcts.shape[0] > 0:
+		
 		# Food list creation (first closure of F)
 		foodSet = deepcopy(closure)
 		closure = generateClosure(closure,rcts)
@@ -93,6 +103,13 @@ def rafsearch(rcts, cats, closure):
 				RAFlpost = len(RAF)
 		
 		catalists = findCatforRAF(cats, RAF, closure)
+# 		if len(closure) > 14: 
+# 			print rcts
+# 			print sorted(closure)
+# 			print RA
+# 			print RAF
+# 			print catalists
+# 			raw_input("closure stop!!!") 
 		return closure, RA, RAF, catalists, len(list(set(RAF)))
 	else:
 		return [], [], [], [], 0
@@ -108,18 +125,28 @@ def rafComputation(fid_initRafRes, fid_initRafResALL, fid_initRafResLIST, tmpDir
 	return rafset
 
 # BRIDGE FUNCTION TO DETECT RAFs in DYNAMICS
-def rafDynamicComputation(fid_dynRafRes, tmpTime, rcts, cats, foodList, growth=False, rctsALL=None, catsALL=None):
+def rafDynamicComputation(fid_dynRafRes, tmpTime, rcts, cats, foodList, growth=False, rctsALL=None, catsALL=None, completeRCTS=None):
 	#print rcts
 	#print cats
 	rafset = rafsearch(rcts, cats, foodList) # RAF search
 	if growth == True: rafsetALL = rafsearch(rctsALL, catsALL, foodList) # RAF search
 	strRAF = '' 
-	if len(rafset[2]) > 0: 		
-		for x in rafset[2]: strRAF += str(x) + '\t'	
+	# If RAF analysis is made in dynamical temporary structures a trnaslation in real net must be done
+	if completeRCTS != None: convRAF = findRAFrcts(rafset[2],rcts,completeRCTS)
+	else: convRAF = rafset[2]
+	if len(convRAF) > 0: 		
+		for x in convRAF: strRAF += str(x) + '\t'	
 	if growth == False: strToWrite = str(tmpTime) + "\t" + str(len(rafset[0])) + "\t" + str(rafset[4]) + "\t" + strRAF + "\n"
 	else: strToWrite = str(tmpTime) + "\t" + str(len(rafset[0])) + "\t" + str(rafset[4]) + str(len(rafsetALL[0])) + "\t" + str(rafsetALL[4]) + "\t" + strRAF + "\n"
 	fid_dynRafRes.write(strToWrite)
 	return rafset
+
+def findRAFrcts(RAF, rcts, actrcts):
+	rafset = []
+	for i in RAF:
+		position = ((actrcts[:,1] == rcts[rcts[:,0]==i,1]) & (actrcts[:,2] == rcts[rcts[:,0]==i,2]) & (actrcts[:,3] == rcts[rcts[:,0]==i,3]))
+		rafset.append(int(actrcts[position,0]))
+	return list(set(rafset))
 
 	
 	

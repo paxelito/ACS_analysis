@@ -20,6 +20,7 @@ except:
    
 from lib.IO import * 
 from lib.graph import raf
+from lib.graph import network
 from lib.dyn import dynamics as dm
 
 #ÊInput parameters definition 
@@ -107,6 +108,7 @@ if __name__ == '__main__':
 					for ngen in range(1,numberOfGen+1):
 						print "\t|-Generation ", ngen
 						strZeros = readfiles.zeroBeforeStrNum(ngen, numberOfGen)
+						# IF CATALYIS 
 						if args.exhaustive == 1:
 							# Saving File Creation
 							if args.exhaustive == 1:
@@ -151,6 +153,16 @@ if __name__ == '__main__':
 								R = raf.rafDynamicComputation(fid_inTimeRafRes, actTime, procrcts[:,0:5], proccats[:,0:5], foodList, potential, rcts, cats)
 								#print R
 								actTime += sngTime
+						else:
+							# Last reaction File is however loaded
+							strRct = 'reactions_' + strZeros + str(ngen) + '*'  
+							strCat = 'catalysis_' + strZeros + str(ngen) + '*'  
+						  	# Searching for files
+						  	rctFiles = sorted(glob.glob(os.path.join(resDirPath,strRct)))
+						  	catFiles = sorted(glob.glob(os.path.join(resDirPath,strCat)))
+						  	# Upload latest file
+						  	lastRct = readfiles.loadAllData(totDirName,rctFiles[-1]) # reaction file upload
+						  	lastCat = readfiles.loadAllData(totDirName,catFiles[-1]) # reaction file upload
 							
 						# If decay analysis is TURNED ON (rections are added step by step to the graph and they are removed 
 						# if they do not occur twice within the decay time
@@ -174,73 +186,45 @@ if __name__ == '__main__':
 							cleavage_counter = 0
 							endo_cleavage_counter = 0
 							nAnal = 1
+							rctCurrID = 0
+							catCurrID = 0
 							for rctL, line in enumerate(fid):								 
 								# Load single reaction parameters
-								tmpReaction, tmpTime, tmpcc, tmpCat, tmpMol_I, tmpMol_II, tmpMol_III, tmpLoadedMols,\
-						 		tmpLoadedMolsConc, tmpGillMean, tmpGillSD, tmpGillEntropy, tmpNSCprob, tmpRevProb = line.split()
-						 		reaction = int(tmpReaction)
-								rtime = float(tmpTime)
-								cc = int(tmpcc) 
-								cat = int(tmpCat)
-								mol_I = int(tmpMol_I)
-								mol_II = int(tmpMol_II)
-								mol_III = int(tmpMol_III)
-								loadedMolsConc = float(tmpLoadedMolsConc)
-								loadedMols = int(tmpLoadedMols)
-								gillMean = float(tmpGillMean)
-								gillSD = float(tmpGillSD)
-								gillEntropy = float(tmpGillEntropy)
-								newSpeciesCreationProb = float(tmpNSCprob)
-								reverseProbability = float(tmpRevProb)
+								reaction, rtime, cc, cat, mol_I, mol_II, mol_III, loadedMolsConc, loadedMols,\
+		   						gillMean, gillSD, gillEntropy, newSpeciesCreationProb, reverseProbability = readfiles.splitRctParsLine(line)
 								
 								if rctL % 10000 == 0: print "\t\t\t|- Reaction number ", rctL, " - Time: ", rtime
-								
-								# REACTIONS NOT OCCURING TWICE IN THE DACAY TIME ARE REMOVED FROM THE GRAPH
 								
 								# update time intervals 
 								timeInterval = rtime - previousTime
 								previousTime = rtime
 				
-								# Increment the time of each reaction present in the system
-								# If the time of some reactions overcome the decay time the reaction is removed from the igraph structure
 								if rctL > 0:
-									# CATALYST -> PRODUCT
-									if shape(graph)[0] > 1:
-										graph[:,3] = graph[:,3] + timeInterval
-										graph[:,4] = graph[:,2] - graph[:,3]
-										graph = graph[graph[:,4]>0,:]
-									# SUBSTRATE -> PRODUCT
-									if shape(graphSUB)[0] > 1:
-										graphSUB[:,3] = graphSUB[:,3] + timeInterval
-										graphSUB[:,4] = graphSUB[:,2] - graphSUB[:,3]
-										graphSUB = graphSUB[graphSUB[:,4]>0,:]
-									# REACTION STRUCTURES
-									if shape(onrcts)[0] > 1:
-										onrcts[:,6] += timeInterval
-										onrcts[:,7] = onrcts[:,5] - onrcts[:,6]
-										onrcts = onrcts[onrcts[:,7]>0,:]
-									# CATALYSS STRUCTURES
-									if shape(onrcts)[0] > 1:
-										oncats[:,4] = oncats[:,4] + timeInterval
-										oncats[:,5] = oncats[:,3] - oncats[:,4]
-										oncats = oncats[oncats[:,5]>0,:]
-										
-									#print onrcts.shape[0]
-									#print oncats
-									#raw_input("cioa")
+									# REACTIONS NOT OCCURING TWICE IN THE DACAY TIME ARE REMOVED FROM THE GRAPH
+									graph = network.removeRareRcts(graph,2,3,4,timeInterval)
+									graphSUB = network.removeRareRcts(graphSUB,2,3,4,timeInterval)
+									onrcts = network.removeRareRcts(onrcts,5,6,7,timeInterval)
+									oncats = network.removeRareRcts(oncats,3,4,5,timeInterval)
 								
 								# ONGOING REACTION STRUCTURES CREATION
 								if rctL == 0:
-									onrcts = np.array([[rctL, cc, mol_I, mol_II, mol_III, decayTime, 0, decayTime, 1]], dtype=np.float64)
-									oncats = np.array([[rctL, cat, onrcts[0,0], decayTime, 0, decayTime, 1]], dtype=float)
+									mol_I, mol_II, mol_III = network.fixCondensationReaction(mol_I, mol_II, mol_III, lastRct)
+									onrcts = np.array([[rctCurrID, cc, mol_I, mol_II, mol_III, decayTime, 0, decayTime, 1]], dtype=np.float64)
+									oncats = np.array([[catCurrID, cat, onrcts[0,0], decayTime, 0, decayTime, 1]], dtype=np.float64)
+									rctCurrID += 1
+									catCurrID += 1
 								else:
 									# !!! ONCSTR ANALYSIS
+									mol_I, mol_II, mol_III = network.fixCondensationReaction(mol_I, mol_II, mol_III, lastRct)
 									if sum((onrcts[:,1] == cc) & (onrcts[:,2] == mol_I) & (onrcts[:,3] == mol_II)) == 1:
 										positionR = ((onrcts[:,1] == cc) & (onrcts[:,2] == mol_I) & (onrcts[:,3] == mol_II))	
 										onrcts[positionR] = [onrcts[positionR,0], cc, mol_I, mol_II, mol_III, decayTime, 0, decayTime, onrcts[positionR,8]+1]	
 									else:
-										onrcts = np.vstack([onrcts,(onrcts.shape[0], cc, mol_I, mol_II, mol_III, decayTime, 0, decayTime, 1)])	
-										positionR = onrcts.shape[0]-1
+		
+										onrcts = np.vstack([onrcts,(rctCurrID, cc, mol_I, mol_II, mol_III, decayTime, 0, decayTime, 1)])	
+										positionR = onrcts[:,0] == rctCurrID
+										rctCurrID += 1	
+																		
 									
 									# !!! ONCAT ANALYSIS
 									if sum((oncats[:,1] == cat) & (oncats[:,2] == onrcts[positionR,0])) == 1:
@@ -248,22 +232,14 @@ if __name__ == '__main__':
 										position = ((oncats[:,1] == cat) & (oncats[:,2] == onrcts[positionR,0]))	
 										oncats[position] = [oncats[position,0], cat, onrcts[positionR,0], decayTime, 0, decayTime, oncats[position,6]+1]	
 									else:
-										oncats = np.vstack([oncats,(oncats.shape[0], cat, onrcts[positionR,0], decayTime, 0, decayTime, 1)])	
-										
-								#print line
-								#formatting_function = np.vectorize(lambda f: format(f, '6.1F'))
-								#print formatting_function(onrcts)
-								#print ".............."
-								#print formatting_function(oncats)
-								#print onrcts
-								#print oncats
-								#raw_input("prova")
+										oncats = np.vstack([oncats,(catCurrID, cat, onrcts[positionR,0], decayTime, 0, decayTime, 1)])
+										catCurrID += 1	
 								
 								# RAF ANALYSIS	
-								if rtime > float((args.timeWindow * nAnal)):
-									print "\t\t\t|- RAF analysis...", " ", rtime
+								if rtime >= float((args.timeWindow * nAnal)):
+									print "\t\t\t|- RAF analysis...", " ", rtime, " - Reaction ", rctL
 									foodList = dm.generateFluxList(totDirName, sysType)
-									R = raf.rafDynamicComputation(fid_dynRafRes, tmpTime, onrcts[:,0:5], oncats[:,0:5], foodList, False)
+									R = raf.rafDynamicComputation(fid_dynRafRes, rtime, onrcts[:,0:5], oncats[:,0:5], foodList, False, completeRCTS=lastRct)
 									nAnal += 1
 								
 								# REACTION GRAPH CREATION
