@@ -35,6 +35,7 @@ if __name__ == '__main__':
 	parser.add_argument('-m', '--maxDim', help='Max Dimension of the system (def: 4)', default='4', type=int)
 	parser.add_argument('-p', '--strPath', help='Path where files are stored (def: ./)', default='./')
 	parser.add_argument('-r', '--resFolder', help='Name of the result folder (def: res)', default='res')
+	parser.add_argument('-b', '--debug', type=int, help='Debug Mode (Def: 0)', default=0)
 	
 	args = parser.parse_args()
 	
@@ -93,7 +94,7 @@ if __name__ == '__main__':
 					rcts = readfiles.loadAllData(totDirName,'_acsreactions.csv') # reaction file upload
 					cats = readfiles.loadAllData(totDirName,'_acscatalysis.csv') # catalysis file upload
 					# REAL RAF COMPUTATION (!!!!!! 1 is average connectivity)
-					raf.rafComputation(fid_initRafRes, fid_initRafResALL, fid_initRafResLIST, tmpDir, conf[9], 1, rcts, cats, foodList, args.maxDim)
+					raf.rafComputation(fid_initRafRes, fid_initRafResALL, fid_initRafResLIST, tmpDir, conf[9], 1, rcts, cats, foodList, args.maxDim, debug=args.debug)
 					
 				os.chdir(resDirPath)
 				print "    \-Oucomes Folder ", resDirPath
@@ -150,7 +151,7 @@ if __name__ == '__main__':
 								# Reshape rcts according to the reactions really occurred
 								procrcts = rcts[rcts[:,5] > 0,:]
 								proccats = cats[cats[:,3] > 0,:]
-								R = raf.rafDynamicComputation(fid_inTimeRafRes, actTime, procrcts[:,0:5], proccats[:,0:5], foodList, potential, rcts, cats)
+								R = raf.rafDynamicComputation(fid_inTimeRafRes, actTime, procrcts[:,0:5], proccats[:,0:5], foodList, potential, rcts, cats, debug=args.debug)
 								#print R
 								actTime += sngTime
 						else:
@@ -239,7 +240,7 @@ if __name__ == '__main__':
 								if rtime >= float((args.timeWindow * nAnal)):
 									print "\t\t\t|- RAF analysis...", " ", rtime, " - Reaction ", rctL
 									foodList = dm.generateFluxList(totDirName, sysType)
-									R = raf.rafDynamicComputation(fid_dynRafRes, rtime, onrcts[:,0:5], oncats[:,0:5], foodList, False, completeRCTS=lastRct)
+									R = raf.rafDynamicComputation(fid_dynRafRes, rtime, onrcts[:,0:5], oncats[:,0:5], foodList, False, completeRCTS=lastRct , debug=args.debug)
 									nAnal += 1
 								
 								# REACTION GRAPH CREATION
