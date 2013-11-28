@@ -148,6 +148,7 @@ def rafDynamicComputation(fid_dynRafRes, tmpTime, rcts, cats, foodList, growth=F
 	if growth == True: rafsetALL = rafsearch(rctsALL, catsALL, foodList) # RAF search
 	strRAF = '' 
 	# If RAF analysis is made in dynamical temporary structures a trnaslation in real net must be done
+	 
 	if completeRCTS != None: convRAF = findRAFrcts(rafset[2],rcts,completeRCTS)
 	else: convRAF = rafset[2]
 	if len(convRAF) > 0: 		
@@ -161,6 +162,8 @@ def findRAFrcts(RAF, rcts, actrcts):
 	rafset = []
 	for i in RAF:
 		position = ((actrcts[:,1] == rcts[rcts[:,0]==i,1]) & (actrcts[:,2] == rcts[rcts[:,0]==i,2]) & (actrcts[:,3] == rcts[rcts[:,0]==i,3]))
+		if sum(position) < 1:
+			position = ((actrcts[:,1] == rcts[rcts[:,0]==i,1]) & (actrcts[:,2] == rcts[rcts[:,0]==i,2]) & (actrcts[:,3] == rcts[rcts[:,0]==i,4]))	
 		rafset.append(int(actrcts[position,0]))
 	return list(set(rafset))
 

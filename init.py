@@ -31,7 +31,6 @@ if __name__ == '__main__':
 	parser.add_argument('-m', '--minDim', help='min Dimension of the systems (Default: 5)', default='5', type=int)
 	parser.add_argument('-i', '--iteration', help='How many network instances per dimension are created (Default: 10)', default='10', type=int)
 	parser.add_argument('-p', '--rctProb', help='Reaction Probability, if 0 args.avgCon will be used', default='0', type=float)
-	#parser.add_argument('-v', '--avgCon', help='Tuple containing the average connectivity range', default=[0.5, 0.05, 1], type=tuple) nargs=2, metavar=('bar', 'baz')
 	parser.add_argument('-v', '--avgCon', help='Tuple containing the average connectivity range (deafult: [0.5, 0.05, 1])	', nargs=3, metavar=('fr', 'st', 'en'), default= [0.5, 0.05, 1])
 	parser.add_argument('-n', '--noCat', help='Non catalytic max length (default: 2)', default='2', type=float)
 	parser.add_argument('-c', '--rctRatio', help='Ratio between cleavages and condensations (default: 0, it means that the actual ratio is used)', default='0', type=float)

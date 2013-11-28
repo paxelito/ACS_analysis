@@ -24,18 +24,18 @@ def removeRareRcts(graph, dt, life, nrg, deltat):
 
 def fixCondensationReaction(m1, m2, m3, rcts):
 	
-	if sum((rcts[:,2] == m1) & (rcts[:,3] == m2) & (rcts[:,4] == m3)) == 1:
+	if sum((rcts[:,2] == m1) & (rcts[:,3] == m2) & (rcts[:,4] == m3)) > 1:
 		#print "- Right RCT"
 		#print rcts[((rcts[:,2] == m1) & (rcts[:,3] == m2) & (rcts[:,4] == m3)),:]
 		#raw_input("ecco...")
 		return m1, m2, m3
-	elif sum((rcts[:,2] == m1) & (rcts[:,3] == m3) & (rcts[:,4] == m2)) == 1:
+	elif sum((rcts[:,2] == m1) & (rcts[:,3] == m3) & (rcts[:,4] == m2)) > 1:
 		#print "- REVERSE RCT"
 		#print rcts[((rcts[:,2] == m1) & (rcts[:,3] == m3) & (rcts[:,4] == m2)),:]
 		#raw_input("ecco...")
 		return m1, m3, m2
 	else: 
-		print r
+		print m1, m2, m3
 		print "ERROR!!!!"
 		sys.exit(1)
 		

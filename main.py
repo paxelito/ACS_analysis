@@ -154,6 +154,10 @@ if __name__ == '__main__':
 								R = raf.rafDynamicComputation(fid_inTimeRafRes, actTime, procrcts[:,0:5], proccats[:,0:5], foodList, potential, rcts, cats, debug=args.debug)
 								#print R
 								actTime += sngTime
+							
+							# Upload latest file
+						  	lastRct = readfiles.loadAllData(totDirName,rctFiles[-1]) # reaction file upload
+						  	lastCat = readfiles.loadAllData(totDirName,catFiles[-1]) # reaction file upload
 						else:
 							# Last reaction File is however loaded
 							strRct = 'reactions_' + strZeros + str(ngen) + '*'  
