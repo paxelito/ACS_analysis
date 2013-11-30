@@ -129,81 +129,93 @@ if __name__ == '__main__':
 						# If cleavage
 						if (rctType == 1) & (nCleavage <= totCleavage):
 							# Select species to cleave
-							rctok = False
-							while rctok == False:
-								molToCleav = ran.choice(species[len(alphabet):initSpeciesListLength-1])
-								cutPt = ran.randint(1,len(molToCleav)-1) 
-								tmp1 = molToCleav[0:cutPt]
-							
-								try: 
-									tmp1id = species.index(tmp1)
-									find1 = True
-								except: 
-									tmp1id = len(species)+1
-									find1 = False
-									
-								tmp2 = molToCleav[cutPt:len(molToCleav)]
-								try: 
-									tmp2id = species.index(tmp2)
-								except: 
-									if find1 == True: tmp2id = len(species) + 1   
-									else: tmp2id = len(species)+2
+							rctnew = False
+							molToCleav = ran.choice(species[len(alphabet):initSpeciesListLength-1])
+							cutPt = ran.randint(1,len(molToCleav)-1) 
+							tmp1 = molToCleav[0:cutPt]
+						
+							try: 
+								tmp1id = species.index(tmp1)
+								find1 = True
+							except: 
+								tmp1id = len(species)+1
+								find1 = False
 								
-								if i == 0: rctok = True
-								else:
-									if find1 == True:
-										if sum((rcts[:,1] == 1) & (rcts[:,2] == species.index(molToCleav)) \
-											& (rcts[:,3] == tmp1id)) == 0: rctok = True
+							tmp2 = molToCleav[cutPt:len(molToCleav)]
+							try: 
+								tmp2id = species.index(tmp2)
+							except: 
+								if find1 == True: tmp2id = len(species) + 1   
+								else: tmp2id = len(species)+2
+							
+							if i == 0: rctnew = True
+							else:
+								if find1 == True:
+									if sum((rcts[:,1] == 1) & (rcts[:,2] == species.index(molToCleav)) \
+										& (rcts[:,3] == tmp1id)) == 0: rctnew = True
 								
 							# Reaction Structure Creation
-							if reactionID == 0:
-								rcts = np.array([[int(reactionID), int(rctType), species.index(molToCleav), tmp1id, tmp2id, int(0), int(0), int(0)]])
-								reactionID += 1
-								nCleavage += 1
-							else: 
-								rcts = np.vstack([rcts,(int(reactionID), int(rctType), species.index(molToCleav), tmp1id, tmp2id, int(0), int(0), int(0))])	
-								reactionID += 1
-								nCleavage += 1
-								
-							if args.creationMethod == 2: # If WIM method the reverse reaction is added
-								rcts = np.vstack([rcts,(int(reactionID), int(0), species.index(molToCleav), tmp1id, tmp2id, int(0), int(0), int(0))])	
-								reactionID += 1
-								nCondensa += 1
+							if rctnew:
+								if reactionID == 0:
+									rcts = np.array([[int(reactionID), int(rctType), species.index(molToCleav), tmp1id, tmp2id, int(0), int(0), int(0)]])
+									reactionID += 1
+									nCleavage += 1
+								else: 
+									rcts = np.vstack([rcts,(int(reactionID), int(rctType), species.index(molToCleav), tmp1id, tmp2id, int(0), int(0), int(0))])	
+									reactionID += 1
+									nCleavage += 1
+									
+								if args.creationMethod == 2: # If WIM method the reverse reaction is added
+									rcts = np.vstack([rcts,(int(reactionID), int(0), species.index(molToCleav), tmp1id, tmp2id, int(0), int(0), int(0))])	
+									reactionID += 1
+									nCondensa += 1
+							else:
+								rct2cat = rcts[(rcts[:,1] == 1) & (rcts[:,2] == species.index(molToCleav)) & (rcts[:,3] == tmp1id),0]
 						else: # condensation
 							if args.creationMethod == 1:
-								rctok = False
-								while rctok == False:
-									sub1 = ran.choice(species[:initSpeciesListLength-1])
-									idsub1 = species.index(sub1)
-						
-									sub2 = ran.choice(species[:initSpeciesListLength-1])
-									idsub2 = species.index(sub2)
-									prod = sub1 + sub2
-									try:
-										tmpprodid = species.index(prod)
-									except:
-										tmpprodid = len(species)
-										species.append(prod)
-									
-									if i == 0: rctok = True
-									else:
-										if find1 == True:
-											if sum((rcts[:,1] == 0) & (rcts[:,3] == idsub1) & (rcts[:,4] == idsub2)) == 0: rctok = True
+								rctnew = False
+								sub1 = ran.choice(species[:initSpeciesListLength-1])
+								idsub1 = species.index(sub1)
+					
+								sub2 = ran.choice(species[:initSpeciesListLength-1])
+								idsub2 = species.index(sub2)
+								prod = sub1 + sub2
+								try:
+									tmpprodid = species.index(prod)
+								except:
+									tmpprodid = len(species)
+									species.append(prod)
+								
+								if i == 0: rctnew = True
+								else:
+									if sum((rcts[:,1] == 0) & (rcts[:,3] == idsub1) & (rcts[:,4] == idsub2)) == 0: rctnew = True
 								# Reaction Structure Creation
-								if reactionID == 0: 
-									rcts = np.array([[int(reactionID), int(rctType), tmpprodid, idsub1, idsub2, int(0), int(0), int(0)]])
-									reactionID += 1
-								else: 
-									rcts = np.vstack([rcts,(int(reactionID), int(rctType), tmpprodid, idsub1, idsub2, int(0), int(0), int(0))])	
-									reactionID += 1
-								nCondensa += 1
+								if rctnew:
+									if reactionID == 0: 
+										rcts = np.array([[int(reactionID), int(rctType), tmpprodid, idsub1, idsub2, int(0), int(0), int(0)]])
+										reactionID += 1
+									else: 
+										rcts = np.vstack([rcts,(int(reactionID), int(rctType), tmpprodid, idsub1, idsub2, int(0), int(0), int(0))])	
+										reactionID += 1
+									nCondensa += 1
+								else:
+									rct2cat = rcts[(rcts[:,1] == 0) & (rcts[:,3] == idsub1) & (rcts[:,4] == idsub2),0]
 						# A CATALYST IS RANDOMLY ASSIGNED FROM THE SPECIES LIST
 						catalyst = -1
 						catFound = False
+						
 						while not catFound: 
 							catalyst = species.index(ran.choice(species[len(alphabet):]))
-							if len(species[catalyst]) > args.noCat: catFound = True
-						rctsToCat = reactionID - 1
+							if (len(species[catalyst]) > args.noCat):
+								if rctnew == False:
+									if sum((cats[:,1]==catalyst) & (cats[:,2]==rct2cat))==0:
+										catFound = True
+								else:
+									catFound = True
+							
+						if rctnew: rctsToCat = reactionID - 1
+						else: rctsToCat = rct2cat
+						
 						if args.creationMethod == 2: rctsToCat = reactionID - 2
 						if catalysisID == 0: 
 							cats = np.array([[int(catalysisID), int(catalyst), int(rctsToCat), int(0), float(0.5), float(0.25), float(0.5), ran.randint(1,2)]])
