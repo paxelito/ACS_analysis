@@ -27,7 +27,7 @@ if __name__ == '__main__':
 				description='This script re-arrange results in a more friendly way from the angle analysis in time.'
 				, epilog='''File with angle trajectories are created. ''') 
 	parser.add_argument('-a', '--sysType', help='System Architecture [1:CLOSE, 2:PROTO, 3:CSTR], deafult: 1', default='1')
-	parser.add_argument('-k', '--creationMethod', help='Network creation method (1: Filisetti, 2: Wim, DEF: 1)', default='1', type=int)
+	parser.add_argument('-k', '--creationMethod', help='Network creation method (1: Filisetti, 2: Wim, 3: WimNoRevs, DEF: 1)', default='1', type=int)
 	parser.add_argument('-f', '--lastFood', type=int, help='Last food species ID (deafult: 5)', default='5')
 	parser.add_argument('-s', '--strPath', help='Path where files are stored', default='./')
 	parser.add_argument('-o', '--strOut', help='Path for output file storing', default='./')
