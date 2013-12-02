@@ -136,6 +136,17 @@ def splitRctParsLine(tmpLine):
 	tmpReaction, tmpTime, tmpRtype, tmpCat, tmpMol_I, tmpMol_II, tmpMol_III, tmpLoadedMols,\
 	tmpLoadedMolsConc, tmpGillMean, tmpGillSD, tmpGillEntropy, tmpNSCprob, tmpRevProb = tmpLine.split()
 	
+	
+	if (int(tmpRtype) == 10) | (int(tmpRtype) == 11):
+		print "hello"
+		tempVar = tmpMol_III
+		tmpMol_III = tmpMol_I
+		tmpMol_I = tmpCat
+		tmpMol_II = tempVar
+		
+		
+	
 	return int(tmpReaction), float(tmpTime), int(tmpRtype), int(tmpCat), int(tmpMol_I), int(tmpMol_II), int(tmpMol_III), float(tmpLoadedMolsConc),\
 		    int(tmpLoadedMols), float(tmpGillMean), float(tmpGillSD),  float(tmpGillEntropy), float(tmpNSCprob), float(tmpRevProb)
+
 

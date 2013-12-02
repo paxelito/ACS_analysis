@@ -174,7 +174,7 @@ if __name__ == '__main__':
 						# if they do not occur twice within the decay time
 						if args.decay > 0:
 							print "\t\t|- Analysis of the reactions actually occurred according to the decay time equal to ", str(args.decay)
-							fName = 'RAF_dynamics_analysis_gen_' + strZeros + str(ngen) + '.csv'
+							fName = 'RAF_dynamics_analysis_'+ tmpDir +'_gen_' + strZeros + str(ngen) + '.csv'
 							fname_dynRafRes = os.path.join(newdirAllResults, fName)
 							fid_dynRafRes = open(fname_dynRafRes, 'w')
 							
