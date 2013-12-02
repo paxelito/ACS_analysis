@@ -16,6 +16,8 @@ except:
     pass
    
 from lib.graph import raf
+from lib.graph import scc
+from lib.graph import network
 from lib.dyn import dynamics as dn
 
 
@@ -61,7 +63,7 @@ if __name__ == '__main__':
 	fid_initRafResSUM = open(fname_initRafResSUM, 'w')
 	fid_initRafResLIST = open(fname_initRafResLIST, 'w')
 	fid_initRafResALL = open(fname_initRafResALL, 'w')
-	strToWrite = "Folder\tP\tAC\tM\tRAFsize\tClosure\tCats\tuRAF\n"
+	strToWrite = "Folder\tP\tAC\tM\tRAFsize\tClosure\tCats\tuRAF\tSCC\tAutoCat\n"
 	fid_initRafRes.write(strToWrite)
 	strToWrite = "P\tM\tAC\tRAF%\tTIME\n"
 	fid_initRafResSUM.write(strToWrite)
@@ -75,6 +77,7 @@ if __name__ == '__main__':
 			while (increaseYet == True) & (averageConn < 5):
 				time1 = time()
 				raffound = 0
+				sccfound = 0
 				iterations = int((args.iteration/(maxlength+1-args.minDim)))
 				for instanceID, instance in enumerate((range(iterations))): # For each instance of network
 					nCleavage = 0
@@ -88,12 +91,9 @@ if __name__ == '__main__':
 					totSpecies = 2 ** (maxlength + 1) - 2
 					# Compute overall conceivable number of reactions
 					totCleavage = sum(map(lambda x: len(x)-1,species))
-					if args.creationMethod == 1:
-						totCond = totSpecies ** 2
-						totRcts = totCleavage + totCond
-					else:
-						totRcts = totCleavage
-						totCond = 0
+					if args.creationMethod == 1: totCond = totSpecies ** 2
+					else: totCond = 0
+					totRcts = totCleavage + totCond
 					
 					# If the reaction probability is 0, it is set to the critical value of 1 reaction per species on average
 					if args.rctProb == 0: prob = (1 / float(totRcts)) * averageConn
@@ -102,9 +102,11 @@ if __name__ == '__main__':
 					if instanceID == 0: print '|- Max Length: ', maxlength, ' - AVG CON: ', averageConn, ' - Species: ', \
 										totSpecies, '- Reactions: ', totRcts, ' <- Condensations: ', totCond, ' - Cleavage: ', totCleavage
 					# Compute reactions to catalyse according to the probability
-					rctToCat = int(round(totRcts * totSpecies * prob))
-					if instanceID == 0: print '\t\t|- According to probability ', prob, ' and the number of species (', totSpecies,'), ', \
-										rctToCat, ' catalysis will be created. Itertion --> ', iterations
+					# rctToCat = int(round(totRcts * totSpecies * prob))
+					rctToCat = int(round(totSpecies * averageConn))
+					if instanceID == 0: print '\t\t|- P: ', prob, ' , Species (', totSpecies, \
+												'), , reactions (', totRcts ,'),', rctToCat,\
+												' catalysis. Iteration --> ', iterations
 					
 					initSpeciesListLength = len(species)
 					
@@ -236,9 +238,10 @@ if __name__ == '__main__':
 					# Create food list
 					foodList = range(args.lastFood+1)
 					#print "\t\t|- RAF searching step..."
-					rafsets = raf.rafComputation(fid_initRafRes, fid_initRafResALL, fid_initRafResLIST, 'tmpDir', prob, averageConn, rcts, cats, foodList, maxlength)
-					#print rafsets
-					if len(rafsets[2]) > 0: raffound += 1
+					netouts = network.net_analysis_of_static_graphs(fid_initRafRes, fid_initRafResALL, fid_initRafResLIST, 'tmpDir', prob, averageConn, rcts, cats, foodList, maxlength)
+					#print netouts
+					if len(netouts[0][2]) > 0: raffound += 1
+					if netouts[1][4] > 0: sccfound += 1
 					#print raffound
 					#raw_input("ciao")
 
@@ -247,8 +250,9 @@ if __name__ == '__main__':
 			
 				time2 = time()
 				percAcsFounds = raffound/float(iterations)
+				percSccFounds = sccfound/float(iterations)
 				timet = time2-time1
-				print "\t\t\t %RAF --> ", percAcsFounds, " TIME: ", time2 - time1, " Cleavages: ", nCleavage, " - Condensations: ", nCondensa
+				print "\t\t\t %RAF *** ", percAcsFounds, " *** %SCC ***", percSccFounds," *** TIME: ", time2 - time1, " Cleavages: ", nCleavage, " - Condensations: ", nCondensa
 				if percAcsFounds >= 0.99: 
 					print "\t\t\t Max number of RAFs found"
 					increaseYet = False # If RAF is always found so next average conn is assessed

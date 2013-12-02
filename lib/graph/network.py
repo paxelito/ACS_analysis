@@ -12,6 +12,11 @@ try:
 except:
     pass
    
+from ..graph import raf
+from ..graph import scc
+from ..dyn import dynamics as dn
+from ..IO import writefiles
+   
    
 def removeRareRcts(graph, dt, life, nrg, deltat):
 	if shape(graph)[0] > 1:
@@ -38,5 +43,19 @@ def fixCondensationReaction(m1, m2, m3, rcts):
 		print m1, m2, m3
 		print "ERROR!!!!"
 		sys.exit(1)
+
+# BRIDGE FUNCTION TO DETECT RAFs in INITIAL SETS
+def net_analysis_of_static_graphs(fid_initRafRes, fid_initRafResALL, fid_initRafResLIST, tmpDir, rctProb, avgCon, rcts, cats, foodList, maxDim,debug=False):
+	rafset = raf.rafsearch(rcts, cats, foodList,debug) # RAF search 
+	stdgraph = scc.createNetXGraph(rcts,cats)
+	sccsets = scc.diGraph_netX_stats(stdgraph)
+	ErctP = "%.4g" % rctProb
+	strToWrite = tmpDir + "\t" + str(ErctP) + "\t" + str(avgCon) + "\t" + str(maxDim) + "\t" + \
+				 str(len(rafset[2])) + "\t" + str(len(rafset[0])) + "\t" + str(len(rafset[3])) + \
+				 "\t" + str(rafset[4]) + "\t" + str(sccsets[4]) + "\t" + str(sccsets[2]) + "\n"
+	fid_initRafRes.write(strToWrite)
+	writefiles.write_init_raf_list(fid_initRafResLIST, rafset, tmpDir)
+	writefiles.write_init_raf_all(fid_initRafResALL, rafset, tmpDir, rcts, cats)
+	return rafset, sccsets
 		
 	
