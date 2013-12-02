@@ -65,7 +65,7 @@ if __name__ == '__main__':
 		fid_initRafRes = open(fname_initRafRes, 'w')
 		fid_initRafResLIST = open(fname_initRafResLIST, 'w')
 		fid_initRafResALL = open(fname_initRafResALL, 'w')
-		strToWrite = "Folder\tP\tAC\tM\tRAFsize\tClosureSize\tCatsSize\tuRAF\n"
+		strToWrite = "Folder\tP\tAC\tM\tRAFsize\tClosureSize\tCatsSize\tuRAF\tSCC\tAutoCat\n"
 		fid_initRafRes.write(strToWrite)
 	
 	for tmpDir in tmpDirs:
@@ -94,7 +94,7 @@ if __name__ == '__main__':
 					rcts = readfiles.loadAllData(totDirName,'_acsreactions.csv') # reaction file upload
 					cats = readfiles.loadAllData(totDirName,'_acscatalysis.csv') # catalysis file upload
 					# REAL RAF COMPUTATION (!!!!!! 1 is average connectivity)
-					raf.rafComputation(fid_initRafRes, fid_initRafResALL, fid_initRafResLIST, tmpDir, conf[9], 1, rcts, cats, foodList, args.maxDim, debug=args.debug)
+					network.net_analysis_of_static_graphs(fid_initRafRes, fid_initRafResALL, fid_initRafResLIST, tmpDir, conf[9], 1, rcts, cats, foodList, args.maxDim, debug=args.debug)
 					
 				os.chdir(resDirPath)
 				print "    \-Oucomes Folder ", resDirPath
@@ -118,7 +118,7 @@ if __name__ == '__main__':
 								fname_inTimeRafRes = os.path.join(newdirAllResults, fName)
 								fid_inTimeRafRes = open(fname_inTimeRafRes, 'w')
 								if conf[10] >= 1: 
-									strToWrite = "t\t#CL\t#RAF\tRAF\n"
+									strToWrite = "t\t#CL\t#RAF\t#SCC\t#SelfCats\tRAF\n"
 									potential = False
 								else: 
 									strToWrite = "t\t#CL\t#RAF\t#PCL\t#PRAF\tRAF\n"
@@ -151,7 +151,8 @@ if __name__ == '__main__':
 								# Reshape rcts according to the reactions really occurred
 								procrcts = rcts[rcts[:,5] > 0,:]
 								proccats = cats[cats[:,3] > 0,:]
-								R = raf.rafDynamicComputation(fid_inTimeRafRes, actTime, procrcts[:,0:5], proccats[:,0:5], foodList, potential, rcts, cats, debug=args.debug)
+								R = network.net_analysis_of_dynamic_graphs(fid_inTimeRafRes, actTime, procrcts[:,0:5], proccats[:,0:5], \
+																		   foodList, potential, rcts, cats, debug=args.debug)
 								#print R
 								actTime += sngTime
 							
@@ -178,7 +179,7 @@ if __name__ == '__main__':
 							fid_dynRafRes = open(fname_dynRafRes, 'w')
 							
 							# FILE FIRST RAW
-							strToWrite = "t\t#CL\t#RAF\tRAF\n"
+							strToWrite = "t\t#CL\t#RAF\t#SCC\t#SelfCats\tRAF\n"
 							fid_dynRafRes.write(strToWrite)
 							
 							strRctPar = 'reactions_parameters_' + strZeros + str(ngen) + '*'
@@ -244,7 +245,8 @@ if __name__ == '__main__':
 								if rtime >= float((args.timeWindow * nAnal)):
 									print "\t\t\t|- RAF analysis...", " ", rtime, " - Reaction ", rctL
 									foodList = dm.generateFluxList(totDirName, sysType)
-									R = raf.rafDynamicComputation(fid_dynRafRes, rtime, onrcts[:,0:5], oncats[:,0:5], foodList, False, completeRCTS=lastRct , debug=args.debug)
+									R = network.net_analysis_of_dynamic_graphs(fid_dynRafRes, rtime, onrcts[:,0:5], oncats[:,0:5], foodList,\
+																			   False, completeRCTS=lastRct , debug=args.debug)
 									nAnal += 1
 								
 								# REACTION GRAPH CREATION

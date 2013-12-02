@@ -57,5 +57,29 @@ def net_analysis_of_static_graphs(fid_initRafRes, fid_initRafResALL, fid_initRaf
 	writefiles.write_init_raf_list(fid_initRafResLIST, rafset, tmpDir)
 	writefiles.write_init_raf_all(fid_initRafResALL, rafset, tmpDir, rcts, cats)
 	return rafset, sccsets
+
+# BRIDGE FUNCTION TO DETECT RAFs in DYNAMICS
+def net_analysis_of_dynamic_graphs(fid_dynRafRes, tmpTime, rcts, cats, foodList, growth=False, rctsALL=None, catsALL=None, completeRCTS=None,debug=False):
+	#print rcts
+	#print cats
+	rafset = raf.rafsearch(rcts, cats, foodList,debug) # RAF search
+	stdgraph = scc.createNetXGraph(rcts,cats) # netX graph creation
+	sccsets = scc.diGraph_netX_stats(stdgraph) # SCC analysis
+	if growth == True: 
+		rafsetALL = raf.rafsearch(rctsALL, catsALL, foodList) # RAF search
+		stdgraphALL = scc.createNetXGraph(rctsALL,catsALL) # netX graph creation
+		sccsetsALL = scc.diGraph_netX_stats(stdgraphALL) # SCC analysis
+		
+	strRAF = '' 
+	# If RAF analysis is made in dynamical temporary structures a trnaslation in real net must be done
+	 
+	if completeRCTS != None: convRAF = raf.findRAFrcts(rafset[2],rcts,completeRCTS)
+	else: convRAF = rafset[2]
+	if len(convRAF) > 0: 		
+		for x in convRAF: strRAF += str(x) + '\t'	
+	if growth == False: strToWrite = str(tmpTime) + "\t" + str(len(rafset[0])) + "\t" + str(rafset[4]) + "\t" + str(sccsets[4]) + "\t" + str(sccsets[2]) + "\t" + strRAF + "\n"
+	else: strToWrite = str(tmpTime) + "\t" + str(len(rafset[0])) + "\t" + str(rafset[4]) + str(len(rafsetALL[0])) + "\t" + str(rafsetALL[4]) + "\t" + str(sccsets[4]) + "\t" + str(sccsets[2]) + "\t" + strRAF + "\n"
+	fid_dynRafRes.write(strToWrite)
+	return rafset
 		
 	
