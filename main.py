@@ -194,6 +194,7 @@ if __name__ == '__main__':
 							nAnal = 1
 							rctCurrID = 0
 							catCurrID = 0
+							realRctl = 0
 							for rctL, line in enumerate(fid):								 
 								# Load single reaction parameters
 								reaction, rtime, cc, cat, mol_I, mol_II, mol_III, loadedMolsConc, loadedMols,\
@@ -207,7 +208,7 @@ if __name__ == '__main__':
 									timeInterval = rtime - previousTime
 									previousTime = rtime
 					
-									if rctL > 0:
+									if realRctl > 0:
 										# REACTIONS NOT OCCURING TWICE IN THE DACAY TIME ARE REMOVED FROM THE GRAPH
 										graph = network.removeRareRcts(graph,2,3,4,timeInterval)
 										graphSUB = network.removeRareRcts(graphSUB,2,3,4,timeInterval)
@@ -215,7 +216,7 @@ if __name__ == '__main__':
 										oncats = network.removeRareRcts(oncats,3,4,5,timeInterval)
 									
 									# ONGOING REACTION STRUCTURES CREATION
-									if rctL == 0:
+									if realRctl == 0:
 										mol_I, mol_II, mol_III = network.fixCondensationReaction(mol_I, mol_II, mol_III, lastRct)
 										onrcts = np.array([[rctCurrID, cc, mol_I, mol_II, mol_III, decayTime, 0, decayTime, 1]], dtype=np.float64)
 										oncats = np.array([[catCurrID, cat, onrcts[0,0], decayTime, 0, decayTime, 1]], dtype=np.float64)
@@ -228,20 +229,30 @@ if __name__ == '__main__':
 											positionR = ((onrcts[:,1] == cc) & (onrcts[:,2] == mol_I) & (onrcts[:,3] == mol_II))	
 											onrcts[positionR] = [onrcts[positionR,0], cc, mol_I, mol_II, mol_III, decayTime, 0, decayTime, onrcts[positionR,8]+1]	
 										else:
-			
+											if rctCurrID in onrcts[:0]: 
+												print onrcts
+												print rctCurrID, cc, mol_I, mol_II, mol_III
+												print rctL
 											onrcts = np.vstack([onrcts,(rctCurrID, cc, mol_I, mol_II, mol_III, decayTime, 0, decayTime, 1)])	
 											positionR = onrcts[:,0] == rctCurrID
 											rctCurrID += 1	
-																			
-										
+																				
 										# !!! ONCAT ANALYSIS
 										if sum((oncats[:,1] == cat) & (oncats[:,2] == onrcts[positionR,0])) == 1:
 											#print  onrcts[positionR,0]
 											position = ((oncats[:,1] == cat) & (oncats[:,2] == onrcts[positionR,0]))	
 											oncats[position] = [oncats[position,0], cat, onrcts[positionR,0], decayTime, 0, decayTime, oncats[position,6]+1]	
 										else:
+											#print onrcts[:,0]
+											#print onrcts[:,1]
+											#print onrcts[:,2]
+											#print onrcts[:,3]
+											#print onrcts[:,4]
+											#print positionR
 											oncats = np.vstack([oncats,(catCurrID, cat, onrcts[positionR,0], decayTime, 0, decayTime, 1)])
-											catCurrID += 1	
+											catCurrID += 1
+									
+									
 									
 									# RAF ANALYSIS	
 									if rtime >= float((args.timeWindow * nAnal)):
@@ -259,7 +270,7 @@ if __name__ == '__main__':
 										else:
 											endo_condensation_counter +=  1
 											
-										if rctL == 0: #If it is the first reaction nparray (matrix) is created
+										if realRctl == 0: #If it is the first reaction nparray (matrix) is created
 											graph = np.array([[cat, mol_I, decayTime, float(0), decayTime, 1]])
 											graphSUB = np.array([[mol_II, mol_I, decayTime, float(0), decayTime, 1]])
 											if mol_II != mol_III:
@@ -294,7 +305,7 @@ if __name__ == '__main__':
 										else:
 											cleavage_counter +=  1
 											
-										if rctL == 0: # If it is the first reaction nparray is created
+										if realRctl == 0: # If it is the first reaction nparray is created
 											# CAT -> PROD
 											graph = np.array([[cat, mol_II, decayTime, 0, decayTime, 1]]) # Product 1
 											if mol_II != mol_III:
@@ -327,13 +338,16 @@ if __name__ == '__main__':
 													position = ((graphSUB[:,0] == mol_I) & (graphSUB[:,1] == mol_III))
 													graphSUB[position] = [mol_I, mol_III, decayTime, 0, decayTime, graphSUB[position,5]+1]
 												else:
-													graphSUB = np.vstack([graphSUB,(mol_I, mol_III, decayTime, 0, decayTime, 1)])			
-								
-							
-							
-								#raw_input("...")
+													graphSUB = np.vstack([graphSUB,(mol_I, mol_III, decayTime, 0, decayTime, 1)])	
+									realRctl += 1
+									
+	
 							fid.close() # close fid
-					
+							del graph
+							del graphSUB
+							del onrcts
+							del oncats
+		
 					
 	if args.initanal == 1: 
 		fid_initRafRes.close()
