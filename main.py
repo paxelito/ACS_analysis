@@ -198,134 +198,136 @@ if __name__ == '__main__':
 								# Load single reaction parameters
 								reaction, rtime, cc, cat, mol_I, mol_II, mol_III, loadedMolsConc, loadedMols,\
 		   						gillMean, gillSD, gillEntropy, newSpeciesCreationProb, reverseProbability = readfiles.splitRctParsLine(line)
+		   						
+		   						if cc < 10: 
 								
-								if rctL % 10000 == 0: print "\t\t\t|- Reaction number ", rctL, " - Time: ", rtime
-								
-								# update time intervals 
-								timeInterval = rtime - previousTime
-								previousTime = rtime
-				
-								if rctL > 0:
-									# REACTIONS NOT OCCURING TWICE IN THE DACAY TIME ARE REMOVED FROM THE GRAPH
-									graph = network.removeRareRcts(graph,2,3,4,timeInterval)
-									graphSUB = network.removeRareRcts(graphSUB,2,3,4,timeInterval)
-									onrcts = network.removeRareRcts(onrcts,5,6,7,timeInterval)
-									oncats = network.removeRareRcts(oncats,3,4,5,timeInterval)
-								
-								# ONGOING REACTION STRUCTURES CREATION
-								if rctL == 0:
-									mol_I, mol_II, mol_III = network.fixCondensationReaction(mol_I, mol_II, mol_III, lastRct)
-									onrcts = np.array([[rctCurrID, cc, mol_I, mol_II, mol_III, decayTime, 0, decayTime, 1]], dtype=np.float64)
-									oncats = np.array([[catCurrID, cat, onrcts[0,0], decayTime, 0, decayTime, 1]], dtype=np.float64)
-									rctCurrID += 1
-									catCurrID += 1
-								else:
-									# !!! ONCSTR ANALYSIS
-									mol_I, mol_II, mol_III = network.fixCondensationReaction(mol_I, mol_II, mol_III, lastRct)
-									if sum((onrcts[:,1] == cc) & (onrcts[:,2] == mol_I) & (onrcts[:,3] == mol_II)) == 1:
-										positionR = ((onrcts[:,1] == cc) & (onrcts[:,2] == mol_I) & (onrcts[:,3] == mol_II))	
-										onrcts[positionR] = [onrcts[positionR,0], cc, mol_I, mol_II, mol_III, decayTime, 0, decayTime, onrcts[positionR,8]+1]	
-									else:
-		
-										onrcts = np.vstack([onrcts,(rctCurrID, cc, mol_I, mol_II, mol_III, decayTime, 0, decayTime, 1)])	
-										positionR = onrcts[:,0] == rctCurrID
-										rctCurrID += 1	
-																		
+									if rctL % 10000 == 0: print "\t\t\t|- Reaction number ", rctL, " - Time: ", rtime
 									
-									# !!! ONCAT ANALYSIS
-									if sum((oncats[:,1] == cat) & (oncats[:,2] == onrcts[positionR,0])) == 1:
-										#print  onrcts[positionR,0]
-										position = ((oncats[:,1] == cat) & (oncats[:,2] == onrcts[positionR,0]))	
-										oncats[position] = [oncats[position,0], cat, onrcts[positionR,0], decayTime, 0, decayTime, oncats[position,6]+1]	
+									# update time intervals 
+									timeInterval = rtime - previousTime
+									previousTime = rtime
+					
+									if rctL > 0:
+										# REACTIONS NOT OCCURING TWICE IN THE DACAY TIME ARE REMOVED FROM THE GRAPH
+										graph = network.removeRareRcts(graph,2,3,4,timeInterval)
+										graphSUB = network.removeRareRcts(graphSUB,2,3,4,timeInterval)
+										onrcts = network.removeRareRcts(onrcts,5,6,7,timeInterval)
+										oncats = network.removeRareRcts(oncats,3,4,5,timeInterval)
+									
+									# ONGOING REACTION STRUCTURES CREATION
+									if rctL == 0:
+										mol_I, mol_II, mol_III = network.fixCondensationReaction(mol_I, mol_II, mol_III, lastRct)
+										onrcts = np.array([[rctCurrID, cc, mol_I, mol_II, mol_III, decayTime, 0, decayTime, 1]], dtype=np.float64)
+										oncats = np.array([[catCurrID, cat, onrcts[0,0], decayTime, 0, decayTime, 1]], dtype=np.float64)
+										rctCurrID += 1
+										catCurrID += 1
 									else:
-										oncats = np.vstack([oncats,(catCurrID, cat, onrcts[positionR,0], decayTime, 0, decayTime, 1)])
-										catCurrID += 1	
-								
-								# RAF ANALYSIS	
-								if rtime >= float((args.timeWindow * nAnal)):
-									print "\t\t\t|- RAF analysis...", " ", rtime, " - Reaction ", rctL
-									foodList = dm.generateFluxList(totDirName, sysType)
-									R = network.net_analysis_of_dynamic_graphs(fid_dynRafRes, rtime, onrcts[:,0:5], oncats[:,0:5], foodList,\
-																			   False, completeRCTS=lastRct , debug=args.debug)
-									nAnal += 1
-								
-								# REACTION GRAPH CREATION
-								
-								if (cc == 0)|(cc == 7): # CONDENSATION and ENDO CONDENSATION
-									if cc == 0:
-										condensation_counter += 1
-									else:
-										endo_condensation_counter +=  1
+										# !!! ONCSTR ANALYSIS
+										mol_I, mol_II, mol_III = network.fixCondensationReaction(mol_I, mol_II, mol_III, lastRct)
+										if sum((onrcts[:,1] == cc) & (onrcts[:,2] == mol_I) & (onrcts[:,3] == mol_II)) == 1:
+											positionR = ((onrcts[:,1] == cc) & (onrcts[:,2] == mol_I) & (onrcts[:,3] == mol_II))	
+											onrcts[positionR] = [onrcts[positionR,0], cc, mol_I, mol_II, mol_III, decayTime, 0, decayTime, onrcts[positionR,8]+1]	
+										else:
+			
+											onrcts = np.vstack([onrcts,(rctCurrID, cc, mol_I, mol_II, mol_III, decayTime, 0, decayTime, 1)])	
+											positionR = onrcts[:,0] == rctCurrID
+											rctCurrID += 1	
+																			
 										
-									if rctL == 0: #If it is the first reaction nparray (matrix) is created
-										graph = np.array([[cat, mol_I, decayTime, float(0), decayTime, 1]])
-										graphSUB = np.array([[mol_II, mol_I, decayTime, float(0), decayTime, 1]])
-										if mol_II != mol_III:
-											graphSUB = np.vstack([graphSUB,(mol_III, mol_I, decayTime, 0, decayTime, 1)]) # Substrate 2 (If different from 1)
-									else: 
-										#!!! CAT -> PRO, Otherwise if the reaction is already present its parameters are updated
-										if sum((graph[:,0] == cat) & (graph[:,1] == mol_I)) == 1:
-											position = ((graph[:,0] == cat) & (graph[:,1] == mol_I))
-											graph[position] = [cat, mol_I, decayTime, 0, decayTime, graph[position,5]+1]
+										# !!! ONCAT ANALYSIS
+										if sum((oncats[:,1] == cat) & (oncats[:,2] == onrcts[positionR,0])) == 1:
+											#print  onrcts[positionR,0]
+											position = ((oncats[:,1] == cat) & (oncats[:,2] == onrcts[positionR,0]))	
+											oncats[position] = [oncats[position,0], cat, onrcts[positionR,0], decayTime, 0, decayTime, oncats[position,6]+1]	
 										else:
-											# Otherwise a new reaction is added at the end of the matrix
-											graph = np.vstack([graph,(cat, mol_I, decayTime, 0, decayTime, 1)])
-							
-										#!!! SUB -> PRO, Otherwise if the reaction is already present its parameters are updated
-										if sum((graphSUB[:,0] == mol_II) & (graphSUB[:,1] == mol_I)) == 1:
-											position = ((graphSUB[:,0] == mol_II) & (graphSUB[:,1] == mol_I))
-											graphSUB[position] = [mol_II, mol_I, decayTime, 0, decayTime, graphSUB[position,5]+1]
+											oncats = np.vstack([oncats,(catCurrID, cat, onrcts[positionR,0], decayTime, 0, decayTime, 1)])
+											catCurrID += 1	
+									
+									# RAF ANALYSIS	
+									if rtime >= float((args.timeWindow * nAnal)):
+										print "\t\t\t|- RAF analysis...", " ", rtime, " - Reaction ", rctL
+										foodList = dm.generateFluxList(totDirName, sysType)
+										R = network.net_analysis_of_dynamic_graphs(fid_dynRafRes, rtime, onrcts[:,0:5], oncats[:,0:5], foodList,\
+																				   False, completeRCTS=lastRct , debug=args.debug)
+										nAnal += 1
+									
+									# REACTION GRAPH CREATION
+									
+									if (cc == 0)|(cc == 7): # CONDENSATION and ENDO CONDENSATION
+										if cc == 0:
+											condensation_counter += 1
 										else:
-											# Otherwise a new reaction is added at the end of the matrix
-											graphSUB = np.vstack([graphSUB,(mol_II, mol_I, decayTime, 0, decayTime, 1)])
-										if mol_II != mol_III:
-											if sum((graphSUB[:,0] == mol_III) & (graphSUB[:,1] == mol_I)) == 1:
-												position = ((graphSUB[:,0] == mol_III) & (graphSUB[:,1] == mol_I))
-												graphSUB[position] = [mol_III, mol_I, decayTime, 0, decayTime, graphSUB[position,5]+1]
+											endo_condensation_counter +=  1
+											
+										if rctL == 0: #If it is the first reaction nparray (matrix) is created
+											graph = np.array([[cat, mol_I, decayTime, float(0), decayTime, 1]])
+											graphSUB = np.array([[mol_II, mol_I, decayTime, float(0), decayTime, 1]])
+											if mol_II != mol_III:
+												graphSUB = np.vstack([graphSUB,(mol_III, mol_I, decayTime, 0, decayTime, 1)]) # Substrate 2 (If different from 1)
+										else: 
+											#!!! CAT -> PRO, Otherwise if the reaction is already present its parameters are updated
+											if sum((graph[:,0] == cat) & (graph[:,1] == mol_I)) == 1:
+												position = ((graph[:,0] == cat) & (graph[:,1] == mol_I))
+												graph[position] = [cat, mol_I, decayTime, 0, decayTime, graph[position,5]+1]
 											else:
-												graphSUB = np.vstack([graphSUB,(mol_III, mol_I, decayTime, 0, decayTime, 1)])	
-														
-										
-								else: # CLEAVAGE (The same of condensation expected for the double computation due to the presence of two products
-									if cc == 6:
-										endo_cleavage_counter += 1
-									else:
-										cleavage_counter +=  1
-										
-									if rctL == 0: # If it is the first reaction nparray is created
-										# CAT -> PROD
-										graph = np.array([[cat, mol_II, decayTime, 0, decayTime, 1]]) # Product 1
-										if mol_II != mol_III:
-											graph = np.vstack([graph,(cat, mol_III, decayTime, 0, decayTime, 1)]) # Product 2 (If different from 1)
-										# SUB -> PRO
-										graphSUB = np.array([[mol_I, mol_II, decayTime, 0, decayTime, 1]])
-										if mol_II != mol_III:
-											graphSUB = np.vstack([graphSUB,(mol_I, mol_III, decayTime, 0, decayTime, 1)]) # Sub 2 (If different from 1)					
-									else:
-										if sum((graph[:,0] == cat) & (graph[:,1] == mol_II)) == 1:
-											position = ((graph[:,0] == cat) & (graph[:,1] == mol_II))
-											graph[position] = [cat, mol_II, decayTime, 0, decayTime, graph[position,5]+1]
-										else:
-											graph = np.vstack([graph,(cat, mol_II, decayTime, 0, decayTime, 1)])				
-										if mol_II != mol_III:
-											if sum((graph[:,0] == cat) & (graph[:,1] == mol_III)) == 1:
-												position = ((graph[:,0] == cat) & (graph[:,1] == mol_III))
-												graph[position] = [cat, mol_III, decayTime, 0, decayTime, graph[position,5]+1]
+												# Otherwise a new reaction is added at the end of the matrix
+												graph = np.vstack([graph,(cat, mol_I, decayTime, 0, decayTime, 1)])
+								
+											#!!! SUB -> PRO, Otherwise if the reaction is already present its parameters are updated
+											if sum((graphSUB[:,0] == mol_II) & (graphSUB[:,1] == mol_I)) == 1:
+												position = ((graphSUB[:,0] == mol_II) & (graphSUB[:,1] == mol_I))
+												graphSUB[position] = [mol_II, mol_I, decayTime, 0, decayTime, graphSUB[position,5]+1]
 											else:
-												graph = np.vstack([graph,(cat, mol_III, decayTime, 0, decayTime, 1)])
-										# SUB -> PRO, Otherwise if the reaction is already present its parameters are updated
-										if sum((graphSUB[:,0] == mol_I) & (graphSUB[:,1] == mol_II)) == 1:
-											position = ((graphSUB[:,0] == mol_I) & (graphSUB[:,1] == mol_II))
-											graphSUB[position] = [mol_I, mol_II, decayTime, 0, decayTime, graphSUB[position,5]+1]
+												# Otherwise a new reaction is added at the end of the matrix
+												graphSUB = np.vstack([graphSUB,(mol_II, mol_I, decayTime, 0, decayTime, 1)])
+											if mol_II != mol_III:
+												if sum((graphSUB[:,0] == mol_III) & (graphSUB[:,1] == mol_I)) == 1:
+													position = ((graphSUB[:,0] == mol_III) & (graphSUB[:,1] == mol_I))
+													graphSUB[position] = [mol_III, mol_I, decayTime, 0, decayTime, graphSUB[position,5]+1]
+												else:
+													graphSUB = np.vstack([graphSUB,(mol_III, mol_I, decayTime, 0, decayTime, 1)])	
+															
+											
+									else: # CLEAVAGE (The same of condensation expected for the double computation due to the presence of two products
+										if cc == 6:
+											endo_cleavage_counter += 1
 										else:
-											# Otherwise a new reaction is added at the end of the matrix
-											graphSUB = np.vstack([graphSUB,(mol_I, mol_II, decayTime, 0, decayTime, 1)])
-										if mol_II != mol_III:
-											if sum((graphSUB[:,0] == mol_I) & (graphSUB[:,1] == mol_III)) == 1:
-												position = ((graphSUB[:,0] == mol_I) & (graphSUB[:,1] == mol_III))
-												graphSUB[position] = [mol_I, mol_III, decayTime, 0, decayTime, graphSUB[position,5]+1]
+											cleavage_counter +=  1
+											
+										if rctL == 0: # If it is the first reaction nparray is created
+											# CAT -> PROD
+											graph = np.array([[cat, mol_II, decayTime, 0, decayTime, 1]]) # Product 1
+											if mol_II != mol_III:
+												graph = np.vstack([graph,(cat, mol_III, decayTime, 0, decayTime, 1)]) # Product 2 (If different from 1)
+											# SUB -> PRO
+											graphSUB = np.array([[mol_I, mol_II, decayTime, 0, decayTime, 1]])
+											if mol_II != mol_III:
+												graphSUB = np.vstack([graphSUB,(mol_I, mol_III, decayTime, 0, decayTime, 1)]) # Sub 2 (If different from 1)					
+										else:
+											if sum((graph[:,0] == cat) & (graph[:,1] == mol_II)) == 1:
+												position = ((graph[:,0] == cat) & (graph[:,1] == mol_II))
+												graph[position] = [cat, mol_II, decayTime, 0, decayTime, graph[position,5]+1]
 											else:
-												graphSUB = np.vstack([graphSUB,(mol_I, mol_III, decayTime, 0, decayTime, 1)])			
+												graph = np.vstack([graph,(cat, mol_II, decayTime, 0, decayTime, 1)])				
+											if mol_II != mol_III:
+												if sum((graph[:,0] == cat) & (graph[:,1] == mol_III)) == 1:
+													position = ((graph[:,0] == cat) & (graph[:,1] == mol_III))
+													graph[position] = [cat, mol_III, decayTime, 0, decayTime, graph[position,5]+1]
+												else:
+													graph = np.vstack([graph,(cat, mol_III, decayTime, 0, decayTime, 1)])
+											# SUB -> PRO, Otherwise if the reaction is already present its parameters are updated
+											if sum((graphSUB[:,0] == mol_I) & (graphSUB[:,1] == mol_II)) == 1:
+												position = ((graphSUB[:,0] == mol_I) & (graphSUB[:,1] == mol_II))
+												graphSUB[position] = [mol_I, mol_II, decayTime, 0, decayTime, graphSUB[position,5]+1]
+											else:
+												# Otherwise a new reaction is added at the end of the matrix
+												graphSUB = np.vstack([graphSUB,(mol_I, mol_II, decayTime, 0, decayTime, 1)])
+											if mol_II != mol_III:
+												if sum((graphSUB[:,0] == mol_I) & (graphSUB[:,1] == mol_III)) == 1:
+													position = ((graphSUB[:,0] == mol_I) & (graphSUB[:,1] == mol_III))
+													graphSUB[position] = [mol_I, mol_III, decayTime, 0, decayTime, graphSUB[position,5]+1]
+												else:
+													graphSUB = np.vstack([graphSUB,(mol_I, mol_III, decayTime, 0, decayTime, 1)])			
 								
 							
 							

@@ -138,7 +138,6 @@ def splitRctParsLine(tmpLine):
 	
 	
 	if (int(tmpRtype) == 10) | (int(tmpRtype) == 11):
-		print "hello"
 		tempVar = tmpMol_III
 		tmpMol_III = tmpMol_I
 		tmpMol_I = tmpCat
