@@ -74,7 +74,7 @@ if __name__ == '__main__':
 		if args.rctProb == 0: # if reaction probability is 0
 			increaseYet = True 
 			averageConn = 0.1
-			while (increaseYet == True) & (averageConn < 5):
+			while (increaseYet == True) & (averageConn < 3):
 				time1 = time()
 				raffound = 0
 				sccfound = 0
