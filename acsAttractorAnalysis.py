@@ -46,6 +46,10 @@ today = dt.date.today()
 StrPath = os.path.abspath(StrPath)
 	
 tmpDirs = sort(os.listdir(StrPath))
+
+print tmpDirs
+#raw_input("cvjdfkj")
+
 allSortedSpecies = [] 
 allConcentrations = [] 
 allSortedSpeciesNOINFLUX = [] 

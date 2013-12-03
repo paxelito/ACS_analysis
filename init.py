@@ -65,7 +65,7 @@ if __name__ == '__main__':
 	fid_initRafResALL = open(fname_initRafResALL, 'w')
 	strToWrite = "Folder\tP\tAC\tM\tRAFsize\tClosure\tCats\tuRAF\tSCC\tAutoCat\n"
 	fid_initRafRes.write(strToWrite)
-	strToWrite = "P\tM\tAC\tRAF%\tTIME\n"
+	strToWrite = "P\tM\tAC\tRAF%\tSCC%\t%SCCinRAF\t%SelfInRAF\tTIME\n"
 	fid_initRafResSUM.write(strToWrite)
 	
 	for maxlength in range(args.minDim,args.maxDim+1): # For each dimension
@@ -78,6 +78,8 @@ if __name__ == '__main__':
 				time1 = time()
 				raffound = 0
 				sccfound = 0
+				sccinraffound = 0
+				self_sccinraffound = 0
 				iterations = int((args.iteration/(maxlength+1-args.minDim)))
 				for instanceID, instance in enumerate((range(iterations))): # For each instance of network
 					nCleavage = 0
@@ -240,7 +242,14 @@ if __name__ == '__main__':
 					#print "\t\t|- RAF searching step..."
 					netouts = network.net_analysis_of_static_graphs(fid_initRafRes, fid_initRafResALL, fid_initRafResLIST, 'tmpDir', prob, averageConn, rcts, cats, foodList, maxlength)
 					#print netouts
-					if len(netouts[0][2]) > 0: raffound += 1
+					if len(netouts[0][2]) > 0: 
+						raffound += 1
+						rctsRAF = rcts[np.any(rcts[:, 0] == np.expand_dims(netouts[0][2],1), 0), :]
+						scc_in_raf = network.return_scc_in_raf(rctsRAF, cats, netouts[0][0])
+						if scc_in_raf[1] > 0:
+							sccinraffound += 1
+						if scc_in_raf[2] > 0:
+							self_sccinraffound += 1
 					if netouts[1][4] > 0: sccfound += 1
 					#print raffound
 					#raw_input("ciao")
@@ -249,14 +258,23 @@ if __name__ == '__main__':
 					del cats
 			
 				time2 = time()
-				percAcsFounds = raffound/float(iterations)
+				percRAFFounds = raffound/float(iterations)
 				percSccFounds = sccfound/float(iterations)
+				if raffound > 0: percScc_in_rafFounds = sccinraffound / float(raffound)
+				else: percScc_in_rafFounds = 0
+				if raffound > 0: perc_self_Scc_in_rafFounds = self_sccinraffound / float(raffound)
+				else: perc_self_Scc_in_rafFounds = 0
+				#print percScc_in_rafFounds
+				#print perc_self_Scc_in_rafFounds
+				#raw_input("ciao")
+				
 				timet = time2-time1
-				print "\t\t\t %RAF *** ", percAcsFounds, " *** %SCC ***", percSccFounds," *** TIME: ", time2 - time1, " Cleavages: ", nCleavage, " - Condensations: ", nCondensa
-				if percAcsFounds >= 0.99: 
+				print "\t\t\t %RAF *** ", percRAFFounds, " *** %SCC ***", percSccFounds," *** TIME: ", time2 - time1, " Cleavages: ", nCleavage, " - Condensations: ", nCondensa
+				if percRAFFounds >= 0.99: 
 					print "\t\t\t Max number of RAFs found"
 					increaseYet = False # If RAF is always found so next average conn is assessed
-				strToWrite = str(prob) + "\t" + str(maxlength) + "\t" + str(averageConn) + "\t" + str(percAcsFounds) + "\t" + str(timet) + "\n"
+				strToWrite = str(prob) + "\t" + str(maxlength) + "\t" + str(averageConn) + "\t" + str(percRAFFounds) + "\t" + str(percSccFounds) + \
+							"\t" + str(percScc_in_rafFounds) + "\t" + str(perc_self_Scc_in_rafFounds) + "\t" + str(timet) + "\n"
 				fid_initRafResSUM.write(strToWrite)
 				averageConn += 0.1
 	# Close text files

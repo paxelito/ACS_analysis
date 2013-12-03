@@ -30,14 +30,8 @@ def removeRareRcts(graph, dt, life, nrg, deltat):
 def fixCondensationReaction(m1, m2, m3, rcts):
 	
 	if sum((rcts[:,2] == m1) & (rcts[:,3] == m2) & (rcts[:,4] == m3)) > 1:
-		#print "- Right RCT"
-		#print rcts[((rcts[:,2] == m1) & (rcts[:,3] == m2) & (rcts[:,4] == m3)),:]
-		#raw_input("ecco...")
 		return m1, m2, m3
 	elif sum((rcts[:,2] == m1) & (rcts[:,3] == m3) & (rcts[:,4] == m2)) > 1:
-		#print "- REVERSE RCT"
-		#print rcts[((rcts[:,2] == m1) & (rcts[:,3] == m3) & (rcts[:,4] == m2)),:]
-		#raw_input("ecco...")
 		return m1, m3, m2
 	else: 
 		print m1, m2, m3
@@ -81,5 +75,11 @@ def net_analysis_of_dynamic_graphs(fid_dynRafRes, tmpTime, rcts, cats, foodList,
 	else: strToWrite = str(tmpTime) + "\t" + str(len(rafset[0])) + "\t" + str(rafset[4]) + str(len(rafsetALL[0])) + "\t" + str(rafsetALL[4]) + "\t" + str(sccsets[4]) + "\t" + str(sccsets[2]) + "\t" + strRAF + "\n"
 	fid_dynRafRes.write(strToWrite)
 	return rafset
+
+def return_scc_in_raf(tmpRAF, tmpClosure, tmpCats):
+	stdgraph = scc.createNetXGraphForRAF(tmpRAF, tmpClosure, tmpCats)
+	sccsets = scc.diGraph_netX_stats(stdgraph)
+	return sccsets 
+	
 		
 	

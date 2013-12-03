@@ -31,12 +31,35 @@ def createNetXGraph(tmpCstr, tmpCats):
 	#print tmpCstr
 	#print tmpCats
 	for id, cat in enumerate(tmpCats):
-		Gcatpro.add_weighted_edges_from([(int(cat[1]),int(tmpCstr[tmpCstr[:,0] == cat[2],0]),1)])
+		if int(tmpCstr[tmpCstr[:,0] == cat[2],1]) == 1:
+			Gcatpro.add_weighted_edges_from([(int(cat[1]),int(tmpCstr[tmpCstr[:,0] == cat[2],3]),1)])
+			if int(tmpCstr[tmpCstr[:,0] == cat[2],3]) is not int(tmpCstr[tmpCstr[:,0] == cat[2],4]):
+				Gcatpro.add_weighted_edges_from([(int(cat[1]),int(tmpCstr[tmpCstr[:,0] == cat[2],4]),1)])
+		else:
+			Gcatpro.add_weighted_edges_from([(int(cat[1]),int(tmpCstr[tmpCstr[:,0] == cat[2],2]),1)])
+		#print Gcatpro.edges()
+	return Gcatpro
+
+def createNetXGraphForRAF(tmpCstr, tmpCats, tmpClosure):
+	"\t\t|- Cat -> Prod graph creation..."
+	Gcatpro = nx.DiGraph()
+	# Extract catalysts catalysing reactions of the RAF set. 
+		
+	for id, cat in enumerate(tmpCats):
+		if cat[1] in tmpCats:
+			if sum(tmpCstr[:,0] == cat[2]) > 0:
+				if int(tmpCstr[tmpCstr[:,0] == cat[2],1]) == 1:
+					Gcatpro.add_weighted_edges_from([(int(cat[1]),int(tmpCstr[tmpCstr[:,0] == cat[2],3]),1)])
+					if int(tmpCstr[tmpCstr[:,0] == cat[2],3]) is not int(tmpCstr[tmpCstr[:,0] == cat[2],4]):
+						Gcatpro.add_weighted_edges_from([(int(cat[1]),int(tmpCstr[tmpCstr[:,0] == cat[2],4]),1)])
+				else:
+					Gcatpro.add_weighted_edges_from([(int(cat[1]),int(tmpCstr[tmpCstr[:,0] == cat[2],2]),1)])
 	return Gcatpro
 
 def diGraph_netX_stats(tmpDig):
 	realSccs = 0
 	scc = nx.strongly_connected_components(tmpDig)
+	sccsg = nx.strongly_connected_component_subgraphs(tmpDig)
 	actualScc = []
 	for i in scc: 
 		if len(i) > 1: actualScc.append(i)
@@ -44,7 +67,7 @@ def diGraph_netX_stats(tmpDig):
 	selfLoops = tmpDig.number_of_selfloops()
 	selfLoopsEgdes = tmpDig.selfloop_edges()
 	realSccs = selfLoops + sccN 
-	return actualScc, sccN, selfLoops, selfLoopsEgdes, realSccs
+	return actualScc, sccN, selfLoops, selfLoopsEgdes, realSccs, sccsg
 
 
 
