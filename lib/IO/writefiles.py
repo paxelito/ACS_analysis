@@ -83,8 +83,8 @@ def writeAllFilesAndCreateResFolder(pathFile, resFolderName, cats, rcts, food, s
 	write_acsReactions_file(pathFile, rcts, spontRatio, kspontass, kspontdiss)
 	
 def write_acsms_file(path_file, nGen=10, nSim=1,nSec=1000,nRct=200000000,nH=0,nA=0,rs=0,dl=0,tssi=10,ftsi=0,nspmt=1,lfds=13,oc=0.0001,ecc=0,alf="AB",v=1e-18,\
-					 vg=0,sd=0,nrg=0,rse=0,ncml=2,P=0.00103306,cp=0.5,rr=0,rrr=0,sr=0,K_ass=50,K_diss=25,K_cpx=50,K_cpxDiss=1,K_nrg=0,K_nrg_decay=0,K_spont_ass=0,\
-					 K_spont_diss=0,moleculeDecay_KineticConstant=0.02,diffusion_contribute=0,solubility_threshold=0,influx_rate=0,maxLOut=3,mrevrct=0):
+					 vg=0,sd=0,nrg=0,rse=0,ncml=2,P=0.00103306,cp=0.5,mrevrct=0,rr=0,rrr=0,sr=0,K_ass=50,K_diss=25,K_cpx=50,K_cpxDiss=1,K_nrg=0,K_nrg_decay=0,K_spont_ass=0,\
+					 K_spont_diss=0,moleculeDecay_KineticConstant=0.02,diffusion_contribute=0,solubility_threshold=0,influx_rate=0,maxLOut=3):
 	print "\t|- save conf file"
 	fname_conf = os.path.join(path_file, 'acsm2s.conf')
 	fid_conf = open(fname_conf, 'w')

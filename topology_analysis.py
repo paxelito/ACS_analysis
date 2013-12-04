@@ -19,6 +19,8 @@ from lib.graph import raf
 from lib.graph import scc
 from lib.graph import network
 from lib.dyn import dynamics as dn
+from lib.model import species as sp
+from lib.model import reactions
 
 
 #ÊInput parameters definition 
@@ -84,16 +86,18 @@ if __name__ == '__main__':
 				for instanceID, instance in enumerate((range(iterations))): # For each instance of network
 					nCleavage = 0
 					nCondensa = 0
-					# Create all the the species starting from the alphabet
+					
+					# Create the complete population of species according to the Max Length and the alphabet
 					alphabet = ['A', 'B']
-					species = []
-					for i in range(maxlength): species.extend(map(''.join,it.product(alphabet, repeat=i+1)))
+					species = sp.createCompleteSpeciesPopulation(maxlength, alphabet)
 					
 					# compute number of cleavage
-					totSpecies = 2 ** (maxlength + 1) - 2
+					totSpecies = sp.getTotNumberOfSpeciesFromCompletePop(maxlength)
+					
 					# Compute overall conceivable number of reactions
-					totCleavage = sum(map(lambda x: len(x)-1,species))
-					if args.creationMethod == 1: totCond = totSpecies ** 2
+					totCleavage = reactions.getNumOfCleavages(species)
+					
+					if args.creationMethod == 1: totCond = reactions.getNumOfCondensations(totSpecies)
 					else: totCond = 0
 					totRcts = totCleavage + totCond
 					
@@ -134,24 +138,9 @@ if __name__ == '__main__':
 						if (rctType == 1) & (nCleavage <= totCleavage):
 							# Select species to cleave
 							rctnew = False
-							molToCleav = ran.choice(species[len(alphabet):initSpeciesListLength-1])
-							cutPt = ran.randint(1,len(molToCleav)-1) 
-							tmp1 = molToCleav[0:cutPt]
-						
-							try: 
-								tmp1id = species.index(tmp1)
-								find1 = True
-							except: 
-								tmp1id = len(species)+1
-								find1 = False
-								
-							tmp2 = molToCleav[cutPt:len(molToCleav)]
-							try: 
-								tmp2id = species.index(tmp2)
-							except: 
-								if find1 == True: tmp2id = len(species) + 1   
-								else: tmp2id = len(species)+2
-							
+							# Create random cleavage
+							molToCleav, tmp1, tmp2, tmp1id, tmp2id, find1 = reactions.createRandomCleavage(species, alphabet, initSpeciesListLength)
+							# Check if the reaction is new
 							if i == 0: rctnew = True
 							else:
 								if find1 == True:
@@ -178,12 +167,7 @@ if __name__ == '__main__':
 						else: # condensation
 							if args.creationMethod == 1:
 								rctnew = False
-								sub1 = ran.choice(species[:initSpeciesListLength-1])
-								idsub1 = species.index(sub1)
-					
-								sub2 = ran.choice(species[:initSpeciesListLength-1])
-								idsub2 = species.index(sub2)
-								prod = sub1 + sub2
+								sub1, sub2, idsub1, idsub2, prod = reactions.createRandomCondensation(species, initSpeciesListLength)
 								try:
 									tmpprodid = species.index(prod)
 								except:
