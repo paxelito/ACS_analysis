@@ -31,6 +31,23 @@ def createRandomCleavage(tmpSpecies, alphabet, tmpInitLMax):
 		
 	return M1, M2, M3, M2_ID, M3_ID, M2new
 
+def createRandomCleavageForCompleteFiringDisk(tmpSpecies, alphabet, tmpInitLMax):
+	M1 = ran.choice(tmpSpecies[len(alphabet):tmpInitLMax-1])
+	cutPt = ran.randint(1,len(M1)-1) 
+	
+	try: M1_ID = tmpSpecies.index(M1)
+	except: print M1, " must be present in the population"; sys.exit(1)
+	
+	M2 = M1[0:cutPt]
+	try: M2_ID = tmpSpecies.index(M2)	
+	except: print M2, " must be present in the population"; sys.exit(1)
+	
+	M3 = M1[cutPt:len(M1)]
+	try: M3_ID = tmpSpecies.index(M3)	
+	except: print M3, " must be present in the population"; sys.exit(1)
+		
+	return M1, M2, M3, M1_ID, M2_ID, M3_ID
+
 def createRandomCondensation(tmpSpecies, tmpInitLMax):
 	sub1 = ran.choice(tmpSpecies[:tmpInitLMax-1])
 	idsub1 = tmpSpecies.index(sub1)

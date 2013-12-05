@@ -4,6 +4,7 @@
 import sys, os # Standard librar
 import glob
 from copy import deepcopy
+import random as ran
 import numpy as np # Scientific library
 from numpy import * 
 from argparse import ArgumentParser
@@ -16,6 +17,7 @@ from ..graph import raf
 from ..graph import scc
 from ..dyn import dynamics as dn
 from ..IO import writefiles
+from ..model import reactions
    
    
 def removeRareRcts(graph, dt, life, nrg, deltat):
@@ -80,6 +82,117 @@ def return_scc_in_raf(tmpRAF, tmpClosure, tmpCats):
 	stdgraph = scc.createNetXGraphForRAF(tmpRAF, tmpClosure, tmpCats)
 	sccsets = scc.diGraph_netX_stats(stdgraph)
 	return sccsets 
+
+def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavage, totCond):
+	speciesList = deepcopy(originalSpeciesList)
+	initSpeciesListLength = len(speciesList) # Initial cardinality of the species list (to avoid recursive multiple species evaluation)
+	reactionID = 0
+	catalysisID = 0
+	nCleavage = 0
+	nCondensa = 0
+	#print "\t\t|- NET creation... "
+	checkRct = False
+	
+	for i in range(rctToCat):
+		rctType = 1
+		if args.creationMethod == 1:
+			if args.rctRatio > 0: 
+				if ran.random() > args.rctRatio: rctType = 0
+			else:
+				if (totCleavage / (float(totCleavage) + totCond)) <= ran.random(): rctType = 0
+		
+		# CREATE REACTION 
+		# If cleavage
+		reactionValid = False
+		if (rctType == 1) & (nCleavage <= totCleavage):
+			rctnew = False
+			# Create random cleavage
+			while reactionValid == False:
+				tmp1, tmp2, tmp3, tmp1id, tmp2id, tmp3id = reactions.createRandomCleavageForCompleteFiringDisk(speciesList, parameters[14], initSpeciesListLength)
+				if reactionID > 0:
+					if args.revRcts == 0:
+						if sum((rcts[:,1] == 1) & (rcts[:,2] == tmp1id) & (rcts[:,3] == tmp3id)) == 0: reactionValid = True
+					else:
+						reactionValid = True
+				else:
+					reactionValid = True
+				
+			# Check if the reaction is new
+			if reactionID == 0: rctnew = True
+			else: 
+				if sum((rcts[:,1] == 1) & (rcts[:,2] == tmp1id) & (rcts[:,3] == tmp2id)) == 0: rctnew = True
+				
+			# Reaction Structure Creation
+			if rctnew:
+				if reactionID == 0:
+					rcts = np.array([[int(reactionID), int(rctType), tmp1id, tmp2id, tmp3id, int(0), int(0), parameters[34]]])
+					reactionID += 1
+					nCleavage += 1
+				else: 
+					rcts = np.vstack([rcts,(int(reactionID), int(rctType), tmp1id, tmp2id, tmp3id, int(0), int(0), parameters[34])])	
+					reactionID += 1
+					nCleavage += 1
+					
+				if args.creationMethod == 2: # If WIM method the reverse reaction is added
+					rcts = np.vstack([rcts,(int(reactionID), int(0), tmp1id, tmp2id, tmp3id, int(0), int(0), parameters[34])])	
+					reactionID += 1
+					nCondensa += 1
+			else:
+				rct2cat = rcts[(rcts[:,1] == 1) & (rcts[:,2] == tmp1id) & (rcts[:,3] == tmp2id),0]
+		else: # condensation
+			if args.creationMethod == 1:
+				rctnew = False
+				sub1, sub2, idsub1, idsub2, prod = reactions.createRandomCondensation(speciesList, initSpeciesListLength)
+				try:
+					tmpprodid = speciesList.index(prod)
+				except:
+					tmpprodid = len(speciesList)
+					speciesList.append(prod)
+				
+				if reactionID == 0: rctnew = True
+				else:
+					if sum((rcts[:,1] == 0) & (rcts[:,3] == idsub1) & (rcts[:,4] == idsub2)) == 0: rctnew = True
+				# Reaction Structure Creation
+				if rctnew:
+					if reactionID == 0: 
+						rcts = np.array([[int(reactionID), int(rctType), tmpprodid, idsub1, idsub2, int(0), int(0), parameters[33]]])
+						reactionID += 1
+					else: 
+						rcts = np.vstack([rcts,(int(reactionID), int(rctType), tmpprodid, idsub1, idsub2, int(0), int(0), parameters[33])])	
+						reactionID += 1
+					nCondensa += 1
+				else:
+					rct2cat = rcts[(rcts[:,1] == 0) & (rcts[:,3] == idsub1) & (rcts[:,4] == idsub2),0]
+		# A CATALYST IS RANDOMLY ASSIGNED FROM THE SPECIES LIST
+		catalyst = -1
+		
+		catFound = False
+		while not catFound: 
+			catalyst = speciesList.index(ran.choice(speciesList[len(parameters[14]):]))
+			if (len(speciesList[catalyst]) > args.noCat):
+				if rctnew == False:
+					if sum((cats[:,1]==catalyst) & (cats[:,2]==rct2cat))==0: catFound = True
+				else:
+					catFound = True
+			
+		if rctnew: rctsToCat = reactionID - 1
+		else: rctsToCat = rct2cat
+		
+		if args.creationMethod == 2: rctsToCat = reactionID - 2
+		if catalysisID == 0: 
+			cats = np.array([[int(catalysisID), int(catalyst), int(rctsToCat), int(0), parameters[27], parameters[28], parameters[29], int(1)]])
+			catalysisID += 1
+			if args.creationMethod == 2: # IF wim method
+				cats = np.vstack([cats,(int(catalysisID), int(catalyst), int(rctsToCat + 1), int(0), parameters[27], parameters[28], parameters[29], int(1))])
+				catalysisID += 1
+		else: 
+			cats = np.vstack([cats,(int(catalysisID), int(catalyst), int(rctsToCat), int(0), parameters[27], parameters[28], parameters[29], int(1))])
+			catalysisID += 1
+			if args.creationMethod == 2:
+				cats = np.vstack([cats,(int(catalysisID), int(catalyst), int(rctsToCat + 1), int(0), parameters[27], parameters[28], parameters[29], int(1))])
+				catalysisID += 1
+	
+	return rcts, cats
 	
 		
 	

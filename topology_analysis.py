@@ -91,7 +91,7 @@ if __name__ == '__main__':
 					alphabet = ['A', 'B']
 					species = sp.createCompleteSpeciesPopulation(maxlength, alphabet)
 					
-					# compute number of cleavage
+					# compute population carinality
 					totSpecies = sp.getTotNumberOfSpeciesFromCompletePop(maxlength)
 					
 					# Compute overall conceivable number of reactions

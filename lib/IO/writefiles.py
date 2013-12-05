@@ -39,7 +39,6 @@ def write_acsCatalysis_file(path_file, catStr):
 
 def write_acsReactions_file(path_file, rctStr, spontRatio=None, kspontass=None, kspontdiss=None):
 	print "\t|- save Reaction file"
-	print spontRatio, kspontass, kspontdiss
 	if spontRatio and spontRatio > 0:
 		for rct in rctStr:
 			if ran.random() < spontRatio:

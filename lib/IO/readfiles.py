@@ -140,6 +140,7 @@ def read_sims_conf_file(paramFile):
 		if strLine[0] == "maxLOut":
 			maxLOut = int(strLine[1])				
 			
+	#r1 = 0 : 9 || 10 : 17 || 11 : 24 || 25 : 36 || 37 : 39
 	return (nGEN,nSIM,nSeconds,nReactions,nHours,nAttempts,randomSeed,debugLevel,timeStructuresSavingInterval,fileTimesSaveInterval,\
 		    newSpeciesProbMinThreshold,lastFiringDiskSpeciesID,overallConcentration,ECConcentration,alphabet,volume,volumeGrowth,stochDivision,\
 		    energy,ratioSpeciesEnergizable,nonCatalyticMaxLength,reactionProbability,cleavageProbability,main_rev_rct_allowed,reverseReactions,\
