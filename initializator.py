@@ -47,6 +47,7 @@ if __name__ == '__main__':
 	parser.add_argument('-C', '--core', help='Number of core on which simulations are distributed', default='2', type=int)	
 	parser.add_argument('-F', '--folderName', help='Simulation Folder Name (Deafault: SIMS)', default='SIMS')
 	parser.add_argument('-R', '--revRcts', help='Reverse reactions are allowed to be created for chance(1: Yes, 0: No, Deafult: No)', default='0', type=int)	
+	parser.add_argument('-F', '--rafPresence', help='Force the presence of RAF of 1 dimension, i.e. self-catalysis (1), or bigger (2) or no RAF at all (0), Default: 0', default='0', type=int)
 	parser.add_argument('-r', '--randomSeed', help='random seed', type=int, default=None)
 	args = parser.parse_args()
 	
@@ -115,7 +116,7 @@ if __name__ == '__main__':
 				rcts, cats, speciesList = network.create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavage, totCond)
 				food = deepcopy(foodList)
 				rafset = raf.rafsearch(rcts, cats, food) # RAF search
-				if len(rafset[2]) == 0:
+				if len(rafset[2]) >= args.rafPresence:
 					print rafset
 					chemFound = True
 				scanned += 1
