@@ -125,16 +125,16 @@ def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavag
 			# Reaction Structure Creation
 			if rctnew:
 				if reactionID == 0:
-					rcts = np.array([[int(reactionID), int(rctType), tmp1id, tmp2id, tmp3id, int(0), int(0), parameters[34]]])
+					rcts = np.array([[int(reactionID), int(rctType), tmp1id, tmp2id, tmp3id, int(0), int(239), parameters[34]]])
 					reactionID += 1
 					nCleavage += 1
 				else: 
-					rcts = np.vstack([rcts,(int(reactionID), int(rctType), tmp1id, tmp2id, tmp3id, int(0), int(0), parameters[34])])	
+					rcts = np.vstack([rcts,(int(reactionID), int(rctType), tmp1id, tmp2id, tmp3id, int(0), int(239), parameters[34])])	
 					reactionID += 1
 					nCleavage += 1
 					
 				if args.creationMethod == 2: # If WIM method the reverse reaction is added
-					rcts = np.vstack([rcts,(int(reactionID), int(0), tmp1id, tmp2id, tmp3id, int(0), int(0), parameters[34])])	
+					rcts = np.vstack([rcts,(int(reactionID), int(0), tmp1id, tmp2id, tmp3id, int(0), int(239), parameters[34])])	
 					reactionID += 1
 					nCondensa += 1
 			else:
@@ -155,10 +155,10 @@ def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavag
 				# Reaction Structure Creation
 				if rctnew:
 					if reactionID == 0: 
-						rcts = np.array([[int(reactionID), int(rctType), tmpprodid, idsub1, idsub2, int(0), int(0), parameters[33]]])
+						rcts = np.array([[int(reactionID), int(rctType), tmpprodid, idsub1, idsub2, int(0), int(239), parameters[33]]])
 						reactionID += 1
 					else: 
-						rcts = np.vstack([rcts,(int(reactionID), int(rctType), tmpprodid, idsub1, idsub2, int(0), int(0), parameters[33])])	
+						rcts = np.vstack([rcts,(int(reactionID), int(rctType), tmpprodid, idsub1, idsub2, int(0), int(239), parameters[33])])	
 						reactionID += 1
 					nCondensa += 1
 				else:
@@ -192,7 +192,7 @@ def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavag
 				cats = np.vstack([cats,(int(catalysisID), int(catalyst), int(rctsToCat + 1), int(0), parameters[27], parameters[28], parameters[29], int(1))])
 				catalysisID += 1
 	
-	return rcts, cats
+	return rcts, cats, speciesList
 	
 		
 	

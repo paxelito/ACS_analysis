@@ -34,7 +34,7 @@ if __name__ == '__main__':
 	parser.add_argument('-a', '--sysType', help='System Architecture [1:CLOSE, 2:PROTO, 3:CSTR], deafult: 1', default='1')
 	parser.add_argument('-k', '--creationMethod', help='Network creation method (1: Filisetti, 2: Wim, 3: WimNoRevs, DEF: 1)', default='1', type=int)
 	parser.add_argument('-f', '--lastFood', type=int, help='max food species length (deafult: 2)', default='2')
-	parser.add_argument('-n', '--noCat', help='Non catalytic max length (default: 2)', default='5', type=int)
+	parser.add_argument('-n', '--noCat', help='Non catalytic max length (default: 2)', default='2', type=int)
 	parser.add_argument('-N', '--initAmount', help='Default Initial Amount', default='600', type=int)
 	parser.add_argument('-s', '--initSet', type=int, help='Dimension of the initial set (Default: 4)', default='4')
 	parser.add_argument('-m', '--maxDim', help='Max Dimension of the systems (Default: 6)', default='6', type=int)
@@ -89,12 +89,13 @@ if __name__ == '__main__':
 		foodList = range(int(2**(args.lastFood+1)-2))
 		# Create species List
 		speciesList = sp.createCompleteSpeciesPopulation(args.maxDim, parameters[14])
+		originalSpeciesList = deepcopy(speciesList)
 		# Crate chemist
 		# compute population cardinality
 		totSpecies = sp.getTotNumberOfSpeciesFromCompletePop(args.maxDim)
 		
 		# Compute overall conceivable number of reactions
-		totCleavage = reactions.getNumOfCleavages(speciesList)
+		totCleavage = reactions.getNumOfCleavages(originalSpeciesList)
 		
 		if args.creationMethod == 1: totCond = reactions.getNumOfCondensations(totSpecies)
 		else: totCond = 0
@@ -111,10 +112,10 @@ if __name__ == '__main__':
 			scanned = 0
 			while chemFound == False:
 				if scanned % 100 == 0: print "\t\t tried chemistries to find RAFs -> ", scanned
-				rcts, cats = network.create_chemistry(args, speciesList, parameters, rctToCat, totCleavage, totCond)
+				rcts, cats, speciesList = network.create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavage, totCond)
 				food = deepcopy(foodList)
 				rafset = raf.rafsearch(rcts, cats, food) # RAF search
-				if len(rafset[2]) > 0:
+				if len(rafset[2]) == 0:
 					print rafset
 					chemFound = True
 				scanned += 1
@@ -122,7 +123,7 @@ if __name__ == '__main__':
 			scanned = 0
 			while chemFound == False:
 				if scanned % 100 == 0: print "\t\t tried chemistries -> ", scanned
-				rcts, cats = network.create_chemistry(args, speciesList, parameters, rctToCat, totCleavage, totCond)
+				rcts, cats, speciesList = network.create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavage, totCond)
 				food = deepcopy(foodList)
 				rafset = raf.rafsearch(rcts, cats, food) # RAF search
 				if len(rafset[2]) == 0:
