@@ -171,4 +171,4 @@ if __name__ == '__main__':
 			if fidid == args.core: fidid = 0 
 	
 	# Close fid runs		
-	map(close(),fid_run)
+	map(close,fid_run)
