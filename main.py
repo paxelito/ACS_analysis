@@ -239,15 +239,9 @@ if __name__ == '__main__':
 																				
 										# !!! ONCAT ANALYSIS
 										if sum((oncats[:,1] == cat) & (oncats[:,2] == onrcts[positionR,0])) == 1:
-											#print  onrcts[positionR,0]
 											position = ((oncats[:,1] == cat) & (oncats[:,2] == onrcts[positionR,0]))	
 											oncats[position] = [oncats[position,0], cat, onrcts[positionR,0], decayTime, 0, decayTime, oncats[position,6]+1]	
 										else:
-											#print onrcts[:,0]
-											#print onrcts[:,1]
-											#print onrcts[:,2]
-											#print onrcts[:,3]
-											#print onrcts[:,4]
 											#print positionR
 											oncats = np.vstack([oncats,(catCurrID, cat, onrcts[positionR,0], decayTime, 0, decayTime, 1)])
 											catCurrID += 1
