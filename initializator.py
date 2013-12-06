@@ -163,7 +163,7 @@ if __name__ == '__main__':
 			writefiles.write_acsReactions_file(condFolderPath, rcts)	
 			
 			# UPDATE SIMULATION LUNCHER
-			str2w = "echo 'Simulation " + condFolderPath + "'\nnice ./carness ." + condFolderPath + "/ ." + condFolderPath + "/res/ ." + condFolderPath +\
+			str2w = "echo 'Simulation " + condFolderPath + "'\nnice ./carness ../." + condFolderPath + "/ ../." + condFolderPath + "/res/ ../." + condFolderPath +\
 					"/ > " + chemFolder + '_' + tmpCondFolder + ".log\n"
 			
 			fid_run[fidid].write(str2w)
@@ -171,4 +171,4 @@ if __name__ == '__main__':
 			if fidid == args.core: fidid = 0 
 	
 	# Close fid runs		
-	map(close,fid_run)
+	map(lambda x: x.close(),fid_run)
