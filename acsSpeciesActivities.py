@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: latin-1 -*-
 '''Function to evaluate the activity of each species during the simulation, 
-   catalyst substrate product or nothing
+   catalyst substrate product or nothing. Moreover the script recognize all those molecules functioning as hub
 '''
 
 import sys, os # Standard library

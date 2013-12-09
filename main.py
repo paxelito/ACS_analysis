@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: latin-1 -*-
-'''Function to evaluate the activity of each species during the simulation, 
-   catalyst substrate product or nothing
+''' MAIN analysis script package for CaRNeSS simulations
 '''
 
 import sys, os # Standard library
@@ -118,10 +117,10 @@ if __name__ == '__main__':
 								fname_inTimeRafRes = os.path.join(newdirAllResults, fName)
 								fid_inTimeRafRes = open(fname_inTimeRafRes, 'w')
 								if conf[10] >= 1: 
-									strToWrite = "t\t#CL\t#RAF\t#SCC\t#SelfCats\tRAF\n"
+									strToWrite = "t\t#CL\t#RAF\t#SCC\t#SelfCats\tSCCinRAF\tRAF\n"
 									potential = False
 								else: 
-									strToWrite = "t\t#CL\t#RAF\t#PCL\t#PRAF\tRAF\n"
+									strToWrite = "t\t#CL\t#RAF\t#PCL\t#PRAF\t#SCC\t#SelfCats\tSCCinRAF\tRAF\n"
 									potential = True
 								fid_inTimeRafRes.write(strToWrite)
 							# reactions file loading
@@ -248,12 +247,13 @@ if __name__ == '__main__':
 									
 									
 									
-									# RAF ANALYSIS	
+									# RAF and SCC ANALYSIS	
 									if rtime >= float((args.timeWindow * nAnal)):
 										print "\t\t\t|- RAF analysis...", " ", rtime, " - Reaction ", rctL
 										foodList = dm.generateFluxList(totDirName, sysType)
-										R = network.net_analysis_of_dynamic_graphs(fid_dynRafRes, rtime, onrcts[:,0:5], oncats[:,0:5], foodList,\
+										netouts = network.net_analysis_of_dynamic_graphs(fid_dynRafRes, rtime, onrcts[:,0:5], oncats[:,0:5], foodList,\
 																				   False, completeRCTS=lastRct , debug=args.debug)
+										
 										nAnal += 1
 									
 									# REACTION GRAPH CREATION

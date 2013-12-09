@@ -68,13 +68,20 @@ def net_analysis_of_dynamic_graphs(fid_dynRafRes, tmpTime, rcts, cats, foodList,
 		
 	strRAF = '' 
 	# If RAF analysis is made in dynamical temporary structures a trnaslation in real net must be done
+	
+	if len(rafset[0][2]) > 0: 
+		rctsRAF = rcts[np.any(rcts[:, 0] == np.expand_dims(rafset[0][2],1), 0), :]
+		scc_in_raf = return_scc_in_raf(rctsRAF, cats, rafset[0][0])
 	 
 	if completeRCTS != None: convRAF = raf.findRAFrcts(rafset[2],rcts,completeRCTS)
 	else: convRAF = rafset[2]
 	if len(convRAF) > 0: 		
 		for x in convRAF: strRAF += str(x) + '\t'	
-	if growth == False: strToWrite = str(tmpTime) + "\t" + str(len(rafset[0])) + "\t" + str(rafset[4]) + "\t" + str(sccsets[4]) + "\t" + str(sccsets[2]) + "\t" + strRAF + "\n"
-	else: strToWrite = str(tmpTime) + "\t" + str(len(rafset[0])) + "\t" + str(rafset[4]) + str(len(rafsetALL[0])) + "\t" + str(rafsetALL[4]) + "\t" + str(sccsets[4]) + "\t" + str(sccsets[2]) + "\t" + strRAF + "\n"
+	
+	#t	#CL	#RAF	#SCC	#SelfCats	RAF		
+		
+	if growth == False: strToWrite = str(tmpTime) + "\t" + str(len(rafset[0])) + "\t" + str(rafset[4]) + "\t" + str(sccsets[4]) + "\t" + str(sccsets[2]) + "\t" + scc_in_raf[1] + "\t" + strRAF + "\n"
+	else: strToWrite = str(tmpTime) + "\t" + str(len(rafset[0])) + "\t" + str(rafset[4]) + str(len(rafsetALL[0])) + "\t" + str(rafsetALL[4]) + "\t" + str(sccsets[4]) + "\t" + str(sccsets[2]) + "\t" + scc_in_raf[1]+ "\t" + strRAF + "\n"
 	fid_dynRafRes.write(strToWrite)
 	return rafset
 

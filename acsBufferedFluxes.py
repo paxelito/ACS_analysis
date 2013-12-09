@@ -11,11 +11,8 @@ import glob
 import numpy as np # Scientific library
 from numpy import * 
 
-try:
-    from pylab import *
-except:
-    pass
-   
+from lib.IO import *
+from lib.graph import network
 #--------------------------------------------------------------------------------------
 def zeroBeforeStrNum(tmpl, tmpL):
 	strZero = ''
@@ -106,7 +103,7 @@ if __name__ == '__main__':
 							flux_ssize.append(int(len(str(tmpSeq))))
 							nSpecies += 1
 						
-					# Create lists containing statistical data 
+					# Create lists containing stats data 
 					# The number of columns is equal to times + tot(MOLS) + tot(Bricks) + each buffered species (mols and bricks)
 					counters = np.zeros((nSpecies,(len(seq)*2)+7)) 
 					# Select reaction_parameter file
@@ -121,19 +118,26 @@ if __name__ == '__main__':
 					totIN = 0
 					totOUT = 0
 					deltaIO = 0
-					totBIN = 0
-					totBOUT = 0
-					deltaIO = 0
+					tot_B_IN = 0
+					tot_B_OUT = 0
+					delta_B_IO = 0
+					
+					strRct = 'reactions_' + strZeros + str(ngen) + '*'  
+					strCat = 'catalysis_' + strZeros + str(ngen) + '*'  
+				  	# Searching for files
+				  	rctFiles = sorted(glob.glob(os.path.join(resDirPath,strRct)))
+				  	catFiles = sorted(glob.glob(os.path.join(resDirPath,strCat)))
+				  	# Upload latest file
+				  	lastRct = readfiles.loadAllData(totDirName,rctFiles[-1]) # reaction file upload
+				  	lastCat = readfiles.loadAllData(totDirName,catFiles[-1]) # reaction file upload
 					
 					for idRct, sngRct in enumerate(fidRctPar): 
-						tmpRctId, tmpRctT, tmpRctType, tmpCat, tmpS1, tmpS2, tmpS3, tmpCM, \
-						tmpCC, tmpGil, tmpGilSD, tmpE, tmpNSP, tmpRatio = sngRct.split()
-						rctTime = int(tmpRctT)
-						rctType = int(tmpRctType)
-						cat = int(tmpCat)
-						S1 = int(tmpS1)
-						S2 = int(tmpS2)
-						S3 = int(tmpS3)
+						# Load single reaction parameters
+						reaction, rctTime, rctType, cat, S1, S2, S3, loadedMolsConc, loadedMols,\
+   						gillMean, gillSD, gillEntropy, newSpeciesCreationProb, reverseProbability = readfiles.splitRctParsLine(sngRct)
+   						
+   						S1, S2, S3 = network.fixCondensationReaction(S1, S2, S3, lastRct)
+						
 						counters[idRct,0] = rctTime
 						if (rctType == _CONDENSATION_) | (rctType == _ENDOCONDENSATION_) | (rctType == _SPONTCONDENSATION_):
 							if (S1 in flux_ids): 
@@ -155,8 +159,6 @@ if __name__ == '__main__':
 							if (S3 in flux_ids): 
 								totIN -= 1	
 								deltaIO -= 1
-
-					
 					
 					# Go into stat folders
 					os.chdir(newdirAllResults)	
