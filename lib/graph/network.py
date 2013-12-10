@@ -95,8 +95,12 @@ def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavag
 	initSpeciesListLength = len(speciesList) # Initial cardinality of the species list (to avoid recursive multiple species evaluation)
 	reactionID = 0
 	catalysisID = 0
+	catalysisID_no_rev = 0
+	reactionID_no_rev = 0
 	nCleavage = 0
 	nCondensa = 0
+	rcts_no_rev = []
+	cats_no_rev = []
 	#print "\t\t|- NET creation... "
 	checkRct = False
 	
@@ -109,7 +113,7 @@ def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavag
 				if (totCleavage / (float(totCleavage) + totCond)) <= ran.random(): rctType = 0
 		
 		# CREATE REACTION 
-		# If cleavage
+		# If cleavage or WIM method
 		reactionValid = False
 		if (rctType == 1) & (nCleavage <= totCleavage):
 			rctnew = False
@@ -130,17 +134,37 @@ def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavag
 				if sum((rcts[:,1] == 1) & (rcts[:,2] == tmp1id) & (rcts[:,3] == tmp2id)) == 0: rctnew = True
 				
 			# Reaction Structure Creation
+			if args.directRctDirection == 1: 
+				dirrct = 1
+				revrct = 0
+			elif args.directRctDirection == 0:
+				dirrct = 0
+				revrct = 1
+			else:
+				tmpRan = ran.random()
+				dirrct = int(round(tmpRan))
+				revrct = int(round(1 - tmpRan))
+			
+			print dirrct, revrct
+			raw_input("cao")
+			
 			if rctnew:
 				if reactionID == 0:
 					rcts = np.array([[int(reactionID), int(rctType), tmp1id, tmp2id, tmp3id, int(0), int(239), parameters[34]]])
 					reactionID += 1
 					nCleavage += 1
+					if args.creationMethod == 4: 
+						rcts_no_rev = np.array([[int(reactionID_no_rev), int(rctType), tmp1id, tmp2id, tmp3id, int(0), int(239), parameters[34]]])
+						reactionID_no_rev += 1
 				else: 
 					rcts = np.vstack([rcts,(int(reactionID), int(rctType), tmp1id, tmp2id, tmp3id, int(0), int(239), parameters[34])])	
 					reactionID += 1
 					nCleavage += 1
+					if args.creationMethod == 4: 
+						rcts_no_rev = np.vstack([rcts_no_rev,(int(reactionID_no_rev), int(rctType), tmp1id, tmp2id, tmp3id, int(0), int(239), parameters[34])])	
+						reactionID_no_rev += 1
 					
-				if args.creationMethod == 2: # If WIM method the reverse reaction is added
+				if (args.creationMethod == 2) | (args.creationMethod == 4): # If WIM method the reverse reaction is added
 					rcts = np.vstack([rcts,(int(reactionID), int(0), tmp1id, tmp2id, tmp3id, int(0), int(239), parameters[34])])	
 					reactionID += 1
 					nCondensa += 1
@@ -185,21 +209,39 @@ def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavag
 		if rctnew: rctsToCat = reactionID - 1
 		else: rctsToCat = rct2cat
 		
-		if args.creationMethod == 2: rctsToCat = reactionID - 2
-		if catalysisID == 0: 
+		# If the creation method is WIM RAF in REV no RAF in No Rev
+		if args.creationMethod == 4:
+			if rctnew: rctsToCat_no_rev = reactionID_no_rev - 1
+			else: rctsToCat_no_rev = rct2cat	
+		
+		if (args.creationMethod == 2) | (args.creationMethod == 4): rctsToCat = reactionID - 2
+		
+		if catalysisID == 0: # if this is the first catalysis
+			
 			cats = np.array([[int(catalysisID), int(catalyst), int(rctsToCat), int(0), parameters[27], parameters[28], parameters[29], int(1)]])
 			catalysisID += 1
-			if args.creationMethod == 2: # IF wim method
+			
+			if (args.creationMethod == 4):
+				cats_no_rev = np.array([[int(catalysisID_no_rev), int(catalyst), int(rctsToCat_no_rev), int(0), parameters[27], parameters[28], parameters[29], int(1)]])
+				catalysisID_no_rev += 1
+				
+			if (args.creationMethod == 2) | (args.creationMethod == 4): # IF wim method
 				cats = np.vstack([cats,(int(catalysisID), int(catalyst), int(rctsToCat + 1), int(0), parameters[27], parameters[28], parameters[29], int(1))])
 				catalysisID += 1
+
 		else: 
 			cats = np.vstack([cats,(int(catalysisID), int(catalyst), int(rctsToCat), int(0), parameters[27], parameters[28], parameters[29], int(1))])
 			catalysisID += 1
-			if args.creationMethod == 2:
+			
+			if (args.creationMethod == 4):
+				cats_no_rev = np.vstack([cats_no_rev,(int(catalysisID_no_rev), int(catalyst), int(rctsToCat_no_rev), int(0), parameters[27], parameters[28], parameters[29], int(1))])
+				catalysisID_no_rev += 1
+			
+			if (args.creationMethod == 2) | (args.creationMethod == 4):
 				cats = np.vstack([cats,(int(catalysisID), int(catalyst), int(rctsToCat + 1), int(0), parameters[27], parameters[28], parameters[29], int(1))])
 				catalysisID += 1
 	
-	return rcts, cats, speciesList
+	return rcts, cats, speciesList, rcts_no_rev, cats_no_rev
 	
 		
 	

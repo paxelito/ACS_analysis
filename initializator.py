@@ -32,11 +32,13 @@ if __name__ == '__main__':
 				description='This script re-arrange results in a more friendly way from the angle analysis in time.'
 				, epilog='''File with angle trajectories are created. ''') 
 	parser.add_argument('-a', '--sysType', help='System Architecture [1:CLOSE, 2:PROTO, 3:CSTR], deafult: 1', default='1')
-	parser.add_argument('-k', '--creationMethod', help='Network creation method (1: Filisetti, 2: Wim, 3: WimNoRevs, DEF: 1)', default='1', type=int)
+	parser.add_argument('-k', '--creationMethod', help='Network creation method (1: Filisetti, 2: Wim, 3: WimNoRevs, 4: WIM_RAFinREV_noRAFinNOrev, DEF: 1)', default='1', type=int)
+	parser.add_argument('-d', '--directRctDirection', help='Direction of the forward reaction where necessary (1: cleavage, 0: condensation, 2: random with probability 0.5,Default: 1)', default='1', type=int)
+	parser.add_argument('-K', '--chemistriesWithRAF', help='Number of Chemistries with RAF to create', default='0', type=int)
 	parser.add_argument('-f', '--lastFood', type=int, help='max food species length (deafult: 2)', default='2')
 	parser.add_argument('-n', '--noCat', help='Non catalytic max length (default: 2)', default='2', type=int)
 	parser.add_argument('-N', '--initAmount', help='Default Initial Amount', default='600', type=int)
-	parser.add_argument('-s', '--initSet', type=int, help='Dimension of the initial set (Default: 4)', default='4')
+	parser.add_argument('-s', '--initSet', type=int, help='Max Dimension of the initial set (Default: 4)', default='4')
 	parser.add_argument('-m', '--maxDim', help='Max Dimension of the systems (Default: 6)', default='6', type=int)
 	parser.add_argument('-o', '--strOut', help='Path for output file storing (Default: ./)', default='./')
 	parser.add_argument('-I', '--conf', help='Configuration File (Default: ./acsm2s.conf)', default='./acsm2s.conf')
@@ -47,7 +49,7 @@ if __name__ == '__main__':
 	parser.add_argument('-C', '--core', help='Number of core on which simulations are distributed', default='2', type=int)	
 	parser.add_argument('-F', '--folderName', help='Simulation Folder Name (Deafault: SIMS)', default='SIMS')
 	parser.add_argument('-R', '--revRcts', help='Reverse reactions are allowed to be created for chance(1: Yes, 0: No, Deafult: No)', default='0', type=int)	
-	parser.add_argument('-P', '--rafPresence', help='Force the presence of RAF of 1 dimension, i.e. self-catalysis (1), or bigger (2) or no RAF at all (0), Default: 0', default='0', type=int)
+	parser.add_argument('-P', '--rafPresence', help='Force the presence of RAF of 1 dimension, i.e. self-catalysis (1), or bigger (2...N) or no RAF at all (0), Default: 0', default='0', type=int)
 	parser.add_argument('-r', '--randomSeed', help='random seed', type=int, default=None)
 	args = parser.parse_args()
 	
@@ -73,6 +75,12 @@ if __name__ == '__main__':
 	parameters = readfiles.read_sims_conf_file(args.conf)
 	
 	fidid = 0 # Core on which the chemistry will run
+	
+	fname_initRafRes = os.path.join(folderName, '0_theoreticalRAFanalysis.csv')
+	fid_initRafRes = open(fname_initRafRes, 'w')
+	strToWrite = "RAFsize\tClosure\tCats\tRAF(unique)\tRAF\n"
+	fid_initRafRes.write(strToWrite)
+	
 	for singlechem in range(args.chemistries):
 		# CREATE CHEMIST FOLDER
 		print "|- ARTIFICIAL CHEMISTRY ", singlechem+1, " Creation..."
@@ -98,6 +106,7 @@ if __name__ == '__main__':
 		# Compute overall conceivable number of reactions
 		totCleavage = reactions.getNumOfCleavages(originalSpeciesList)
 		
+		# Compute the number of reactions according to the chemistry type adopted
 		if args.creationMethod == 1: totCond = reactions.getNumOfCondensations(totSpecies)
 		else: totCond = 0
 		totRcts = totCleavage + totCond
@@ -109,16 +118,33 @@ if __name__ == '__main__':
 
 		# Create chemistry 
 		chemFound = False
-		if singlechem < (args.chemistries / 2.0):
+		if singlechem < args.chemistriesWithRAF:
 			scanned = 0
 			while chemFound == False:
 				if scanned % 100 == 0: print "\t\t tried chemistries to find RAFs -> ", scanned
-				rcts, cats, speciesList = network.create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavage, totCond)
+				rcts, cats, speciesList, rcts_no_rev, cats_no_rev = network.create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavage, totCond)
 				food = deepcopy(foodList)
 				rafset = raf.rafsearch(rcts, cats, food) # RAF search
+				if args.creationMethod == 4: 
+					food = deepcopy(foodList)
+					rafset_no_rev = raf.rafsearch(rcts_no_rev, cats_no_rev, food) # RAF search
+					#print rcts[0:8,:]
+					#print cats[0:8,:]
+					#print rcts_no_rev[0:8,:]
+					#print cats_no_rev[0:8,:]
+					#raw_input("cao")
+				# IF the RAF has been found the chemistry is valid, is creationMethod == 4 no RAF at all must be present in the chemistry without reverse reactions
+				
 				if len(rafset[2]) >= args.rafPresence:
-					print rafset
-					chemFound = True
+					if args.creationMethod == 4:
+						print "\t\t\t", rafset
+						print "\t\t\t", rafset_no_rev
+						if len(rafset_no_rev[2]) == 0:
+							chemFound = True
+					else:		
+						print "\t\t\t", rafset
+						chemFound = True
+					
 				scanned += 1
 		else:
 			scanned = 0
@@ -130,6 +156,9 @@ if __name__ == '__main__':
 				if len(rafset[2]) == 0:
 					chemFound = True
 				scanned += 1
+				
+		strToWrite = str(len(rafset[2])) + "\t" + str(rafset[0]) + "\t" + str(rafset[3]) + "\t" + str(rafset[4]) + "\t" + str(rafset[2]) + "\n"
+		fid_initRafRes.write(strToWrite)
 		
 		# CREATE DISTINCT INITIAL CONDITIONS		
 		for singleCond in range(args.iteration):
@@ -170,5 +199,6 @@ if __name__ == '__main__':
 			fidid += 1
 			if fidid == args.core: fidid = 0 
 	
-	# Close fid runs		
+	# Close fid runs	
+	fid_initRafRes.close()	
 	map(lambda x: x.close(),fid_run)

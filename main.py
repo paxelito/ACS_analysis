@@ -96,7 +96,7 @@ if __name__ == '__main__':
 					network.net_analysis_of_static_graphs(fid_initRafRes, fid_initRafResALL, fid_initRafResLIST, tmpDir, conf[9], 1, rcts, cats, foodList, args.maxDim, debug=args.debug)
 					
 				os.chdir(resDirPath)
-				print "    \-Oucomes Folder ", resDirPath
+				print "    \-Outcomes Folder ", resDirPath
 				# Find the number of generations
 				numberOfGen = len(glob.glob(os.path.join(resDirPath,'times_*')))
 				# For each generation
