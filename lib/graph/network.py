@@ -134,19 +134,9 @@ def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavag
 				if sum((rcts[:,1] == 1) & (rcts[:,2] == tmp1id) & (rcts[:,3] == tmp2id)) == 0: rctnew = True
 				
 			# Reaction Structure Creation
-			if args.directRctDirection == 1: 
-				dirrct = 1
-				revrct = 0
-			elif args.directRctDirection == 0:
-				dirrct = 0
-				revrct = 1
-			else:
-				tmpRan = ran.random()
-				dirrct = int(round(tmpRan))
-				revrct = int(round(1 - tmpRan))
-			
-			print dirrct, revrct
-			raw_input("cao")
+			if args.directRctDirection == 1: dirrct = 1
+			elif args.directRctDirection == 0: dirrct = 0
+			else: dirrct = int(round(ran.random()))
 			
 			if rctnew:
 				if reactionID == 0:
@@ -154,14 +144,14 @@ def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavag
 					reactionID += 1
 					nCleavage += 1
 					if args.creationMethod == 4: 
-						rcts_no_rev = np.array([[int(reactionID_no_rev), int(rctType), tmp1id, tmp2id, tmp3id, int(0), int(239), parameters[34]]])
+						rcts_no_rev = np.array([[int(reactionID_no_rev), int(dirrct), tmp1id, tmp2id, tmp3id, int(0), int(239), parameters[34]]])
 						reactionID_no_rev += 1
 				else: 
 					rcts = np.vstack([rcts,(int(reactionID), int(rctType), tmp1id, tmp2id, tmp3id, int(0), int(239), parameters[34])])	
 					reactionID += 1
 					nCleavage += 1
 					if args.creationMethod == 4: 
-						rcts_no_rev = np.vstack([rcts_no_rev,(int(reactionID_no_rev), int(rctType), tmp1id, tmp2id, tmp3id, int(0), int(239), parameters[34])])	
+						rcts_no_rev = np.vstack([rcts_no_rev,(int(reactionID_no_rev), int(dirrct), tmp1id, tmp2id, tmp3id, int(0), int(239), parameters[34])])	
 						reactionID_no_rev += 1
 					
 				if (args.creationMethod == 2) | (args.creationMethod == 4): # If WIM method the reverse reaction is added
@@ -170,6 +160,7 @@ def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavag
 					nCondensa += 1
 			else:
 				rct2cat = rcts[(rcts[:,1] == 1) & (rcts[:,2] == tmp1id) & (rcts[:,3] == tmp2id),0]
+				rct2cat_no_rev = rcts_no_rev[(rcts_no_rev[:,1] == dirrct) & (rcts_no_rev[:,2] == tmp1id) & (rcts_no_rev[:,3] == tmp2id),0]
 		else: # condensation
 			if args.creationMethod == 1:
 				rctnew = False
@@ -212,7 +203,7 @@ def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavag
 		# If the creation method is WIM RAF in REV no RAF in No Rev
 		if args.creationMethod == 4:
 			if rctnew: rctsToCat_no_rev = reactionID_no_rev - 1
-			else: rctsToCat_no_rev = rct2cat	
+			else: rctsToCat_no_rev = rct2cat_no_rev	
 		
 		if (args.creationMethod == 2) | (args.creationMethod == 4): rctsToCat = reactionID - 2
 		

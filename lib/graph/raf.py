@@ -73,6 +73,7 @@ def Fcondition(tmpCL, tmpRA, rcts,debug=False):
 			print "\t Closure: ", tmpCL
 		return RAFset
 	except: 
+		print "!!!ERROR in ASSESS F CONDITION..."
 		print rcts
 		print tmpRA
 		sys.exit(1)

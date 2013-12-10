@@ -127,22 +127,20 @@ if __name__ == '__main__':
 				rafset = raf.rafsearch(rcts, cats, food) # RAF search
 				if args.creationMethod == 4: 
 					food = deepcopy(foodList)
+					#print cats[200:,:]
+					#print cats_no_rev[100:,:]
 					rafset_no_rev = raf.rafsearch(rcts_no_rev, cats_no_rev, food) # RAF search
-					#print rcts[0:8,:]
-					#print cats[0:8,:]
-					#print rcts_no_rev[0:8,:]
-					#print cats_no_rev[0:8,:]
-					#raw_input("cao")
+					
 				# IF the RAF has been found the chemistry is valid, is creationMethod == 4 no RAF at all must be present in the chemistry without reverse reactions
 				
 				if len(rafset[2]) >= args.rafPresence:
 					if args.creationMethod == 4:
-						print "\t\t\t", rafset
-						print "\t\t\t", rafset_no_rev
+						#print "\t\t\t", rafset
+						#print "\t\t\t", rafset_no_rev
 						if len(rafset_no_rev[2]) == 0:
 							chemFound = True
 					else:		
-						print "\t\t\t", rafset
+						#print "\t\t\t", rafset
 						chemFound = True
 					
 				scanned += 1
