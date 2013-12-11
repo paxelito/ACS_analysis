@@ -10,6 +10,7 @@ import linecache as lc
 import glob
 import numpy as np # Scientific library
 from numpy import * 
+from argparse import ArgumentParser
 
 from lib.IO import *
 from lib.graph import network
@@ -31,7 +32,7 @@ if __name__ == '__main__':
 	args = parser.parse_args()
 	
 	# Create absolute paths
-	strPath = os.path.abspath(args.strPath)
+	StrPath = os.path.abspath(args.strPath)
 	tmpDirs = sort(os.listdir(StrPath))
 	
 	# Reaction types
@@ -73,7 +74,9 @@ if __name__ == '__main__':
 				for ngen in range(1,numberOfGen+1):
 					
 					tmpFluxFile = 'fluxDynamics_'  + str(tmpDir) + "_" + str(ngen) + '.csv'
-					tmpSpeciesStatsSummaryNameFID = open(tmpFluxFile, 'w')
+					fid_tmpSpeciesStatsSummaryName = open(os.path.join(newdirAllResults,tmpFluxFile), 'w')
+					strToWrite = "Time\tIN\tOUT\tDELTA\tbrick_IN\tbrick_OUT\tbrick_DELTA\n"
+					fid_tmpSpeciesStatsSummaryName.write(strToWrite)
 						
 					strZeros = zeroBeforeStrNum(ngen, numberOfGen)
 					if ngen == 1:
@@ -105,7 +108,7 @@ if __name__ == '__main__':
 						
 					# Create lists containing stats data 
 					# The number of columns is equal to times + tot(MOLS) + tot(Bricks) + each buffered species (mols and bricks)
-					counters = np.zeros((nSpecies,(len(seq)*2)+7)) 
+					# counters = np.zeros((nSpecies,(len(flux_seq)*2)+6)) 
 					# Select reaction_parameter file
 					strRctPar = 'reactions_parameters_' + strZeros + str(ngen) + '_1.csv'
 					
@@ -133,58 +136,58 @@ if __name__ == '__main__':
 					
 					for idRct, sngRct in enumerate(fidRctPar): 
 						# Load single reaction parameters
+						
+						if idRct % 10000 == 0: print "\t|- Reaction: ", idRct
+						
 						reaction, rctTime, rctType, cat, S1, S2, S3, loadedMolsConc, loadedMols,\
    						gillMean, gillSD, gillEntropy, newSpeciesCreationProb, reverseProbability = readfiles.splitRctParsLine(sngRct)
    						
    						S1, S2, S3 = network.fixCondensationReaction(S1, S2, S3, lastRct)
 						
-						counters[idRct,0] = rctTime
+						# counters[idRct,0] = rctTime
+						
 						if (rctType == _CONDENSATION_) | (rctType == _ENDOCONDENSATION_) | (rctType == _SPONTCONDENSATION_):
 							if (S1 in flux_ids): 
 								deltaIO -= 1
-								totOUT -= 1
+								totOUT += 1
+								tot_B_OUT += len(flux_seq[S1])
+								delta_B_IO -= len(flux_seq[S1])
 							if (S2 in flux_ids): 
 								totIN += 1
 								deltaIO += 1
+								tot_B_IN += len(flux_seq[S2])
+								delta_B_IO += len(flux_seq[S2])
 							if (S3 in flux_ids): 
 								totIN += 1	
 								deltaIO += 1
+								tot_B_IN += len(flux_seq[S3])
+								delta_B_IO += len(flux_seq[S3])
 						else:
 							if (S1 in flux_ids): 
 								deltaIO += 1
-								totOUT += 1
+								totIN += 1
+								tot_B_IN += len(flux_seq[S1])
+								delta_B_IO += len(flux_seq[S1])
 							if (S2 in flux_ids): 
-								totIN -= 1
+								totOUT += 1
 								deltaIO -= 1
+								tot_B_OUT += len(flux_seq[S2])
+								delta_B_IO -= len(flux_seq[S2])
 							if (S3 in flux_ids): 
-								totIN -= 1	
+								totOUT += 1	
 								deltaIO -= 1
+								tot_B_OUT += len(flux_seq[S3])
+								delta_B_IO -= len(flux_seq[S3])
+								
+						str2wrt = str(rctTime) + "\t" + str(totIN) + "\t" + str(totOUT) + "\t" + str(deltaIO) + "\t" + str(tot_B_IN) + "\t" + str(tot_B_OUT) + "\t"  + str(delta_B_IO) + "\n"
+						fid_tmpSpeciesStatsSummaryName.write(str2wrt) 
+						
+					fid_tmpSpeciesStatsSummaryName.close()
 					
-					# Go into stat folders
-					os.chdir(newdirAllResults)	
-					os.chdir(newdirAllResultsInner)		
+	
 					
 					
-					tmpFileName = 'speciesStats_'  + str(chemistry) + '_' + strZeros + str(ngen) + '.csv'
-					print '  |- Saving result file: : ', tmpFileName
-					tmpFileNameFID = open(tmpFileName, 'w')
-					ID = 0
-					tmpStr = 'Total Number of Reactions\t\t\t\t' + str(idRct) + '\n'
-					tmpSpeciesStatsSummaryNameFID.write(tmpStr)
-					tmpStr = 'ID\tCat\tSub\tProd\n'
-					tmpSpeciesStatsSummaryNameFID.write(tmpStr)
-					for sngCnt in counters:
-						tmpStr = str(ID) + "\t" + str(sngCnt[0]) + "\t" + str(sngCnt[1]) + "\t" + str(sngCnt[2]) + "\n"
-						tmpFileNameFID.write(tmpStr)
-						if (sngCnt[0] > (sngCnt[1] * 100)) & (sngCnt[0] > 1000):
-							tmpSpeciesStatsSummaryNameFID.write(tmpStr)
-						ID += 1
-					tmpFileNameFID.close()
-					
-					os.chdir(resDirPath)	
-				
-				tmpSpeciesStatsSummaryNameFID.close()
-				chemistry += 1	
+			chemistry += 1	
 					
 				  	
 				  	
