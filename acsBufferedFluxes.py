@@ -142,7 +142,7 @@ if __name__ == '__main__':
 						reaction, rctTime, rctType, cat, S1, S2, S3, loadedMolsConc, loadedMols,\
    						gillMean, gillSD, gillEntropy, newSpeciesCreationProb, reverseProbability = readfiles.splitRctParsLine(sngRct)
    						
-   						S1, S2, S3 = network.fixCondensationReaction(S1, S2, S3, lastRct)
+   						#S1, S2, S3 = network.fixCondensationReaction(S1, S2, S3, lastRct)
 						
 						# counters[idRct,0] = rctTime
 						
