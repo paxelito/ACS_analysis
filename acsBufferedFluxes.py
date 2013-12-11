@@ -91,7 +91,7 @@ if __name__ == '__main__':
 				  	# Select the last file to create the specie vector. 
 				  	lastfilespecies = speciesFiles[-1]
 				  	
-				  	print '  |- Create fluxed species vector from: ', lastfilespecies	
+				  	print '  |- Create fluxed species vector...'	
 					try:
 						fidSpecies = open(lastfilespecies, 'r')
 					except:
