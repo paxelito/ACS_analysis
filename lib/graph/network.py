@@ -31,18 +31,18 @@ def removeRareRcts(graph, dt, life, nrg, deltat):
 
 def fixCondensationReaction(m1, m2, m3, rcts):
 	
-	if sum((rcts[:,2] == m1) & (rcts[:,3] == m2) & (rcts[:,4] == m3)) > 1:
+	if sum((rcts[:,2] == m1) & (rcts[:,3] == m2) & (rcts[:,4] == m3)) >= 1:
 		return m1, m2, m3
-	elif sum((rcts[:,2] == m1) & (rcts[:,3] == m3) & (rcts[:,4] == m2)) > 1:
+	elif sum((rcts[:,2] == m1) & (rcts[:,3] == m3) & (rcts[:,4] == m2)) >= 1:
 		return m1, m3, m2
 	else: 
 		print m1, m2, m3
 		print "ERROR!!!!"
 		sys.exit(1)
 
-# BRIDGE FUNCTION TO DETECT RAFs in INITIAL SETS
+# BRIDGE FUNCTION TO DETECT RAFs in INITIAL SETS
 def net_analysis_of_static_graphs(fid_initRafRes, fid_initRafResALL, fid_initRafResLIST, tmpDir, rctProb, avgCon, rcts, cats, foodList, maxDim,debug=False):
-	rafset = raf.rafsearch(rcts, cats, foodList,debug) # RAF search 
+	rafset = raf.rafsearch(rcts, cats, foodList,debug) #RAF search 
 	stdgraph = scc.createNetXGraph(rcts,cats)
 	sccsets = scc.diGraph_netX_stats(stdgraph)
 	ErctP = "%.4g" % rctProb
@@ -54,24 +54,25 @@ def net_analysis_of_static_graphs(fid_initRafRes, fid_initRafResALL, fid_initRaf
 	writefiles.write_init_raf_all(fid_initRafResALL, rafset, tmpDir, rcts, cats)
 	return rafset, sccsets
 
-# BRIDGE FUNCTION TO DETECT RAFs in DYNAMICS
+# BRIDGE FUNCTION TO DETECT RAFs in DYNAMICS
 def net_analysis_of_dynamic_graphs(fid_dynRafRes, tmpTime, rcts, cats, foodList, growth=False, rctsALL=None, catsALL=None, completeRCTS=None,debug=False):
 	#print rcts
 	#print cats
-	rafset = raf.rafsearch(rcts, cats, foodList,debug) # RAF search
-	stdgraph = scc.createNetXGraph(rcts,cats) # netX graph creation
+	rafset = raf.rafsearch(rcts, cats, foodList,debug) #RAF search
+	stdgraph = scc.createNetXGraph(rcts,cats) #netX graph creation
 	sccsets = scc.diGraph_netX_stats(stdgraph) # SCC analysis
 	if growth == True: 
-		rafsetALL = raf.rafsearch(rctsALL, catsALL, foodList) # RAF search
-		stdgraphALL = scc.createNetXGraph(rctsALL,catsALL) # netX graph creation
+		rafsetALL = raf.rafsearch(rctsALL, catsALL, foodList) #RAF search
+		stdgraphALL = scc.createNetXGraph(rctsALL,catsALL) # netX graph creation
 		sccsetsALL = scc.diGraph_netX_stats(stdgraphALL) # SCC analysis
 		
 	strRAF = '' 
 	# If RAF analysis is made in dynamical temporary structures a trnaslation in real net must be done
-	
-	if len(rafset[0][2]) > 0: 
-		rctsRAF = rcts[np.any(rcts[:, 0] == np.expand_dims(rafset[0][2],1), 0), :]
-		scc_in_raf = return_scc_in_raf(rctsRAF, cats, rafset[0][0])
+	if len(rafset[2]) > 0: 
+		rctsRAF = rcts[np.any(rcts[:, 0] == np.expand_dims(rafset[2],1), 0), :]
+		scc_in_raf = return_scc_in_raf(rctsRAF, cats, rafset[0])
+	else:
+		scc_in_raf = 0,0,0,0,0,0
 	 
 	if completeRCTS != None: convRAF = raf.findRAFrcts(rafset[2],rcts,completeRCTS)
 	else: convRAF = rafset[2]
@@ -80,8 +81,8 @@ def net_analysis_of_dynamic_graphs(fid_dynRafRes, tmpTime, rcts, cats, foodList,
 	
 	#t	#CL	#RAF	#SCC	#SelfCats	RAF		
 		
-	if growth == False: strToWrite = str(tmpTime) + "\t" + str(len(rafset[0])) + "\t" + str(rafset[4]) + "\t" + str(sccsets[4]) + "\t" + str(sccsets[2]) + "\t" + scc_in_raf[1] + "\t" + strRAF + "\n"
-	else: strToWrite = str(tmpTime) + "\t" + str(len(rafset[0])) + "\t" + str(rafset[4]) + str(len(rafsetALL[0])) + "\t" + str(rafsetALL[4]) + "\t" + str(sccsets[4]) + "\t" + str(sccsets[2]) + "\t" + scc_in_raf[1]+ "\t" + strRAF + "\n"
+	if growth == False: strToWrite = str(tmpTime) + "\t" + str(len(rafset[0])) + "\t" + str(rafset[4]) + "\t" + str(sccsets[4]) + "\t" + str(sccsets[2]) + "\t" + str(scc_in_raf[1])+ "\t" + strRAF + "\n"
+	else: strToWrite = str(tmpTime) + "\t" + str(len(rafset[0])) + "\t" + str(rafset[4]) + str(len(rafsetALL[0])) + "\t" + str(rafsetALL[4]) + "\t" + str(sccsets[4]) + "\t" + str(sccsets[2]) + "\t" + str(scc_in_raf[1])+ "\t" + strRAF + "\n"
 	fid_dynRafRes.write(strToWrite)
 	return rafset
 
@@ -112,7 +113,7 @@ def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavag
 			else:
 				if (totCleavage / (float(totCleavage) + totCond)) <= ran.random(): rctType = 0
 		
-		# CREATE REACTION 
+		# CREATE REACTION 
 		# If cleavage or WIM method
 		reactionValid = False
 		if (rctType == 1) & (nCleavage <= totCleavage):
@@ -133,7 +134,7 @@ def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavag
 			else: 
 				if sum((rcts[:,1] == 1) & (rcts[:,2] == tmp1id) & (rcts[:,3] == tmp2id)) == 0: rctnew = True
 				
-			# Reaction Structure Creation
+			# Reaction Structure Creation
 			if args.directRctDirection == 1: dirrct = 1
 			elif args.directRctDirection == 0: dirrct = 0
 			else: dirrct = int(round(ran.random()))
@@ -174,7 +175,7 @@ def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavag
 				if reactionID == 0: rctnew = True
 				else:
 					if sum((rcts[:,1] == 0) & (rcts[:,3] == idsub1) & (rcts[:,4] == idsub2)) == 0: rctnew = True
-				# Reaction Structure Creation
+				# Reaction Structure Creation
 				if rctnew:
 					if reactionID == 0: 
 						rcts = np.array([[int(reactionID), int(rctType), tmpprodid, idsub1, idsub2, int(0), int(239), parameters[33]]])
@@ -185,7 +186,7 @@ def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavag
 					nCondensa += 1
 				else:
 					rct2cat = rcts[(rcts[:,1] == 0) & (rcts[:,3] == idsub1) & (rcts[:,4] == idsub2),0]
-		# A CATALYST IS RANDOMLY ASSIGNED FROM THE SPECIES LIST
+		# A CATALYST IS RANDOMLY ASSIGNED FROM THE SPECIES LIST
 		catalyst = -1
 		
 		catFound = False

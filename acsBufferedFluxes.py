@@ -149,34 +149,34 @@ if __name__ == '__main__':
 						if (rctType == _CONDENSATION_) | (rctType == _ENDOCONDENSATION_) | (rctType == _SPONTCONDENSATION_):
 							if (S1 in flux_ids): 
 								deltaIO -= 1
+								delta_B_IO -= len(flux_seq[S1])
 								totOUT += 1
 								tot_B_OUT += len(flux_seq[S1])
-								delta_B_IO -= len(flux_seq[S1])
 							if (S2 in flux_ids): 
 								totIN += 1
-								deltaIO += 1
 								tot_B_IN += len(flux_seq[S2])
+								deltaIO += 1
 								delta_B_IO += len(flux_seq[S2])
 							if (S3 in flux_ids): 
 								totIN += 1	
-								deltaIO += 1
 								tot_B_IN += len(flux_seq[S3])
+								deltaIO += 1
 								delta_B_IO += len(flux_seq[S3])
 						else:
 							if (S1 in flux_ids): 
 								deltaIO += 1
+								delta_B_IO += len(flux_seq[S1])
 								totIN += 1
 								tot_B_IN += len(flux_seq[S1])
-								delta_B_IO += len(flux_seq[S1])
 							if (S2 in flux_ids): 
 								totOUT += 1
-								deltaIO -= 1
 								tot_B_OUT += len(flux_seq[S2])
+								deltaIO -= 1
 								delta_B_IO -= len(flux_seq[S2])
 							if (S3 in flux_ids): 
 								totOUT += 1	
-								deltaIO -= 1
 								tot_B_OUT += len(flux_seq[S3])
+								deltaIO -= 1
 								delta_B_IO -= len(flux_seq[S3])
 								
 						str2wrt = str(rctTime) + "\t" + str(totIN) + "\t" + str(totOUT) + "\t" + str(deltaIO) + "\t" + str(tot_B_IN) + "\t" + str(tot_B_OUT) + "\t"  + str(delta_B_IO) + "\n"
