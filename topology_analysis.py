@@ -216,11 +216,11 @@ if __name__ == '__main__':
 						if (args.creationMethod == 2) | (args.creationMethod == 4):
 							cats = np.vstack([cats,(int(catalysisID), int(catalyst), int(rctsToCat + 1), int(0), float(0.5), float(0.25), float(0.5), ran.randint(1,2))])
 							catalysisID += 1
-				print rcts
-				print cats
-				print rcts.shape
-				print cats.shape
-				raw_input("ca0")
+				#print rcts
+				#print cats
+				#print cats.shape
+				#print rcts.shape
+				#raw_input("ca0")
 				# Create food list
 				foodList = range(args.lastFood+1)
 				#print "\t\t|- RAF searching step..."
