@@ -43,7 +43,7 @@ if __name__ == '__main__':
 	ran.seed(args.randomSeed)
 	
 	# Create stas folders
-	ndn = '_0_new_allStatResults_' +  str(args.creationMethod) + '_' + str(args.lastFood) + '_' + str(args.noCat)
+	ndn = '_topological_assessment_' +  str(args.creationMethod) + '_' + str(args.lastFood) + '_' + str(args.noCat) + '_' + str(args.rctRatio)
 	newdirAllResults = os.path.join(args.strOut, ndn)
 	if not os.path.isdir(newdirAllResults):
 		try:
