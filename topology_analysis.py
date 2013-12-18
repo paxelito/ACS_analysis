@@ -70,7 +70,7 @@ if __name__ == '__main__':
 		#sys.stdout.flush() # Force save data on file
 		increaseYet = True 
 		averageConn = 0.1
-		while (increaseYet == True) & (averageConn < 3):
+		while (increaseYet == True) & (averageConn <= 4):
 			time1 = time()
 			raffound = 0
 			sccfound = 0
@@ -145,11 +145,10 @@ if __name__ == '__main__':
 							if reactionID == 0:
 								rcts = np.array([[int(reactionID), int(rctType), species.index(molToCleav), tmp1id, tmp2id, int(0), int(0), int(0)]])
 								reactionID += 1
-								nCleavage += 1
 							else: 
 								rcts = np.vstack([rcts,(int(reactionID), int(rctType), species.index(molToCleav), tmp1id, tmp2id, int(0), int(0), int(0))])	
 								reactionID += 1
-								nCleavage += 1
+							nCleavage += 1
 								
 							if (args.creationMethod == 2) | (args.creationMethod == 4): # if reverse reaction are allowed (methods 2 and 4 :: WIM and OUR)
 								rcts = np.vstack([rcts,(int(reactionID), int(0), species.index(molToCleav), tmp1id, tmp2id, int(0), int(0), int(0))])	
@@ -186,7 +185,7 @@ if __name__ == '__main__':
 							if args.creationMethod == 4: # if reverse reaction are allowed (methods 2 and 4 :: WIM and OUR)
 								rcts = np.vstack([rcts,(int(reactionID), int(1), tmpprodid, idsub1, idsub2, int(0), int(0), int(0))])	
 								reactionID += 1
-								nCondensa += 1
+								nCleavage += 1
 					# A CATALYST IS RANDOMLY ASSIGNED FROM THE SPECIES LIST
 					catalyst = -1
 					catFound = False
