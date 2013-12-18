@@ -91,7 +91,7 @@ if __name__ == '__main__':
 				# Compute overall conceivable number of reactions
 				totCleavage = reactions.getNumOfCleavages(species)
 				
-				if args.creationMethod == 1: totCond = reactions.getNumOfCondensations(totSpecies)
+				if (args.creationMethod == 1) | (args.creationMethod == 4): totCond = reactions.getNumOfCondensations(totSpecies)
 				else: totCond = 0
 				totRcts = totCleavage + totCond
 				
