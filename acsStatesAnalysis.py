@@ -235,14 +235,14 @@ for IDdir, tmpDir in enumerate(tmpDirs):
 					tmpMols = 0; tmpCpx = 0; tmpCpxMols = 0; tmpTotMass = 0
 					for sp in fidSpecies:
 						tmpID, tmpSeq, tmpConc, tmpDiff, tmpSol, tmpCpxDiss, tmpCpxCut, tmpEval, tmpAge, tmpReb, tmpCatID, tmpSubID, tmpKpho, tmpLoadConc, tmpConcLock = sp.split()
-						if (int(tmpCpxCut) == 0) & (float(tmpConc) > 0):
+						if (int(tmpCpxCut) == 0) & (np.float64(tmpConc) > 0):
 							seq.append(str(tmpSeq))
-							conc.append(float(tmpConc))
+							conc.append(np.float64(tmpConc))
 							if idS == 0:
 								seqSTART.append(str(tmpSeq))
-								concSTART.append(float(tmpConc))
+								concSTART.append(np.float64(tmpConc))
 							if idS == 50:
-								concMIDDLE.append(float(tmpConc))							
+								concMIDDLE.append(np.float64(tmpConc))							
 							if len(str(tmpSeq)) > tmpMaxFluxL:
 								seqNOINFLUX.append(str(tmpSeq))	
 								if idS == 0:
