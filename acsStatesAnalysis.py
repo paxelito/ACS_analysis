@@ -211,7 +211,7 @@ for IDdir, tmpDir in enumerate(tmpDirs):
 				  	
 				  # Create matrix with dimension (NumberOfFileSpecies X Number of species (not complexes) )
 				  # print len(speciesFiles)
-				  speciesConcs = np.zeros((len(speciesFiles)+1,len(zeroList)))
+				  speciesConcs = np.zeros((len(speciesFiles)+1,len(zeroList)),dtype=np.float64)
 				  	
 				  # Initialize moving average lists
 				  seqOLD = []; seqOLDNOINFLUX = []; concOLD = []
