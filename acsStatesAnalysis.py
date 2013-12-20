@@ -408,7 +408,7 @@ for IDdir, tmpDir in enumerate(tmpDirs):
 				  speciesConcs = speciesConcs[:,speciesConcs.sum(0)!=0]
 				  # Save concentrations matrix
 				  filename = "STAT_species_Concentrations_"  + str(validDir) + "_" + str(ngen) + ".csv"
-				  np.savetxt(os.path.join(StrPath,ndn,filename), speciesConcs, delimiter='\t', fmt='%.5f')
+				  np.savetxt(os.path.join(StrPath,ndn,filename), speciesConcs, delimiter='\t', fmt='%.10f')
 			validDir += 1
 		else: 
 			print " |- no result folder has been found"
