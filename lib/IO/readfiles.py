@@ -47,7 +47,7 @@ def readConfFile(tmpPath):
 			
 	return (ngen,nsim,totTimes,nrgType,totalRcts,nrgConc,influx_rate,maxLOut,lfdsID,rctProb,newSpeciesProbMinThreshold)
 
-def read_sims_conf_file(paramFile):
+def read_sims_conf_file(paramFile='acsm2s.conf'):
 	#Open Parameter File
 	paramFile = os.path.abspath(paramFile)
 
