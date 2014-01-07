@@ -186,7 +186,6 @@ for IDdir, tmpDir in enumerate(tmpDirs):
 			numberOfGen = len(glob.glob(os.path.join(resDirPath,'times_*')))
 			conf = readfiles.read_sims_conf_file() #ÊConfiguration file upload
 			tmpVolume = conf[15]
-			print tmpVolume
 			
 			group_A_prev = []; group_HAM_prev = []; group_EUC_prev = [];
 			group_A_start = []; group_HAM_start = []; group_EUC_start = [];
