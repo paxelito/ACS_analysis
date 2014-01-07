@@ -1,7 +1,11 @@
-This repository contains analysis scripts devoted to the study and the characterization of the simulations carried out by means of the CARNESS simulator. 
+The repository contains analysis scripts devoted to the study and the characterization of the simulations carried out by means of the CARNESS simulator. 
+Python Libraries:
+- Numpy
+- Scipy
+- networkX
 
 FILES: 
-- acsAttractorAnalysis.py -> Comparison between distinct final states 
+- acsAttractorAnalysis.py -> Comparison between final states 
 - acsAttractorAnalysisInTime.py -> Comparison between distinct states in time
 - acsSCCanalysis.py -> Strongly connected components analysis
 - acsSpeciesActivity.py -> Count how many times a species is a substrate, a catalyst or a product
