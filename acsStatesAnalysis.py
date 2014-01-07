@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: latin-1 -*-
 '''Script to compute the distance between different state of the same simulation. 
 	comparison between t0 and t, t-1 and t adopting three different distance misure:
 	angle, euclidian distance and hamming distance. 
