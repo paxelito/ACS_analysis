@@ -1,0 +1,164 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>lib.graph.scc &mdash; ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '20140204.004',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for lib.graph.scc</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/python</span>
+<span class="c"># -*- coding: latin-1 -*-</span>
+
+<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span> <span class="c"># Standard library</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span> <span class="c"># Scientific library</span>
+<span class="kn">import</span> <span class="nn">networkx</span> <span class="kn">as</span> <span class="nn">nx</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="o">*</span> 
+<span class="kn">from</span> <span class="nn">argparse</span> <span class="kn">import</span> <span class="n">ArgumentParser</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">pylab</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="k">pass</span>
+   
+<div class="viewcode-block" id="createSimpleGraph"><a class="viewcode-back" href="../../../lib.graph.html#lib.graph.scc.createSimpleGraph">[docs]</a><span class="k">def</span> <span class="nf">createSimpleGraph</span><span class="p">(</span><span class="n">tmpCstr</span><span class="p">,</span> <span class="n">tmpCats</span><span class="p">):</span>
+	<span class="s">&quot;</span><span class="se">\t\t</span><span class="s">|- Cat -&gt; Prod graph creation...&quot;</span>
+	<span class="n">g</span> <span class="o">=</span> <span class="p">[]</span>
+	<span class="k">for</span> <span class="nb">id</span><span class="p">,</span> <span class="n">cat</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tmpCats</span><span class="p">):</span>
+		<span class="k">if</span> <span class="nb">id</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+			<span class="n">g</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="nb">int</span><span class="p">(</span><span class="n">cat</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">tmpCstr</span><span class="p">[</span><span class="n">tmpCstr</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">cat</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="mi">0</span><span class="p">])]])</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">g</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">g</span><span class="p">,(</span><span class="nb">int</span><span class="p">(</span><span class="n">cat</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">tmpCstr</span><span class="p">[</span><span class="n">tmpCstr</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">cat</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="mi">0</span><span class="p">]))])</span>
+	<span class="c">#print g</span>
+	<span class="c">#raw_input(&quot;prompt&quot;)</span>
+	<span class="k">return</span> <span class="n">g</span>
+</div>
+<div class="viewcode-block" id="createNetXGraph"><a class="viewcode-back" href="../../../lib.graph.html#lib.graph.scc.createNetXGraph">[docs]</a><span class="k">def</span> <span class="nf">createNetXGraph</span><span class="p">(</span><span class="n">tmpCstr</span><span class="p">,</span> <span class="n">tmpCats</span><span class="p">):</span>
+	<span class="s">&quot;</span><span class="se">\t\t</span><span class="s">|- Cat -&gt; Prod graph creation...&quot;</span>
+	<span class="n">Gcatpro</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">()</span>
+	<span class="c">#print tmpCstr</span>
+	<span class="c">#print tmpCats</span>
+	<span class="k">for</span> <span class="nb">id</span><span class="p">,</span> <span class="n">cat</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tmpCats</span><span class="p">):</span>
+		<span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">tmpCstr</span><span class="p">[</span><span class="n">tmpCstr</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">cat</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="mi">1</span><span class="p">])</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+			<span class="n">Gcatpro</span><span class="o">.</span><span class="n">add_weighted_edges_from</span><span class="p">([(</span><span class="nb">int</span><span class="p">(</span><span class="n">cat</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span><span class="nb">int</span><span class="p">(</span><span class="n">tmpCstr</span><span class="p">[</span><span class="n">tmpCstr</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">cat</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="mi">3</span><span class="p">]),</span><span class="mi">1</span><span class="p">)])</span>
+			<span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">tmpCstr</span><span class="p">[</span><span class="n">tmpCstr</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">cat</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="mi">3</span><span class="p">])</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">int</span><span class="p">(</span><span class="n">tmpCstr</span><span class="p">[</span><span class="n">tmpCstr</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">cat</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="mi">4</span><span class="p">]):</span>
+				<span class="n">Gcatpro</span><span class="o">.</span><span class="n">add_weighted_edges_from</span><span class="p">([(</span><span class="nb">int</span><span class="p">(</span><span class="n">cat</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span><span class="nb">int</span><span class="p">(</span><span class="n">tmpCstr</span><span class="p">[</span><span class="n">tmpCstr</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">cat</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="mi">4</span><span class="p">]),</span><span class="mi">1</span><span class="p">)])</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">Gcatpro</span><span class="o">.</span><span class="n">add_weighted_edges_from</span><span class="p">([(</span><span class="nb">int</span><span class="p">(</span><span class="n">cat</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span><span class="nb">int</span><span class="p">(</span><span class="n">tmpCstr</span><span class="p">[</span><span class="n">tmpCstr</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">cat</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="mi">2</span><span class="p">]),</span><span class="mi">1</span><span class="p">)])</span>
+		<span class="c">#print Gcatpro.edges()</span>
+	<span class="k">return</span> <span class="n">Gcatpro</span>
+</div>
+<div class="viewcode-block" id="createNetXGraphForRAF"><a class="viewcode-back" href="../../../lib.graph.html#lib.graph.scc.createNetXGraphForRAF">[docs]</a><span class="k">def</span> <span class="nf">createNetXGraphForRAF</span><span class="p">(</span><span class="n">tmpCstr</span><span class="p">,</span> <span class="n">tmpCats</span><span class="p">,</span> <span class="n">tmpClosure</span><span class="p">):</span>
+	<span class="s">&quot;</span><span class="se">\t\t</span><span class="s">|- Cat -&gt; Prod graph creation...&quot;</span>
+	<span class="n">Gcatpro</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">()</span>
+	<span class="c"># Extract catalysts catalysing reactions of the RAF set. </span>
+		
+	<span class="k">for</span> <span class="nb">id</span><span class="p">,</span> <span class="n">cat</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tmpCats</span><span class="p">):</span>
+		<span class="k">if</span> <span class="n">cat</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="n">tmpCats</span><span class="p">:</span>
+			<span class="k">if</span> <span class="nb">sum</span><span class="p">(</span><span class="n">tmpCstr</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">cat</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+				<span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">tmpCstr</span><span class="p">[</span><span class="n">tmpCstr</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">cat</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="mi">1</span><span class="p">])</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+					<span class="n">Gcatpro</span><span class="o">.</span><span class="n">add_weighted_edges_from</span><span class="p">([(</span><span class="nb">int</span><span class="p">(</span><span class="n">cat</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span><span class="nb">int</span><span class="p">(</span><span class="n">tmpCstr</span><span class="p">[</span><span class="n">tmpCstr</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">cat</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="mi">3</span><span class="p">]),</span><span class="mi">1</span><span class="p">)])</span>
+					<span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">tmpCstr</span><span class="p">[</span><span class="n">tmpCstr</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">cat</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="mi">3</span><span class="p">])</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">int</span><span class="p">(</span><span class="n">tmpCstr</span><span class="p">[</span><span class="n">tmpCstr</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">cat</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="mi">4</span><span class="p">]):</span>
+						<span class="n">Gcatpro</span><span class="o">.</span><span class="n">add_weighted_edges_from</span><span class="p">([(</span><span class="nb">int</span><span class="p">(</span><span class="n">cat</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span><span class="nb">int</span><span class="p">(</span><span class="n">tmpCstr</span><span class="p">[</span><span class="n">tmpCstr</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">cat</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="mi">4</span><span class="p">]),</span><span class="mi">1</span><span class="p">)])</span>
+				<span class="k">else</span><span class="p">:</span>
+					<span class="n">Gcatpro</span><span class="o">.</span><span class="n">add_weighted_edges_from</span><span class="p">([(</span><span class="nb">int</span><span class="p">(</span><span class="n">cat</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span><span class="nb">int</span><span class="p">(</span><span class="n">tmpCstr</span><span class="p">[</span><span class="n">tmpCstr</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">cat</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="mi">2</span><span class="p">]),</span><span class="mi">1</span><span class="p">)])</span>
+	<span class="k">return</span> <span class="n">Gcatpro</span>
+</div>
+<div class="viewcode-block" id="diGraph_netX_stats"><a class="viewcode-back" href="../../../lib.graph.html#lib.graph.scc.diGraph_netX_stats">[docs]</a><span class="k">def</span> <span class="nf">diGraph_netX_stats</span><span class="p">(</span><span class="n">tmpDig</span><span class="p">):</span>
+	<span class="n">realSccs</span> <span class="o">=</span> <span class="mi">0</span>
+	<span class="n">scc</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">strongly_connected_components</span><span class="p">(</span><span class="n">tmpDig</span><span class="p">)</span>
+	<span class="n">sccsg</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">strongly_connected_component_subgraphs</span><span class="p">(</span><span class="n">tmpDig</span><span class="p">)</span>
+	<span class="n">actualScc</span> <span class="o">=</span> <span class="p">[]</span>
+	<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">scc</span><span class="p">:</span> 
+		<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span> <span class="n">actualScc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+	<span class="n">sccN</span><span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">actualScc</span><span class="p">)</span>
+	<span class="n">selfLoops</span> <span class="o">=</span> <span class="n">tmpDig</span><span class="o">.</span><span class="n">number_of_selfloops</span><span class="p">()</span>
+	<span class="n">selfLoopsEgdes</span> <span class="o">=</span> <span class="n">tmpDig</span><span class="o">.</span><span class="n">selfloop_edges</span><span class="p">()</span>
+	<span class="n">realSccs</span> <span class="o">=</span> <span class="n">selfLoops</span> <span class="o">+</span> <span class="n">sccN</span> 
+	<span class="k">return</span> <span class="n">actualScc</span><span class="p">,</span> <span class="n">sccN</span><span class="p">,</span> <span class="n">selfLoops</span><span class="p">,</span> <span class="n">selfLoopsEgdes</span><span class="p">,</span> <span class="n">realSccs</span><span class="p">,</span> <span class="n">sccsg</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Alessandro Filisetti.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

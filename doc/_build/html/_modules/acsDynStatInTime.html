@@ -1,0 +1,163 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>acsDynStatInTime &mdash; ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '20140204.004',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for acsDynStatInTime</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python</span>
+<span class="c"># -*- coding: latin-1 -*-</span>
+<span class="sd">&#39;&#39;&#39;Script to order the analysis of the divergences in time. </span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span> <span class="c"># Standard librar</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span> <span class="c"># Scientific library</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="o">*</span> 
+<span class="kn">from</span> <span class="nn">argparse</span> <span class="kn">import</span> <span class="n">ArgumentParser</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">pylab</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+<span class="c"># Input parameters definition </span>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+	<span class="n">parser</span> <span class="o">=</span> <span class="n">ArgumentParser</span><span class="p">(</span>
+				<span class="n">description</span><span class="o">=</span><span class="s">&#39;This script re-arrange results in a more friendly way from the angle analysis in time.&#39;</span>
+				<span class="p">,</span> <span class="n">epilog</span><span class="o">=</span><span class="s">&#39;&#39;&#39;File with angle trajectories are created. &#39;&#39;&#39;</span><span class="p">)</span> 
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-p&#39;</span><span class="p">,</span> <span class="s">&#39;--strPath&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Path where files are stored&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;./&#39;</span><span class="p">)</span>
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-c&#39;</span><span class="p">,</span> <span class="s">&#39;--StrChems&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Number of chemistries&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;4&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-s&#39;</span><span class="p">,</span> <span class="s">&#39;--SubStr&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Substring of the filenames to analyze&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;acsAttractorsAnalysisNOINFLUX_COSENO&#39;</span><span class="p">)</span>
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-x&#39;</span><span class="p">,</span> <span class="s">&#39;--computeAngle&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Select if the cos must be converted in angle&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+	<span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+	
+	<span class="c"># Create absolute paths</span>
+	<span class="n">strPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">strPath</span><span class="p">)</span>
+	
+	<span class="c"># Go into the path </span>
+	<span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">strPath</span><span class="p">)</span>	
+	
+	<span class="c"># Retrieve the list of file to analyze</span>
+	<span class="n">strSubStrKey</span> <span class="o">=</span> <span class="s">&#39;*&#39;</span> <span class="o">+</span> <span class="n">args</span><span class="o">.</span><span class="n">SubStr</span> <span class="o">+</span> <span class="s">&#39;*&#39;</span>
+	<span class="n">filesToAnal</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">strPath</span><span class="p">,</span><span class="n">strSubStrKey</span><span class="p">)))</span>
+	<span class="n">lenFilesToAnal</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">filesToAnal</span><span class="p">)</span>
+	<span class="n">numOfTraj</span> <span class="o">=</span> <span class="mi">0</span>
+	<span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">fileToAnal</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">filesToAnal</span><span class="p">):</span>
+		<span class="c"># Load each element of the file in array</span>
+		<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">fileToAnal</span><span class="p">,</span> <span class="nb">str</span><span class="p">)),</span> <span class="nb">float</span><span class="p">)</span>
+		<span class="n">xsize</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span>
+		<span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+			<span class="n">run4Chem</span> <span class="o">=</span> <span class="n">xsize</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="n">args</span><span class="o">.</span><span class="n">StrChems</span>
+			<span class="n">numOfTraj</span> <span class="o">=</span> <span class="p">((</span><span class="n">run4Chem</span> <span class="o">*</span> <span class="p">(</span><span class="n">run4Chem</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.00</span><span class="p">)</span> <span class="o">+</span> <span class="n">run4Chem</span><span class="p">)</span> <span class="o">*</span> <span class="n">args</span><span class="o">.</span><span class="n">StrChems</span>
+			<span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">lenFilesToAnal</span><span class="p">,</span><span class="n">numOfTraj</span><span class="p">))</span>
+		<span class="c"># Store values in the overall matrix</span>
+		<span class="n">pos</span> <span class="o">=</span> <span class="mi">0</span>
+		<span class="n">chem</span> <span class="o">=</span> <span class="mi">1</span>
+		<span class="n">tmpHead</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+		<span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">xsize</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+			<span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="n">run4Chem</span><span class="o">*</span><span class="n">chem</span><span class="p">):</span>
+				<span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">computeAngle</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+					<span class="n">y</span><span class="p">[</span><span class="n">n</span><span class="p">,</span><span class="n">pos</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">row</span><span class="p">,</span><span class="n">col</span><span class="p">])</span> <span class="o">*</span> <span class="mf">360.00</span> <span class="o">/</span> <span class="mf">6.28</span>
+					<span class="c">#if y[n,pos] &gt; 0:</span>
+						<span class="c">#print fileToAnal</span>
+						<span class="c">#print row, &quot; &quot;, col, &quot; &quot;, x[row,col], &quot; &quot;, np.arccos(float(x[row,col])), &quot; &quot;, np.arccos(x[row,col]) * 360.00 / 6.28</span>
+						<span class="c">#raw_input(&quot;test&quot;)</span>
+				<span class="k">else</span><span class="p">:</span>
+					<span class="n">y</span><span class="p">[</span><span class="n">n</span><span class="p">,</span><span class="n">pos</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">row</span><span class="p">,</span><span class="n">col</span><span class="p">]</span>
+				<span class="k">if</span> <span class="p">(</span><span class="n">n</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+					<span class="n">tmpHead</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">chem</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;.&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;-&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">chem</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;.&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">col</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span>
+				<span class="n">pos</span> <span class="o">+=</span> <span class="mi">1</span>
+			<span class="k">if</span> <span class="p">(</span><span class="n">row</span> <span class="o">==</span> <span class="n">run4Chem</span><span class="o">*</span><span class="n">chem</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+				<span class="n">chem</span> <span class="o">+=</span> <span class="mi">1</span>
+				
+		
+	<span class="n">filename</span> <span class="o">=</span> <span class="s">&quot;_arranged_&quot;</span> <span class="o">+</span> <span class="n">args</span><span class="o">.</span><span class="n">SubStr</span> <span class="o">+</span> <span class="s">&quot;.csv&quot;</span>
+	<span class="c">#np.savetxt(filename, y, delimiter=&#39;\t&#39;, fmt=&#39;%.5f&#39;, header=tmpHead) (To use with numpy &gt; 1.7.0)</span>
+	<span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s">&#39;</span><span class="si">%.5f</span><span class="s">&#39;</span><span class="p">)</span>
+	<span class="k">print</span> <span class="s">&quot;File saved, see you next time...&quot;</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Alessandro Filisetti.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

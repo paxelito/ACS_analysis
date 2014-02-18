@@ -1,0 +1,816 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>acsSCCanalysis &mdash; ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '20140204.004',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for acsSCCanalysis</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python</span>
+<span class="c"># -*- coding: latin-1 -*-</span>
+
+<span class="sd">&#39;&#39;&#39;script to analyze the emerging strongly connected components. </span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span> <span class="c"># Standard library</span>
+<span class="kn">import</span> <span class="nn">datetime</span> <span class="kn">as</span> <span class="nn">dt</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span> <span class="c"># Scientific library</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="o">*</span> 
+<span class="kn">import</span> <span class="nn">networkx</span> <span class="kn">as</span> <span class="nn">nx</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">pylab</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+<span class="c"># Function to create string zero string vector before graph filename. </span>
+<span class="c"># According to the total number of reactions N zeros will be add before the instant reaction number </span>
+<span class="c"># (e.g. reaction 130 of 10000 the string became &#39;00130&#39;)</span>
+<div class="viewcode-block" id="zeroBeforeStrNum"><a class="viewcode-back" href="../acsSCCanalysis.html#acsSCCanalysis.zeroBeforeStrNum">[docs]</a><span class="k">def</span> <span class="nf">zeroBeforeStrNum</span><span class="p">(</span><span class="n">tmpl</span><span class="p">,</span> <span class="n">tmpL</span><span class="p">):</span>
+	<span class="n">strZero</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+	<span class="n">nZeros</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmpL</span><span class="p">))</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmpl</span><span class="p">))</span>
+	<span class="k">if</span> <span class="n">nZeros</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+		<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">nZeros</span><span class="p">):</span> <span class="n">strZero</span> <span class="o">=</span> <span class="n">strZero</span> <span class="o">+</span> <span class="s">&#39;0&#39;</span>
+	<span class="k">return</span> <span class="n">strZero</span>
+<span class="c">#eof</span>
+	
+<span class="c">#Function to load the reaction graph</span></div>
+<div class="viewcode-block" id="loadReactionGraph"><a class="viewcode-back" href="../acsSCCanalysis.html#acsSCCanalysis.loadReactionGraph">[docs]</a><span class="k">def</span> <span class="nf">loadReactionGraph</span><span class="p">():</span>
+	<span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">StrPath</span><span class="p">)</span>
+	<span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">StrPath</span><span class="p">,</span><span class="n">folderCat</span><span class="p">))</span>
+	<span class="n">outFname</span> <span class="o">=</span> <span class="s">&#39;_iGraph_CAT&#39;</span> <span class="o">+</span> <span class="n">filextPre</span> <span class="o">+</span> <span class="s">&quot;*&quot;</span>
+	<span class="k">print</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">StrPath</span><span class="p">,</span><span class="n">folderCat</span><span class="p">,</span><span class="n">outFname</span><span class="p">)</span>
+	<span class="n">files</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">outFname</span><span class="p">))</span>
+	<span class="k">print</span> <span class="n">files</span>
+	<span class="k">try</span><span class="p">:</span>
+		<span class="n">fid</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">files</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+	<span class="k">except</span><span class="p">:</span>
+		<span class="k">print</span> <span class="s">&#39;impossible to load &#39;</span><span class="p">,</span> <span class="n">files</span><span class="p">;</span> <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>	
+		
+	<span class="k">print</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">loading reactions graph...&quot;</span>
+	<span class="n">rctID</span> <span class="o">=</span> <span class="mi">1</span>
+	<span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">fid</span><span class="p">:</span>
+		<span class="n">tmpCat</span><span class="p">,</span> <span class="n">tmpProd</span><span class="p">,</span> <span class="n">tmpdt1</span><span class="p">,</span> <span class="n">tmpdt2</span><span class="p">,</span> <span class="n">tmpdt3</span><span class="p">,</span> <span class="n">tmpTimes</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+		<span class="n">cat</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tmpCat</span><span class="p">)</span>
+		<span class="n">prod</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tmpProd</span><span class="p">)</span>
+		<span class="n">dt1</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">tmpdt1</span><span class="p">)</span>
+		<span class="n">dt2</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">tmpdt2</span><span class="p">)</span>
+		<span class="n">dt3</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">tmpdt3</span><span class="p">)</span>
+		<span class="n">t</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tmpTimes</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">rctID</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+			<span class="n">graph</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">cat</span><span class="p">,</span> <span class="n">prod</span><span class="p">,</span> <span class="n">dt1</span><span class="p">,</span> <span class="n">dt2</span><span class="p">,</span> <span class="n">dt3</span><span class="p">,</span> <span class="n">t</span><span class="p">]])</span>
+			<span class="n">rctID</span> <span class="o">=</span> <span class="mi">0</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">graph</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">graph</span><span class="p">,(</span><span class="n">cat</span><span class="p">,</span> <span class="n">prod</span><span class="p">,</span> <span class="n">dt1</span><span class="p">,</span> <span class="n">dt2</span><span class="p">,</span> <span class="n">dt3</span><span class="p">,</span> <span class="n">t</span><span class="p">)])</span>
+			
+	<span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">StrPath</span><span class="p">)</span>
+	
+	<span class="k">return</span> <span class="n">graph</span>
+	
+<span class="c">#Function to load a specific reaction graph (defined as a parameter)</span></div>
+<div class="viewcode-block" id="loadSpecificReactionGraph"><a class="viewcode-back" href="../acsSCCanalysis.html#acsSCCanalysis.loadSpecificReactionGraph">[docs]</a><span class="k">def</span> <span class="nf">loadSpecificReactionGraph</span><span class="p">():</span>
+	<span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">StrPath</span><span class="p">)</span>
+	<span class="k">print</span> <span class="s">&quot;Load reactions file: &quot;</span><span class="p">,</span> <span class="n">tmpRctFileToLoad</span>
+	<span class="k">try</span><span class="p">:</span>
+		<span class="n">fid</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">tmpRctFileToLoad</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+	<span class="k">except</span><span class="p">:</span>
+		<span class="k">print</span> <span class="s">&#39;impossible to load &#39;</span><span class="p">,</span> <span class="n">files</span><span class="p">;</span> <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>	
+		
+	<span class="k">print</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">loading reactions graph...&quot;</span>
+	<span class="n">rctID</span> <span class="o">=</span> <span class="mi">1</span>
+	<span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">fid</span><span class="p">:</span>
+		<span class="n">tmpCat</span><span class="p">,</span> <span class="n">tmpProd</span><span class="p">,</span> <span class="n">tmpdt1</span><span class="p">,</span> <span class="n">tmpdt2</span><span class="p">,</span> <span class="n">tmpdt3</span><span class="p">,</span> <span class="n">tmpTimes</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+		<span class="n">cat</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tmpCat</span><span class="p">)</span>
+		<span class="n">prod</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tmpProd</span><span class="p">)</span>
+		<span class="n">dt1</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">tmpdt1</span><span class="p">)</span>
+		<span class="n">dt2</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">tmpdt2</span><span class="p">)</span>
+		<span class="n">dt3</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">tmpdt3</span><span class="p">)</span>
+		<span class="n">t</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tmpTimes</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">rctID</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+			<span class="n">graph</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">cat</span><span class="p">,</span> <span class="n">prod</span><span class="p">,</span> <span class="n">dt1</span><span class="p">,</span> <span class="n">dt2</span><span class="p">,</span> <span class="n">dt3</span><span class="p">,</span> <span class="n">t</span><span class="p">]])</span>
+			<span class="n">rctID</span> <span class="o">=</span> <span class="mi">0</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">graph</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">graph</span><span class="p">,(</span><span class="n">cat</span><span class="p">,</span> <span class="n">prod</span><span class="p">,</span> <span class="n">dt1</span><span class="p">,</span> <span class="n">dt2</span><span class="p">,</span> <span class="n">dt3</span><span class="p">,</span> <span class="n">t</span><span class="p">)])</span>
+						
+	<span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">StrPath</span><span class="p">)</span>
+	
+	<span class="k">return</span> <span class="n">graph</span>
+	
+<span class="c">#Function to load a specific reaction SUBgraph (defined as a parameter)</span></div>
+<div class="viewcode-block" id="loadSpecificReactionSubGraph"><a class="viewcode-back" href="../acsSCCanalysis.html#acsSCCanalysis.loadSpecificReactionSubGraph">[docs]</a><span class="k">def</span> <span class="nf">loadSpecificReactionSubGraph</span><span class="p">():</span>
+	<span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">StrPath</span><span class="p">)</span>
+	<span class="k">print</span> <span class="s">&quot;Load reactions file: &quot;</span><span class="p">,</span> <span class="n">tmpRctSUBFileToLoad</span>
+	<span class="k">try</span><span class="p">:</span>
+		<span class="n">fid</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">tmpRctSUBFileToLoad</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+	<span class="k">except</span><span class="p">:</span>
+		<span class="k">print</span> <span class="s">&#39;impossible to load &#39;</span><span class="p">,</span> <span class="n">files</span><span class="p">;</span> <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>	
+		
+	<span class="k">print</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">loading reactions graph...&quot;</span>
+	<span class="n">rctID</span> <span class="o">=</span> <span class="mi">1</span>
+	<span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">fid</span><span class="p">:</span>
+		<span class="n">tmpSub</span><span class="p">,</span> <span class="n">tmpProd</span><span class="p">,</span> <span class="n">tmpdt1</span><span class="p">,</span> <span class="n">tmpdt2</span><span class="p">,</span> <span class="n">tmpdt3</span><span class="p">,</span> <span class="n">tmpTimes</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+		<span class="n">sub</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tmpSub</span><span class="p">)</span>
+		<span class="n">prod</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tmpProd</span><span class="p">)</span>
+		<span class="n">dt1</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">tmpdt1</span><span class="p">)</span>
+		<span class="n">dt2</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">tmpdt2</span><span class="p">)</span>
+		<span class="n">dt3</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">tmpdt3</span><span class="p">)</span>
+		<span class="n">t</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tmpTimes</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">rctID</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+			<span class="n">graphSUB</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">sub</span><span class="p">,</span> <span class="n">prod</span><span class="p">,</span> <span class="n">dt1</span><span class="p">,</span> <span class="n">dt2</span><span class="p">,</span> <span class="n">dt3</span><span class="p">,</span> <span class="n">t</span><span class="p">]])</span>
+			<span class="n">rctID</span> <span class="o">=</span> <span class="mi">0</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">graphSUB</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">graphSUB</span><span class="p">,(</span><span class="n">sub</span><span class="p">,</span> <span class="n">prod</span><span class="p">,</span> <span class="n">dt1</span><span class="p">,</span> <span class="n">dt2</span><span class="p">,</span> <span class="n">dt3</span><span class="p">,</span> <span class="n">t</span><span class="p">)])</span>
+						
+	<span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">StrPath</span><span class="p">)</span>
+	
+	<span class="k">return</span> <span class="n">graphSUB</span>
+	
+<span class="c">#Function to save graphs to file (Considering that all variables all global in reading)</span></div>
+<div class="viewcode-block" id="saveGraphToFile"><a class="viewcode-back" href="../acsSCCanalysis.html#acsSCCanalysis.saveGraphToFile">[docs]</a><span class="k">def</span> <span class="nf">saveGraphToFile</span><span class="p">():</span>
+	<span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">StrPath</span><span class="p">)</span>
+	<span class="n">tmpStrZeros</span> <span class="o">=</span> <span class="n">zeroBeforeStrNum</span><span class="p">(</span><span class="n">reaction</span><span class="p">,</span> <span class="n">totalRcts</span><span class="p">)</span>
+	<span class="n">outFname</span> <span class="o">=</span> <span class="s">&#39;_iGraph_CAT&#39;</span> <span class="o">+</span> <span class="n">filextPre</span> <span class="o">+</span> <span class="s">&#39;_&#39;</span> <span class="o">+</span> <span class="n">tmpStrZeros</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">reaction</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">rtime</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;.csv&#39;</span>
+	<span class="n">saveFile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">outFname</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+	<span class="c"># Move to the directory </span>
+	<span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">saveFile</span><span class="p">,</span> <span class="n">graph</span><span class="p">,</span> <span class="s">&#39;</span><span class="si">%d</span><span class="se">\t</span><span class="si">%d</span><span class="se">\t</span><span class="si">%10.5f</span><span class="se">\t</span><span class="si">%10.5f</span><span class="se">\t</span><span class="si">%10.5f</span><span class="se">\t</span><span class="si">%d</span><span class="s">&#39;</span><span class="p">)</span>
+	<span class="n">saveFile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	<span class="n">os</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">outFname</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folderCat</span><span class="p">,</span><span class="n">outFname</span><span class="p">))</span>
+
+<span class="c">#Function to save graphs SUB-&gt;PRO to file (Considering that all variables all global in reading)</span></div>
+<div class="viewcode-block" id="saveGraphSUBToFile"><a class="viewcode-back" href="../acsSCCanalysis.html#acsSCCanalysis.saveGraphSUBToFile">[docs]</a><span class="k">def</span> <span class="nf">saveGraphSUBToFile</span><span class="p">():</span>
+	<span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">StrPath</span><span class="p">)</span>
+	<span class="n">tmpStrZeros</span> <span class="o">=</span> <span class="n">zeroBeforeStrNum</span><span class="p">(</span><span class="n">reaction</span><span class="p">,</span> <span class="n">totalRcts</span><span class="p">)</span>
+	<span class="n">outFname</span> <span class="o">=</span> <span class="s">&#39;_iGraph_SUB&#39;</span> <span class="o">+</span> <span class="n">filextPre</span> <span class="o">+</span> <span class="s">&#39;_&#39;</span> <span class="o">+</span> <span class="n">tmpStrZeros</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">reaction</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">rtime</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;.csv&#39;</span>
+	<span class="n">saveFile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">outFname</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+	<span class="c"># Move to the directory </span>
+	<span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">saveFile</span><span class="p">,</span> <span class="n">graphSUB</span><span class="p">,</span> <span class="s">&#39;</span><span class="si">%d</span><span class="se">\t</span><span class="si">%d</span><span class="se">\t</span><span class="si">%10.5f</span><span class="se">\t</span><span class="si">%10.5f</span><span class="se">\t</span><span class="si">%10.5f</span><span class="se">\t</span><span class="si">%d</span><span class="s">&#39;</span><span class="p">)</span>
+	<span class="n">saveFile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	<span class="n">os</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">outFname</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folderSub</span><span class="p">,</span><span class="n">outFname</span><span class="p">))</span>
+
+<span class="c">#Function to save energy file </span></div>
+<div class="viewcode-block" id="saveNrgToFile"><a class="viewcode-back" href="../acsSCCanalysis.html#acsSCCanalysis.saveNrgToFile">[docs]</a><span class="k">def</span> <span class="nf">saveNrgToFile</span><span class="p">():</span>
+	<span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">StrPath</span><span class="p">)</span>
+	<span class="n">outFname</span> <span class="o">=</span> <span class="s">&#39;_ENERGY.csv&#39;</span>
+	<span class="n">saveFile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">outFname</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+	<span class="c"># Move to the directory </span>
+	<span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">saveFile</span><span class="p">,</span> <span class="n">nrgTimeSeries</span><span class="p">,</span> <span class="s">&#39;</span><span class="si">%10.5f</span><span class="se">\t</span><span class="si">%10.5f</span><span class="se">\t</span><span class="si">%d</span><span class="s">&#39;</span><span class="p">)</span>
+	<span class="n">saveFile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	<span class="n">os</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">outFname</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmpDir</span><span class="p">,</span><span class="n">outFname</span><span class="p">))</span>
+
+<span class="c">#Function to save gillespie information files</span></div>
+<div class="viewcode-block" id="saveGillToFile"><a class="viewcode-back" href="../acsSCCanalysis.html#acsSCCanalysis.saveGillToFile">[docs]</a><span class="k">def</span> <span class="nf">saveGillToFile</span><span class="p">():</span>
+	<span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">StrPath</span><span class="p">)</span>
+	<span class="n">outFname</span> <span class="o">=</span> <span class="s">&#39;_GILLESPIE.csv&#39;</span>
+	<span class="n">saveFile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">outFname</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+	<span class="c"># Move to the directory </span>
+	<span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">saveFile</span><span class="p">,</span> <span class="n">gillTimeSeries</span><span class="p">,</span> <span class="s">&#39;</span><span class="si">%10.5f</span><span class="se">\t</span><span class="si">%10.5f</span><span class="se">\t</span><span class="si">%10.5f</span><span class="se">\t</span><span class="si">%10.5f</span><span class="s">&#39;</span><span class="p">)</span>
+	<span class="n">saveFile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	<span class="n">os</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">outFname</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmpDir</span><span class="p">,</span><span class="n">outFname</span><span class="p">))</span>
+
+<span class="c"># get path for placing simulation</span>
+<span class="c"># INPUT PARAMETERS</span>
+<span class="c"># Input parameters definition </span></div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+	<span class="n">parser</span> <span class="o">=</span> <span class="n">ArgumentParser</span><span class="p">(</span>
+				<span class="n">description</span><span class="o">=</span><span class="s">&#39;ELDA (Emergent Levell Dynamic	 Assessment).&#39;</span>
+				<span class="p">,</span> <span class="n">epilog</span><span class="o">=</span><span class="s">&#39;&#39;&#39;Copyright Alessandro Filisetti 2013 &#39;&#39;&#39;</span><span class="p">)</span> 
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-p&#39;</span><span class="p">,</span> <span class="s">&#39;--StrPath&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Simulation outcomes path&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;./&#39;</span><span class="p">)</span>
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-t&#39;</span><span class="p">,</span> <span class="s">&#39;--threshold&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39; Threshold above which the concentration has to be considered&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-d&#39;</span><span class="p">,</span> <span class="s">&#39;--decayTime&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39; Reaction decay time&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-r&#39;</span><span class="p">,</span> <span class="s">&#39;--tmpRctFileToLoad&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Reaction file to load&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">)</span>
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-s&#39;</span><span class="p">,</span> <span class="s">&#39;--tmpRctSUBFileToLoad&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Reaction subfile to load&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">)</span>
+	<span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+	
+	<span class="k">print</span> <span class="s">&quot;Simulation Results Path: &quot;</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">StrPath</span>
+	
+	<span class="c"># Create absolute path </span>
+	<span class="n">StrPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">StrPath</span><span class="p">)</span>
+	<span class="n">threshold</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">threshold</span>
+	<span class="n">decayTime</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">decayTime</span>
+	<span class="n">tmpRctFileToLoad</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">tmpRctFileToLoad</span>
+	<span class="n">tmpRctSUBFileToLoad</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">tmpRctSUBFileToLoad</span>
+	<span class="n">today</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">today</span><span class="p">()</span>
+	<span class="n">mswindows</span> <span class="o">=</span> <span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s">&quot;win32&quot;</span><span class="p">)</span>
+	
+	<span class="c"># Create summary file</span>
+	<span class="n">cmdFileName</span> <span class="o">=</span> <span class="n">StrPath</span> <span class="o">+</span> <span class="s">&#39;/&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">today</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">threshold</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;_convOverThreshold_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">decayTime</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;.csv&#39;</span>
+	<span class="k">if</span>  <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">cmdFileName</span><span class="p">):</span>
+		<span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">cmdFileName</span><span class="p">)</span>
+	<span class="n">cmdFileFid</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">cmdFileName</span><span class="p">,</span> <span class="s">&#39;a&#39;</span><span class="p">)</span>
+	<span class="n">strToWrite</span> <span class="o">=</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">Reaction Probability&quot;</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">Energy Concentration&quot;</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">Mean Over Threshold&quot;</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">Tot over Threshold&quot;</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">Real ACSs&quot;</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">in ACSs&quot;</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">Leaves&quot;</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">by Chain&quot;</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">Overlap&quot;</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">Autocatalysis&quot;</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">in ACSs (W)&quot;</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">Leaves (W)&quot;</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">by Chain (W)&quot;</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">Overlap (W)&quot;</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">Autocatalysis (W)&quot;</span> <span class="o">+</span><span class="s">&quot;</span><span class="se">\t</span><span class="s">[ACS]&quot;</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">[Leaves]&quot;</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">[Chains]&quot;</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">[Self]&quot;</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">Endo Cond&quot;</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">Cond&quot;</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">Endo Cleavage&quot;</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">Cleavage&quot;</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">Wasted species&quot;</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span>
+	<span class="n">cmdFileFid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">strToWrite</span><span class="p">)</span>
+	
+	<span class="n">initilizeGraphStructure</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+	
+	<span class="c"># If the tmpRctFileToLoad is not empty before to begin the analysis the initial reaction file is loaded</span>
+	<span class="k">if</span> <span class="n">tmpRctFileToLoad</span> <span class="o">!=</span> <span class="s">&quot;&quot;</span><span class="p">:</span>
+		<span class="n">graph</span> <span class="o">=</span> <span class="n">loadSpecificReactionGraph</span><span class="p">()</span>
+		<span class="n">graphSUB</span> <span class="o">=</span> <span class="n">loadSpecificReactionSubGraph</span><span class="p">()</span>
+		<span class="n">initilizeGraphStructure</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+		<span class="n">tmpRctFileToLoadSplitString</span> <span class="o">=</span> <span class="n">tmpRctFileToLoad</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;_&quot;</span><span class="p">)</span>
+		<span class="c"># Retry the reaction number </span>
+		<span class="n">initRctId</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tmpRctFileToLoadSplitString</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">tmpRctFileToLoadSplitString</span><span class="p">)</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span>
+		<span class="n">initTempTime</span> <span class="o">=</span> <span class="n">tmpRctFileToLoadSplitString</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">tmpRctFileToLoadSplitString</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+		<span class="n">initTime</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">initTempTime</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="n">initTempTime</span><span class="p">)</span><span class="o">-</span><span class="mi">4</span><span class="p">])</span>
+		<span class="k">print</span> <span class="n">initRctId</span>
+		<span class="k">print</span> <span class="n">initTime</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="n">initRctId</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+		<span class="n">initTime</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+		
+		
+	<span class="c"># Create directories list </span>
+	<span class="n">tmpDirs</span> <span class="o">=</span> <span class="n">sort</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">StrPath</span><span class="p">))</span>
+		
+	<span class="c"># For each folder</span>
+	<span class="k">for</span> <span class="n">tmpDir</span> <span class="ow">in</span> <span class="n">tmpDirs</span><span class="p">:</span>
+		<span class="k">print</span> <span class="s">&quot;*********************************************************************************&quot;</span>
+		<span class="k">print</span> <span class="s">&quot;* NEW SIMULATION ANALYSIS PROCESS&quot;</span>
+		<span class="k">print</span> <span class="s">&quot;* Folder: &quot;</span><span class="p">,</span><span class="n">tmpDir</span>
+		<span class="k">print</span> <span class="s">&quot;*********************************************************************************&quot;</span>
+		<span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">StrPath</span><span class="p">)</span>
+		<span class="n">totDirName</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">StrPath</span><span class="p">,</span><span class="n">tmpDir</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">totDirName</span><span class="p">):</span>
+			<span class="c"># Move to the directory </span>
+			<span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">totDirName</span><span class="p">)</span>
+			<span class="c"># if there is a result folder (i.e. totDirName is a simulation folder) </span>
+			<span class="n">resDirPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s">&quot;./&quot;</span><span class="p">,</span> <span class="s">&quot;res&quot;</span><span class="p">))</span>
+			<span class="k">print</span> <span class="s">&quot;  |- Results Folder: &quot;</span><span class="p">,</span> <span class="n">resDirPath</span>
+			<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">resDirPath</span><span class="p">):</span>
+				
+				<span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">resDirPath</span><span class="p">)</span>
+				
+				<span class="c"># Find the number of generations contained in this simulation folder</span>
+				<span class="n">numberOfGen</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">resDirPath</span><span class="p">,</span><span class="s">&#39;times_*&#39;</span><span class="p">)))</span>
+				
+				<span class="c"># FOR EACH GENERATION</span>
+				<span class="k">for</span> <span class="n">nGen</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">numberOfGen</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+					
+					<span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">resDirPath</span><span class="p">)</span>
+					
+					<span class="c"># select zero chars to insert before the generation number according to the folder structure.</span>
+					<span class="n">strZeros</span> <span class="o">=</span> <span class="n">zeroBeforeStrNum</span><span class="p">(</span><span class="n">nGen</span><span class="p">,</span> <span class="n">numberOfGen</span><span class="p">)</span>
+					
+					<span class="c"># Open Parameter File</span>
+					<span class="n">paramFile</span> <span class="o">=</span> <span class="s">&quot;acsm2s.conf&quot;</span>
+					<span class="n">simFolder</span> <span class="o">=</span> <span class="mi">0</span>
+					<span class="k">try</span><span class="p">:</span>
+						<span class="n">fid</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">paramFile</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+					<span class="k">except</span><span class="p">:</span>
+						<span class="k">print</span> <span class="s">&#39;impossible to load &#39;</span><span class="p">,</span> <span class="n">paramFile</span><span class="p">;</span> <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+									
+					<span class="c"># Read reaction probability from configuration file</span>
+					<span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">fid</span><span class="p">:</span>
+						<span class="n">strLine</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;=&#39;</span><span class="p">)</span>
+						<span class="k">if</span> <span class="n">strLine</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;reactionProbability&quot;</span><span class="p">:</span>
+							<span class="n">rp</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">strLine</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+						<span class="k">if</span> <span class="n">strLine</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;nSeconds&quot;</span><span class="p">:</span>
+							<span class="k">if</span> <span class="n">decayTime</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+								<span class="n">decayTime</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">strLine</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+							<span class="n">totTimes</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">strLine</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+						<span class="k">if</span> <span class="n">strLine</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;energy&quot;</span><span class="p">:</span>
+							<span class="n">nrgType</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">strLine</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+						<span class="k">if</span> <span class="n">strLine</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;nReactions&quot;</span><span class="p">:</span>
+							<span class="n">totalRcts</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">strLine</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+						<span class="k">if</span> <span class="n">strLine</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;ECConcentration&quot;</span><span class="p">:</span>
+							<span class="n">nrgConc</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">strLine</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+						<span class="k">if</span> <span class="n">strLine</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;influx_rate&quot;</span><span class="p">:</span>
+							<span class="n">influx_rate</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">strLine</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+						<span class="k">if</span> <span class="n">strLine</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;maxLOut&quot;</span><span class="p">:</span>
+							<span class="n">maxLOut</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">strLine</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+					
+					<span class="c"># analysisTimeInterval is 1/10 of the total decay time</span>
+					<span class="n">_ANALTIMEINTERAVAL_</span> <span class="o">=</span> <span class="n">totTimes</span> <span class="o">/</span> <span class="mi">10</span>
+					<span class="n">_ANALTIMEINTERAVALNOSAVE_</span> <span class="o">=</span> <span class="n">totTimes</span> <span class="o">/</span> <span class="mi">100</span>
+							
+					<span class="k">if</span> <span class="n">nrgType</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+						<span class="n">nrg</span> <span class="o">=</span> <span class="mi">1</span>
+					<span class="k">else</span><span class="p">:</span>
+						<span class="n">nrg</span> <span class="o">=</span> <span class="mi">0</span>
+							
+					<span class="c"># Influx in Protocell </span>
+					<span class="k">if</span> <span class="p">(</span><span class="n">influx_rate</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">maxLOut</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+						<span class="k">print</span> <span class="s">&#39;   |- Createing influx for protocell simulation...&#39;</span>
+						<span class="n">speciesInFlux</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">int</span><span class="p">(</span><span class="nb">pow</span><span class="p">(</span><span class="mi">2</span><span class="p">,(</span><span class="n">maxLOut</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span> <span class="o">-</span> <span class="mi">2</span><span class="p">))</span>
+					<span class="k">else</span><span class="p">:</span> <span class="c"># influx in CSTR</span>
+						<span class="k">try</span><span class="p">:</span>
+							<span class="c"># Create influx species list</span>
+							<span class="k">print</span> <span class="s">&#39;   |- Createing influx for CSTR simulation...&#39;</span>
+							<span class="n">fidflux</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;_acsinflux.csv&#39;</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+							<span class="n">speciesInFlux</span> <span class="o">=</span> <span class="p">[]</span>
+							<span class="k">for</span> <span class="n">fluxID</span> <span class="ow">in</span> <span class="n">fidflux</span><span class="p">:</span>
+								<span class="n">tmpID</span><span class="p">,</span> <span class="n">tmpProb</span> <span class="o">=</span> <span class="n">fluxID</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+								<span class="n">speciesInFlux</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">tmpID</span><span class="p">))</span>
+							<span class="n">fidflux</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+						<span class="k">except</span><span class="p">:</span>
+							<span class="k">print</span> <span class="s">&#39;impossible to load &#39;</span><span class="p">,</span> <span class="n">influxFile</span><span class="p">;</span>
+							<span class="k">print</span> <span class="s">&#39;Influx will be set to empty&#39;</span>
+							<span class="n">speciesInFlux</span> <span class="o">=</span> <span class="p">[]</span>
+					
+					<span class="k">print</span> <span class="s">&quot;    &lt;&gt; Influx IDsm -&gt; &quot;</span><span class="p">,</span> <span class="n">speciesInFlux</span>	
+					
+					<span class="c"># initialize stat variables </span>
+					<span class="n">overThreshold</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+					<span class="n">overThresholdTOT</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+					
+					<span class="c"># Searching for the Species files related to the nGen-th generation</span>
+					<span class="n">tmpFilesToSearch</span> <span class="o">=</span> <span class="s">&#39;species_&#39;</span> <span class="o">+</span> <span class="n">strZeros</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">nGen</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;_*&#39;</span>
+					<span class="n">speciesFiles</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">resDirPath</span><span class="p">,</span><span class="n">tmpFilesToSearch</span><span class="p">)))</span>
+					<span class="n">speciesFile</span> <span class="o">=</span> <span class="n">speciesFiles</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+					
+					<span class="k">print</span> <span class="s">&quot;   |- Species File: &quot;</span><span class="p">,</span> <span class="n">speciesFile</span><span class="p">,</span> <span class="s">&quot;--------&quot;</span>
+					
+					<span class="c"># Open Species File</span>
+					<span class="k">try</span><span class="p">:</span>
+						<span class="n">fidSpecies</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">speciesFile</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+					<span class="k">except</span><span class="p">:</span>
+						<span class="k">print</span> <span class="s">&#39;   |- !!!impossible to load &#39;</span><span class="p">,</span> <span class="n">speciesFile</span><span class="p">;</span> <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+					
+					<span class="c"># For each last species file</span>
+					<span class="n">ok</span> <span class="o">=</span> <span class="mi">0</span>
+					<span class="n">IDsOverThreshold</span> <span class="o">=</span> <span class="p">[]</span>
+					<span class="n">concVec</span> <span class="o">=</span> <span class="p">[]</span>
+					
+					<span class="c"># for each species compute species over threshold</span>
+					<span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="n">fidSpecies</span><span class="p">:</span>
+					
+						<span class="n">tmpID</span><span class="p">,</span> <span class="n">tmpSeq</span><span class="p">,</span> <span class="n">tmpConc</span><span class="p">,</span> <span class="n">tmpDiff</span><span class="p">,</span> <span class="n">tmpSol</span><span class="p">,</span> <span class="n">tmpCpxDiss</span><span class="p">,</span> <span class="n">tmpCpxCut</span><span class="p">,</span> <span class="n">tmpEval</span><span class="p">,</span> <span class="n">tmpAge</span><span class="p">,</span>\
+						<span class="n">tmpReb</span><span class="p">,</span> <span class="n">tmpCatID</span><span class="p">,</span> <span class="n">tmpSubID</span><span class="p">,</span> <span class="n">tmpKpho</span><span class="p">,</span> <span class="n">tmpLoadConc</span><span class="p">,</span> <span class="n">tmpConcFixed</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+						
+						<span class="n">index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tmpID</span><span class="p">)</span>
+						<span class="n">conc</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">tmpConc</span><span class="p">)</span>
+						<span class="n">cpxCut</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tmpCpxCut</span><span class="p">)</span>
+						<span class="n">age</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">tmpAge</span><span class="p">)</span>
+							
+						<span class="c">#if the species is not in the influx and greater than the max length</span>
+						<span class="k">if</span> <span class="n">index</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">speciesInFlux</span><span class="p">:</span>
+							<span class="n">realT</span> <span class="o">=</span> <span class="n">threshold</span> <span class="c"># To complete to be consistent</span>
+							<span class="n">concVec</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">conc</span><span class="p">)</span>
+							<span class="k">if</span> <span class="p">(</span><span class="n">conc</span> <span class="o">&gt;</span> <span class="n">realT</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">cpxCut</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">age</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+								<span class="c">#print tmpSeq, &quot; &quot;, conc, int(len(tmpSeq))</span>
+								<span class="k">if</span> <span class="n">ok</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+									<span class="n">overThreshold</span> <span class="o">+=</span> <span class="mi">1</span>
+									<span class="n">ok</span> <span class="o">=</span> <span class="mi">1</span>
+								<span class="n">overThresholdTOT</span> <span class="o">+=</span> <span class="mi">1</span>
+								<span class="n">IDsOverThreshold</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">tmpID</span><span class="p">))</span>
+						<span class="k">else</span><span class="p">:</span>
+							<span class="n">concVec</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">conc</span><span class="p">)</span>
+		
+									
+					<span class="c"># If there are species over threshold network analysis is performed	</span>
+					<span class="k">print</span> <span class="s">&quot;    |- Graph Creation&quot;</span>
+					<span class="n">folderCat</span> <span class="o">=</span> <span class="s">&#39;__0_iGraph_CAT_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">decayTime</span><span class="p">)</span>
+					<span class="n">folderSub</span> <span class="o">=</span> <span class="s">&#39;__0_iGraph_SUB_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">decayTime</span><span class="p">)</span>
+					
+					<span class="c"># Move to the root directory directory </span>
+					<span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">StrPath</span><span class="p">)</span>
+					
+					<span class="c"># Create iGraph directory where iGraph_CAT file will be stored</span>
+					<span class="c"># If the folder has been already create, it is removed</span>
+					<span class="n">newdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">curdir</span><span class="p">,</span> <span class="n">folderCat</span><span class="p">)</span>
+					<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">newdir</span><span class="p">):</span>
+						<span class="k">try</span><span class="p">:</span>
+							<span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">newdir</span><span class="p">)</span>
+						<span class="k">except</span><span class="p">:</span>
+							<span class="k">print</span> <span class="s">&quot;   |- !!! Impossible to create iGraph directory&quot;</span><span class="p">;</span> <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+				
+					<span class="c"># Create iGraph directory where iGraph_SUB file will be stored. </span>
+					<span class="c"># If the folder has been already create, it is removed</span>
+					<span class="n">newdirSUB</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">curdir</span><span class="p">,</span> <span class="n">folderSub</span><span class="p">)</span>
+					<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">newdirSUB</span><span class="p">):</span>
+						<span class="k">try</span><span class="p">:</span>
+							<span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">newdirSUB</span><span class="p">)</span>
+						<span class="k">except</span><span class="p">:</span>
+							<span class="k">print</span> <span class="s">&quot;   |- !!! Impossible to create iGraph directory&quot;</span><span class="p">;</span> <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+					
+					<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmpDir</span><span class="p">,</span> <span class="s">&quot;res&quot;</span><span class="p">)):</span>
+						<span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmpDir</span><span class="p">,</span> <span class="s">&quot;res&quot;</span><span class="p">))</span>		
+						
+						
+						<span class="n">filextPre</span> <span class="o">=</span> <span class="s">&#39;_&#39;</span> <span class="o">+</span> <span class="n">zeroBeforeStrNum</span><span class="p">(</span><span class="n">nGen</span><span class="p">,</span> <span class="n">numberOfGen</span><span class="p">)</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">nGen</span><span class="p">)</span>
+				
+						<span class="c"># Select the reaction_parameters file according to the generation</span>
+						<span class="n">rctParamFileQ</span> <span class="o">=</span> <span class="s">&#39;reactions_parameters_&#39;</span> <span class="o">+</span> <span class="n">strZeros</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">nGen</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;_*&#39;</span>
+						<span class="n">rctParamFile</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">resDirPath</span><span class="p">,</span><span class="n">rctParamFileQ</span><span class="p">)))</span>
+						<span class="c">#open file</span>
+						<span class="n">fid</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">rctParamFile</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+						<span class="n">rctIDshow</span> <span class="o">=</span> <span class="mf">1.0</span>
+						<span class="n">rctIDshowNoSave</span> <span class="o">=</span> <span class="mf">1.0</span>
+						<span class="n">rctID</span> <span class="o">=</span> <span class="n">initRctId</span>
+						<span class="n">previousTime</span> <span class="o">=</span> <span class="mi">0</span>
+						
+						<span class="c">#Initialize reaction type counter</span>
+						<span class="n">endo_condensation_counter</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+						<span class="n">condensation_counter</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+						<span class="n">endo_cleavage_counter</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+						<span class="n">cleavage_counter</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+						
+						<span class="k">print</span> <span class="s">&quot;   |- File &quot;</span><span class="p">,</span> <span class="n">rctParamFile</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s">&quot; processing...&quot;</span>
+											
+						<span class="k">if</span> <span class="n">nrg</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+							<span class="n">nrgTimeSeries</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]])</span>
+							
+						<span class="n">gillTimeSeries</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]])</span>
+						
+						<span class="n">tmpFlagLastRctSaved</span> <span class="o">=</span> <span class="mi">0</span> <span class="c"># Flag var to save the last reaction</span>
+						<span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">fid</span><span class="p">:</span>
+												
+							<span class="c"># Load single reaction parameters</span>
+							<span class="n">tmpReaction</span><span class="p">,</span> <span class="n">tmpTime</span><span class="p">,</span> <span class="n">tmpcc</span><span class="p">,</span> <span class="n">tmpCat</span><span class="p">,</span> <span class="n">tmpMol_I</span><span class="p">,</span> <span class="n">tmpMol_II</span><span class="p">,</span> <span class="n">tmpMol_III</span><span class="p">,</span> <span class="n">tmpLoadedMols</span><span class="p">,</span>\
+							 <span class="n">tmpLoadedMolsConc</span><span class="p">,</span> <span class="n">tmpGillMean</span><span class="p">,</span> <span class="n">tmpGillSD</span><span class="p">,</span> <span class="n">tmpGillEntropy</span><span class="p">,</span> <span class="n">tmpNSCprob</span><span class="p">,</span> <span class="n">tmpRevProb</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+							 
+							<span class="n">reaction</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tmpReaction</span><span class="p">)</span> <span class="o">+</span> <span class="n">initRctId</span>
+							<span class="n">rtime</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">tmpTime</span><span class="p">)</span> <span class="o">+</span> <span class="n">initTime</span>
+							<span class="n">cc</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tmpcc</span><span class="p">)</span> 
+							<span class="n">cat</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tmpCat</span><span class="p">)</span>
+							<span class="n">mol_I</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tmpMol_I</span><span class="p">)</span>
+							<span class="n">mol_II</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tmpMol_II</span><span class="p">)</span>
+							<span class="n">mol_III</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tmpMol_III</span><span class="p">)</span>
+							<span class="n">loadedMolsConc</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">tmpLoadedMolsConc</span><span class="p">)</span>
+							<span class="n">loadedMols</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tmpLoadedMols</span><span class="p">)</span>
+							<span class="n">gillMean</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">tmpGillMean</span><span class="p">)</span>
+							<span class="n">gillSD</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">tmpGillSD</span><span class="p">)</span>
+							<span class="n">gillEntropy</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">tmpGillEntropy</span><span class="p">)</span>
+							<span class="n">newSpeciesCreationProb</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">tmpNSCprob</span><span class="p">)</span>
+							<span class="n">reverseProbability</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">tmpRevProb</span><span class="p">)</span>
+			
+							<span class="k">if</span> <span class="n">nrg</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+								<span class="n">nrgTimeSeries</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">nrgTimeSeries</span><span class="p">,(</span><span class="n">rtime</span><span class="p">,</span> <span class="n">loadedMolsConc</span><span class="p">,</span> <span class="n">loadedMols</span><span class="p">)])</span>
+								
+							<span class="n">gillTimeSeries</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">gillTimeSeries</span><span class="p">,(</span><span class="n">rtime</span><span class="p">,</span> <span class="n">gillMean</span><span class="p">,</span> <span class="n">gillSD</span><span class="p">,</span> <span class="n">gillEntropy</span><span class="p">)])</span>
+														
+							<span class="n">printTemporalMessage</span> <span class="o">=</span> <span class="mi">1</span>
+							<span class="c"># If the time is right save iGraph structures to file</span>
+							<span class="k">if</span> <span class="p">(</span><span class="n">rtime</span> <span class="o">&gt;=</span> <span class="n">rctIDshow</span> <span class="o">*</span> <span class="n">_ANALTIMEINTERAVAL_</span><span class="p">):</span>
+								<span class="k">print</span> <span class="s">&quot;- &quot;</span><span class="p">,</span> <span class="n">tmpDir</span><span class="p">,</span> <span class="s">&quot; | Gen&quot;</span><span class="p">,</span> <span class="n">nGen</span><span class="p">,</span> <span class="s">&quot; | Reaction &quot;</span><span class="p">,</span> <span class="n">reaction</span><span class="p">,</span> <span class="s">&quot; - time: &quot;</span><span class="p">,</span> <span class="n">rtime</span><span class="p">,</span> <span class="s">&quot; - Save structures&quot;</span>
+								<span class="n">saveGraphToFile</span><span class="p">()</span>
+								<span class="n">saveGraphSUBToFile</span><span class="p">()</span>
+								<span class="n">rctIDshow</span> <span class="o">=</span> <span class="n">rctIDshow</span> <span class="o">+</span> <span class="mi">1</span>
+								<span class="n">printTemporalMessage</span> <span class="o">=</span> <span class="mi">0</span>
+								
+							<span class="c"># If the system is close to the end graphs are saved.</span>
+	<span class="c"># 						if (tmpFlagLastRctSaved == 0) and (rtime &gt; (totTimes - 1)) and (rtime &lt; totTimes):</span>
+	<span class="c"># 							print &quot;- &quot;, tmpDir, &quot; | Gen&quot;, nGen, &quot; | Reaction &quot;, reaction, &quot; - time: &quot;, totTimes, &quot; - Save structures&quot;</span>
+	<span class="c"># 							saveGraphToFile()</span>
+	<span class="c"># 							saveGraphSUBToFile()</span>
+	<span class="c"># 							tmpFlagLastRctSaved = 1</span>
+								 
+				
+							<span class="c"># If the prompt time is right a message on the screen indicating the reaction number and the time is shown</span>
+							<span class="k">if</span> <span class="p">((</span><span class="n">rtime</span> <span class="o">&gt;</span> <span class="n">rctIDshowNoSave</span> <span class="o">*</span> <span class="n">_ANALTIMEINTERAVALNOSAVE_</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">printTemporalMessage</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)):</span>
+								<span class="k">print</span> <span class="s">&quot;- &quot;</span><span class="p">,</span> <span class="n">tmpDir</span><span class="p">,</span> <span class="s">&quot; | Gen&quot;</span><span class="p">,</span> <span class="n">nGen</span><span class="p">,</span> <span class="s">&quot; | Reaction &quot;</span><span class="p">,</span> <span class="n">reaction</span><span class="p">,</span> <span class="s">&quot; - time: &quot;</span><span class="p">,</span> <span class="n">rtime</span>
+								<span class="n">rctIDshowNoSave</span> <span class="o">=</span> <span class="n">rctIDshowNoSave</span> <span class="o">+</span> <span class="mi">1</span>
+				
+							<span class="c"># update time intervals </span>
+							<span class="n">timeInterval</span> <span class="o">=</span> <span class="n">rtime</span> <span class="o">-</span> <span class="n">previousTime</span>
+							<span class="n">previousTime</span> <span class="o">=</span> <span class="n">rtime</span>
+			
+							<span class="c"># Increment the time of each reaction present in the system</span>
+							<span class="c"># If the time of some reactions overcome the decay time the reaction is removed from the igraph structure</span>
+							<span class="k">if</span> <span class="n">rctID</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+								<span class="c"># CATALYST -&gt; PRODUCT</span>
+								<span class="k">if</span> <span class="n">shape</span><span class="p">(</span><span class="n">graph</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+									<span class="n">graph</span><span class="p">[:,</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">graph</span><span class="p">[:,</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="n">timeInterval</span>
+									<span class="n">graph</span><span class="p">[:,</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">graph</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">graph</span><span class="p">[:,</span><span class="mi">3</span><span class="p">]</span>
+									<span class="n">graph</span> <span class="o">=</span> <span class="n">graph</span><span class="p">[</span><span class="n">graph</span><span class="p">[:,</span><span class="mi">4</span><span class="p">]</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">,:]</span>
+								<span class="c"># SUBSTRATE -&gt; PRODUCT</span>
+								<span class="k">if</span> <span class="n">shape</span><span class="p">(</span><span class="n">graphSUB</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+									<span class="n">graphSUB</span><span class="p">[:,</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">graphSUB</span><span class="p">[:,</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="n">timeInterval</span>
+									<span class="n">graphSUB</span><span class="p">[:,</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">graphSUB</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">graphSUB</span><span class="p">[:,</span><span class="mi">3</span><span class="p">]</span>
+									<span class="n">graphSUB</span> <span class="o">=</span> <span class="n">graphSUB</span><span class="p">[</span><span class="n">graphSUB</span><span class="p">[:,</span><span class="mi">4</span><span class="p">]</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">,:]</span>
+					
+							<span class="k">if</span> <span class="p">(</span><span class="n">cc</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span><span class="o">|</span><span class="p">(</span><span class="n">cc</span> <span class="o">==</span> <span class="mi">7</span><span class="p">):</span> <span class="c"># CONDENSATION and ENDO CONDENSATION</span>
+								<span class="k">if</span> <span class="n">cc</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+									<span class="n">condensation_counter</span> <span class="o">+=</span> <span class="mi">1</span>
+								<span class="k">else</span><span class="p">:</span>
+									<span class="n">endo_condensation_counter</span> <span class="o">+=</span>  <span class="mi">1</span>
+									
+								<span class="k">if</span> <span class="n">rctID</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="c">#If it is the first reaction nparray (matrix) is created</span>
+									<span class="n">graph</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">cat</span><span class="p">,</span> <span class="n">mol_I</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+									<span class="n">graphSUB</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">mol_II</span><span class="p">,</span> <span class="n">mol_I</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+									<span class="k">if</span> <span class="n">mol_II</span> <span class="o">!=</span> <span class="n">mol_III</span><span class="p">:</span>
+										<span class="n">graphSUB</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">graphSUB</span><span class="p">,(</span><span class="n">mol_III</span><span class="p">,</span> <span class="n">mol_I</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">1</span><span class="p">)])</span> <span class="c"># Substrate 2 (If different from 1)</span>
+								<span class="k">else</span><span class="p">:</span> 
+									<span class="c"># CAT -&gt; PRO, Otherwise if the reaction is already present its parameters are updated</span>
+									<span class="k">if</span> <span class="nb">sum</span><span class="p">((</span><span class="n">graph</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">cat</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">graph</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">mol_I</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+										<span class="n">position</span> <span class="o">=</span> <span class="p">((</span><span class="n">graph</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">cat</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">graph</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">mol_I</span><span class="p">))</span>
+										<span class="n">graph</span><span class="p">[</span><span class="n">position</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">cat</span><span class="p">,</span> <span class="n">mol_I</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="n">graph</span><span class="p">[</span><span class="n">position</span><span class="p">,</span><span class="mi">5</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+									<span class="k">else</span><span class="p">:</span>
+										<span class="c"># Otherwise a new reaction is added at the end of the matrix</span>
+										<span class="n">graph</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">graph</span><span class="p">,(</span><span class="n">cat</span><span class="p">,</span> <span class="n">mol_I</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">1</span><span class="p">)])</span>
+						
+									<span class="c"># SUB -&gt; PRO, Otherwise if the reaction is already present its parameters are updated</span>
+									<span class="k">if</span> <span class="nb">sum</span><span class="p">((</span><span class="n">graphSUB</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">mol_II</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">graphSUB</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">mol_I</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+										<span class="n">position</span> <span class="o">=</span> <span class="p">((</span><span class="n">graphSUB</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">mol_II</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">graphSUB</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">mol_I</span><span class="p">))</span>
+										<span class="n">graphSUB</span><span class="p">[</span><span class="n">position</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">mol_II</span><span class="p">,</span> <span class="n">mol_I</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="n">graphSUB</span><span class="p">[</span><span class="n">position</span><span class="p">,</span><span class="mi">5</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+									<span class="k">else</span><span class="p">:</span>
+										<span class="c"># Otherwise a new reaction is added at the end of the matrix</span>
+										<span class="n">graphSUB</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">graphSUB</span><span class="p">,(</span><span class="n">mol_II</span><span class="p">,</span> <span class="n">mol_I</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">1</span><span class="p">)])</span>
+									<span class="k">if</span> <span class="n">mol_II</span> <span class="o">!=</span> <span class="n">mol_III</span><span class="p">:</span>
+										<span class="k">if</span> <span class="nb">sum</span><span class="p">((</span><span class="n">graphSUB</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">mol_III</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">graphSUB</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">mol_I</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+											<span class="n">position</span> <span class="o">=</span> <span class="p">((</span><span class="n">graphSUB</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">mol_III</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">graphSUB</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">mol_I</span><span class="p">))</span>
+											<span class="n">graphSUB</span><span class="p">[</span><span class="n">position</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">mol_III</span><span class="p">,</span> <span class="n">mol_I</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="n">graphSUB</span><span class="p">[</span><span class="n">position</span><span class="p">,</span><span class="mi">5</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+										<span class="k">else</span><span class="p">:</span>
+											<span class="n">graphSUB</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">graphSUB</span><span class="p">,(</span><span class="n">mol_III</span><span class="p">,</span> <span class="n">mol_I</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">1</span><span class="p">)])</span>						
+									
+							<span class="k">else</span><span class="p">:</span> <span class="c"># CLEAVAGE (The same of condensation expected for the double computation due to the presence of two products</span>
+								<span class="k">if</span> <span class="n">cc</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
+									<span class="n">endo_cleavage_counter</span> <span class="o">+=</span> <span class="mi">1</span>
+								<span class="k">else</span><span class="p">:</span>
+									<span class="n">cleavage_counter</span> <span class="o">+=</span>  <span class="mi">1</span>
+									
+								<span class="k">if</span> <span class="n">rctID</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="c"># If it is the first reaction nparray is created</span>
+									<span class="c"># CAT -&gt; PROD</span>
+									<span class="n">graph</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">cat</span><span class="p">,</span> <span class="n">mol_II</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span> <span class="c"># Product 1</span>
+									<span class="k">if</span> <span class="n">mol_II</span> <span class="o">!=</span> <span class="n">mol_III</span><span class="p">:</span>
+										<span class="n">graph</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">graph</span><span class="p">,(</span><span class="n">cat</span><span class="p">,</span> <span class="n">mol_III</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">1</span><span class="p">)])</span> <span class="c"># Product 2 (If different from 1)</span>
+									<span class="c"># SUB -&gt; PRO</span>
+									<span class="n">graphSUB</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">mol_I</span><span class="p">,</span> <span class="n">mol_II</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+									<span class="k">if</span> <span class="n">mol_II</span> <span class="o">!=</span> <span class="n">mol_III</span><span class="p">:</span>
+										<span class="n">graphSUB</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">graphSUB</span><span class="p">,(</span><span class="n">mol_I</span><span class="p">,</span> <span class="n">mol_III</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">1</span><span class="p">)])</span> <span class="c"># Sub 2 (If different from 1)					</span>
+								<span class="k">else</span><span class="p">:</span>
+									<span class="k">if</span> <span class="nb">sum</span><span class="p">((</span><span class="n">graph</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">cat</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">graph</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">mol_II</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+										<span class="n">position</span> <span class="o">=</span> <span class="p">((</span><span class="n">graph</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">cat</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">graph</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">mol_II</span><span class="p">))</span>
+										<span class="n">graph</span><span class="p">[</span><span class="n">position</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">cat</span><span class="p">,</span> <span class="n">mol_II</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="n">graph</span><span class="p">[</span><span class="n">position</span><span class="p">,</span><span class="mi">5</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+									<span class="k">else</span><span class="p">:</span>
+										<span class="n">graph</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">graph</span><span class="p">,(</span><span class="n">cat</span><span class="p">,</span> <span class="n">mol_II</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">1</span><span class="p">)])</span>				
+									<span class="k">if</span> <span class="n">mol_II</span> <span class="o">!=</span> <span class="n">mol_III</span><span class="p">:</span>
+										<span class="k">if</span> <span class="nb">sum</span><span class="p">((</span><span class="n">graph</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">cat</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">graph</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">mol_III</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+											<span class="n">position</span> <span class="o">=</span> <span class="p">((</span><span class="n">graph</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">cat</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">graph</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">mol_III</span><span class="p">))</span>
+											<span class="n">graph</span><span class="p">[</span><span class="n">position</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">cat</span><span class="p">,</span> <span class="n">mol_III</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="n">graph</span><span class="p">[</span><span class="n">position</span><span class="p">,</span><span class="mi">5</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+										<span class="k">else</span><span class="p">:</span>
+											<span class="n">graph</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">graph</span><span class="p">,(</span><span class="n">cat</span><span class="p">,</span> <span class="n">mol_III</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">1</span><span class="p">)])</span>
+									<span class="c"># SUB -&gt; PRO, Otherwise if the reaction is already present its parameters are updated</span>
+									<span class="k">if</span> <span class="nb">sum</span><span class="p">((</span><span class="n">graphSUB</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">mol_I</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">graphSUB</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">mol_II</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+										<span class="n">position</span> <span class="o">=</span> <span class="p">((</span><span class="n">graphSUB</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">mol_I</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">graphSUB</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">mol_II</span><span class="p">))</span>
+										<span class="n">graphSUB</span><span class="p">[</span><span class="n">position</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">mol_I</span><span class="p">,</span> <span class="n">mol_II</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="n">graphSUB</span><span class="p">[</span><span class="n">position</span><span class="p">,</span><span class="mi">5</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+									<span class="k">else</span><span class="p">:</span>
+										<span class="c"># Otherwise a new reaction is added at the end of the matrix</span>
+										<span class="n">graphSUB</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">graphSUB</span><span class="p">,(</span><span class="n">mol_I</span><span class="p">,</span> <span class="n">mol_II</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">1</span><span class="p">)])</span>
+									<span class="k">if</span> <span class="n">mol_II</span> <span class="o">!=</span> <span class="n">mol_III</span><span class="p">:</span>
+										<span class="k">if</span> <span class="nb">sum</span><span class="p">((</span><span class="n">graphSUB</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">mol_I</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">graphSUB</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">mol_III</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+											<span class="n">position</span> <span class="o">=</span> <span class="p">((</span><span class="n">graphSUB</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">mol_I</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">graphSUB</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">mol_III</span><span class="p">))</span>
+											<span class="n">graphSUB</span><span class="p">[</span><span class="n">position</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">mol_I</span><span class="p">,</span> <span class="n">mol_III</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="n">graphSUB</span><span class="p">[</span><span class="n">position</span><span class="p">,</span><span class="mi">5</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+										<span class="k">else</span><span class="p">:</span>
+											<span class="n">graphSUB</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">graphSUB</span><span class="p">,(</span><span class="n">mol_I</span><span class="p">,</span> <span class="n">mol_III</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">1</span><span class="p">)])</span>							
+							
+							<span class="c"># Reactions counters is updated			</span>
+							<span class="n">rctID</span> <span class="o">=</span> <span class="n">rctID</span> <span class="o">+</span> <span class="mi">1</span>	
+						<span class="c"># Save Gillespie structure on file 	</span>
+						<span class="n">saveGillToFile</span><span class="p">()</span>
+							
+						<span class="k">print</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s"> |-  ------- NetworkX analysis ---------&quot;</span>
+									
+						<span class="c"># Network analysis</span>
+						<span class="c"># Initialize graph</span>
+	
+						<span class="k">print</span> <span class="s">&quot;   |- digraph creation... &quot;</span>
+						<span class="n">realSccs</span> <span class="o">=</span> <span class="mi">0</span>
+						<span class="n">Gcatpro</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">()</span>
+						<span class="k">for</span> <span class="n">sngRct</span> <span class="ow">in</span> <span class="n">graph</span><span class="p">:</span>
+							<span class="n">Gcatpro</span><span class="o">.</span><span class="n">add_weighted_edges_from</span><span class="p">([(</span><span class="n">sngRct</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">sngRct</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">sngRct</span><span class="p">[</span><span class="mi">5</span><span class="p">])])</span>
+	
+						<span class="k">print</span> <span class="s">&quot;   |- Strongly connected components analysis... &quot;</span>
+						
+						<span class="n">scc</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">strongly_connected_components</span><span class="p">(</span><span class="n">Gcatpro</span><span class="p">)</span>
+						<span class="n">sccN</span><span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">number_strongly_connected_components</span><span class="p">(</span><span class="n">Gcatpro</span><span class="p">)</span>
+						<span class="n">selfLoops</span> <span class="o">=</span> <span class="n">Gcatpro</span><span class="o">.</span><span class="n">number_of_selfloops</span><span class="p">()</span>
+						<span class="n">selfLoopsEgdes</span> <span class="o">=</span> <span class="n">Gcatpro</span><span class="o">.</span><span class="n">selfloop_edges</span><span class="p">()</span>
+						<span class="n">realSccs</span> <span class="o">+=</span> <span class="n">selfLoops</span>
+						
+						<span class="c"># Computing actual number od strongly connected components</span>
+						<span class="n">prod_inSCC</span> <span class="o">=</span> <span class="mi">0</span>
+						<span class="n">prod_chain</span> <span class="o">=</span> <span class="mi">0</span>
+						<span class="n">prod_bySCC</span> <span class="o">=</span> <span class="mi">0</span>
+						<span class="n">prod_overlap</span> <span class="o">=</span> <span class="mi">0</span>
+						<span class="n">sccID</span> <span class="o">=</span> <span class="mi">0</span>
+						<span class="n">autocatalysis</span> <span class="o">=</span> <span class="mi">0</span>
+						<span class="n">prod_inSCC_weight</span> <span class="o">=</span> <span class="mi">0</span>
+						<span class="n">prod_chain_weight</span> <span class="o">=</span> <span class="mi">0</span>
+						<span class="n">prod_bySCC_weight</span> <span class="o">=</span> <span class="mi">0</span>
+						<span class="n">prod_overlap_weight</span> <span class="o">=</span> <span class="mi">0</span>
+						<span class="n">self_loop_weight</span> <span class="o">=</span> <span class="mi">0</span>
+						<span class="n">conc_inSCC</span> <span class="o">=</span> <span class="mi">0</span>
+						<span class="n">conc_chain</span> <span class="o">=</span> <span class="mi">0</span>
+						<span class="n">conc_bySCC</span> <span class="o">=</span> <span class="mi">0</span>
+						<span class="n">conc_overLap</span> <span class="o">=</span> <span class="mi">0</span>
+						<span class="n">conc_selfCat</span> <span class="o">=</span> <span class="mi">0</span>
+						<span class="n">wasteSpecies</span> <span class="o">=</span> <span class="mi">0</span>
+						
+						<span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">scc</span><span class="p">:</span> 
+							<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+								<span class="n">sccID</span> <span class="o">+=</span> <span class="mi">1</span>
+								<span class="k">print</span> <span class="s">&quot;&lt;&gt; SCC n.&quot;</span><span class="p">,</span> <span class="n">sccID</span>
+								<span class="k">print</span> <span class="n">c</span>
+								<span class="n">realSccs</span> <span class="o">+=</span> <span class="mi">1</span>
+	
+						<span class="k">print</span> <span class="s">&quot;   |- Number of ACS:&quot;</span><span class="p">,</span> <span class="n">realSccs</span> <span class="o">-</span> <span class="n">selfLoops</span>
+						<span class="k">print</span> <span class="s">&quot;   |- Number of ACS(length 1):&quot;</span><span class="p">,</span> <span class="n">selfLoops</span><span class="p">,</span> <span class="s">&quot;...&quot;</span>
+						
+						<span class="k">print</span> <span class="s">&quot;    &lt;&gt; IDs over threshold -&gt; &quot;</span><span class="p">,</span> <span class="n">IDsOverThreshold</span>
+						
+						<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">IDsOverThreshold</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span> <span class="c"># If there are species over threshold SOT</span>
+							<span class="k">for</span> <span class="n">IdsOT</span> <span class="ow">in</span> <span class="n">IDsOverThreshold</span><span class="p">:</span> <span class="c"># For each species over threshold</span>
+								<span class="n">alreadyAdded_ACS</span> <span class="o">=</span> <span class="mi">0</span>
+								<span class="n">alreadyAdded_leaves</span> <span class="o">=</span> <span class="mi">0</span>
+								<span class="n">alreadyAdded_chain</span> <span class="o">=</span> <span class="mi">0</span>
+								<span class="n">tmpProd_chain</span> <span class="o">=</span> <span class="mi">0</span>
+								<span class="k">try</span><span class="p">:</span> <span class="c"># If there are incoming nodes </span>
+									<span class="n">incomingNodes</span> <span class="o">=</span> <span class="n">Gcatpro</span><span class="o">.</span><span class="n">predecessors</span><span class="p">(</span><span class="n">IdsOT</span><span class="p">)</span> <span class="c"># incoming nodes</span>
+									<span class="n">tmpProd_chain</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">incomingNodes</span><span class="p">)</span> <span class="c"># Number of incoming nodes </span>
+									<span class="n">tempProd_chain_weight</span> <span class="o">=</span> <span class="mi">0</span>
+									<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">incomingNodes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+										<span class="k">for</span> <span class="n">sngInNode</span> <span class="ow">in</span> <span class="n">incomingNodes</span><span class="p">:</span> <span class="c"># for each single incoming nodes Xj -&gt; Xi</span>
+											<span class="n">alreadyAdded_ACS</span> <span class="o">=</span> <span class="mi">0</span>
+											<span class="n">alreadyAdded_leaves</span> <span class="o">=</span> <span class="mi">0</span>
+											<span class="n">noInAcs</span> <span class="o">=</span> <span class="mi">1</span> 
+											<span class="k">if</span> <span class="n">realSccs</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span> <span class="c"># If there are ACS</span>
+												<span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">scc</span><span class="p">:</span>  <span class="c"># for each ACS (if present)</span>
+													<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+														<span class="n">inSCCFlag</span> <span class="o">=</span> <span class="mi">0</span> 
+														<span class="k">if</span> <span class="n">IdsOT</span> <span class="ow">in</span> <span class="n">c</span><span class="p">:</span> <span class="c"># If the SOT is in an ACS</span>
+															<span class="n">inSCCFlag</span> <span class="o">=</span> <span class="mi">1</span>
+															<span class="k">if</span> <span class="n">alreadyAdded_ACS</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+																<span class="n">conc_inSCC</span> <span class="o">+=</span> <span class="n">concVec</span><span class="p">[</span><span class="n">IdsOT</span><span class="p">]</span>
+																<span class="n">alreadyAdded_ACS</span> <span class="o">=</span> <span class="mi">1</span>
+														<span class="n">weightToDistribute</span> <span class="o">=</span> <span class="n">graph</span><span class="p">[((</span><span class="n">graph</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">sngInNode</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">graph</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">IdsOT</span><span class="p">)),</span><span class="mi">5</span><span class="p">]</span>
+														<span class="k">if</span> <span class="n">sngInNode</span> <span class="ow">in</span> <span class="n">c</span><span class="p">:</span> <span class="c"># If the incoming node is in the ACS</span>
+															<span class="n">noInAcs</span> <span class="o">=</span> <span class="mi">0</span>
+															<span class="k">if</span> <span class="n">inSCCFlag</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="c"># If the node is in an ACS, then it has been produced within an ACS</span>
+																<span class="n">prod_inSCC</span> <span class="o">+=</span> <span class="mi">1</span>
+																<span class="n">tmpProd_chain</span> <span class="o">-=</span> <span class="mi">1</span>
+																<span class="k">print</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s"> Within Acs&quot;</span><span class="p">,</span> <span class="n">sngInNode</span><span class="p">,</span> <span class="s">&quot;-&gt;&quot;</span><span class="p">,</span> <span class="n">IdsOT</span><span class="p">,</span> <span class="s">&quot;#&quot;</span><span class="p">,</span> <span class="n">weightToDistribute</span><span class="p">,</span> <span class="s">&quot;-[IdsOT]&quot;</span><span class="p">,</span><span class="n">IdsOT</span><span class="p">,</span> <span class="n">concVec</span><span class="p">[</span><span class="n">IdsOT</span><span class="p">]</span>
+																<span class="n">prod_inSCC_weight</span> <span class="o">+=</span> <span class="n">weightToDistribute</span>
+															<span class="k">else</span><span class="p">:</span> <span class="c"># Otherwise it has been produced by an ACS, so it is a leaves of the first degree</span>
+																<span class="k">if</span> <span class="n">alreadyAdded_leaves</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+																	<span class="n">conc_bySCC</span> <span class="o">+=</span> <span class="n">concVec</span><span class="p">[</span><span class="n">IdsOT</span><span class="p">]</span>
+																	<span class="n">alreadyAdded_leaves</span> <span class="o">=</span> <span class="mi">1</span>
+																<span class="n">prod_bySCC</span> <span class="o">+=</span> <span class="mi">1</span>
+																<span class="n">tmpProd_chain</span> <span class="o">-=</span> <span class="mi">1</span>
+																<span class="k">print</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s"> From Acs&quot;</span><span class="p">,</span> <span class="n">sngInNode</span><span class="p">,</span> <span class="s">&quot;-&gt;&quot;</span><span class="p">,</span> <span class="n">IdsOT</span><span class="p">,</span> <span class="s">&quot;#&quot;</span><span class="p">,</span> <span class="n">weightToDistribute</span><span class="p">,</span> <span class="s">&quot;-[IdsOT]&quot;</span><span class="p">,</span><span class="n">IdsOT</span><span class="p">,</span> <span class="n">concVec</span><span class="p">[</span><span class="n">IdsOT</span><span class="p">]</span>
+																<span class="n">prod_bySCC_weight</span> <span class="o">+=</span> <span class="n">weightToDistribute</span>
+		
+											<span class="k">if</span> <span class="n">noInAcs</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="c"># If the species is not in the ACS and the incoming node as well</span>
+												<span class="n">prod_chain_weight</span> <span class="o">+=</span> <span class="n">graph</span><span class="p">[((</span><span class="n">graph</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">sngInNode</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">graph</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">IdsOT</span><span class="p">)),</span><span class="mi">5</span><span class="p">]</span>
+												<span class="k">if</span> <span class="n">alreadyAdded_chain</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+													<span class="n">conc_chain</span> <span class="o">+=</span> <span class="n">concVec</span><span class="p">[</span><span class="n">IdsOT</span><span class="p">]</span>
+													<span class="n">alreadyAdded_chain</span> <span class="o">=</span> <span class="mi">1</span>
+													
+									<span class="k">if</span> <span class="n">selfLoops</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+										<span class="k">for</span> <span class="n">sngSelfLoop</span> <span class="ow">in</span> <span class="n">selfLoopsEgdes</span><span class="p">:</span>
+											<span class="k">if</span> <span class="n">IdsOT</span> <span class="ow">in</span> <span class="n">sngSelfLoop</span><span class="p">:</span>
+												<span class="n">self_loop_weight</span> <span class="o">+=</span>  <span class="n">graph</span><span class="p">[((</span><span class="n">graph</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">IdsOT</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">graph</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">IdsOT</span><span class="p">)),</span><span class="mi">5</span><span class="p">]</span>
+												<span class="n">conc_selfCat</span> <span class="o">+=</span> <span class="n">concVec</span><span class="p">[</span><span class="n">IdsOT</span><span class="p">]</span>
+												<span class="n">autocatalysis</span> <span class="o">+=</span> <span class="mi">1</span>
+								<span class="k">except</span><span class="p">:</span>
+									<span class="n">wasteSpecies</span> <span class="o">+=</span> <span class="mi">1</span> <span class="c"># The specie is still over the threshold but no longer produced by the system into the considered time window</span>
+											
+															
+								<span class="n">prod_overlap</span> <span class="o">+=</span> <span class="nb">min</span><span class="p">(</span><span class="n">prod_bySCC</span><span class="p">,</span> <span class="n">prod_inSCC</span><span class="p">,</span> <span class="n">tmpProd_chain</span><span class="p">)</span>	
+								<span class="n">prod_chain</span> <span class="o">+=</span> <span class="n">tmpProd_chain</span>
+								<span class="n">prod_overlap_weight</span> <span class="o">+=</span> <span class="nb">min</span><span class="p">(</span><span class="n">prod_inSCC_weight</span><span class="p">,</span> <span class="n">prod_bySCC_weight</span><span class="p">,</span> <span class="n">prod_chain_weight</span><span class="p">)</span>
+										
+										
+						<span class="k">print</span> <span class="s">&quot;   |- &lt;&gt; Number of Structural Autocatalytic set of molecules:&quot;</span><span class="p">,</span> <span class="n">realSccs</span>
+						<span class="k">print</span> <span class="s">&quot;   |- &lt;&gt; -----------------------------------------------&quot;</span>
+						<span class="k">print</span> <span class="s">&quot;   |- &lt;&gt; Species over threshold produced by a CHAIN:&quot;</span><span class="p">,</span> <span class="n">prod_chain</span>
+						<span class="k">if</span> <span class="n">realSccs</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+							<span class="k">print</span> <span class="s">&quot;   |- &lt;&gt; Species over threshold produced INTO an ACS:&quot;</span><span class="p">,</span> <span class="n">prod_inSCC</span>
+							<span class="k">print</span> <span class="s">&quot;   |- &lt;&gt; Species over threshold produced INTO an ACS (weigthed):&quot;</span><span class="p">,</span> <span class="n">prod_inSCC_weight</span>
+							<span class="k">print</span> <span class="s">&quot;   |- &lt;&gt; Species over threshold produced BY an ACS:&quot;</span><span class="p">,</span> <span class="n">prod_bySCC</span>
+							<span class="k">print</span> <span class="s">&quot;   |- &lt;&gt; Species over threshold produced BY an ACS (weigthed):&quot;</span><span class="p">,</span> <span class="n">prod_bySCC_weight</span>
+							<span class="k">print</span> <span class="s">&quot;   |- &lt;&gt; Species over threshold produced by an overlap:&quot;</span><span class="p">,</span> <span class="n">prod_overlap</span>
+							<span class="k">print</span> <span class="s">&quot;   |- &lt;&gt; Species over threshold produced by an overlap (weigthed):&quot;</span><span class="p">,</span> <span class="n">prod_overlap_weight</span>
+							<span class="k">print</span> <span class="s">&quot;   |- &lt;&gt; Species over threshold produced by itself:&quot;</span><span class="p">,</span> <span class="n">autocatalysis</span>
+							<span class="k">print</span> <span class="s">&quot;   |- &lt;&gt; Species over threshold produced by itself (weigthed):&quot;</span><span class="p">,</span> <span class="n">self_loop_weight</span>
+							<span class="k">print</span> <span class="s">&quot;   |- &lt;&gt; Concentration in ACSs:&quot;</span><span class="p">,</span> <span class="n">conc_inSCC</span>
+							<span class="k">print</span> <span class="s">&quot;   |- &lt;&gt; Concentration in ACSs leaves:&quot;</span><span class="p">,</span> <span class="n">conc_bySCC</span>
+							<span class="k">print</span> <span class="s">&quot;   |- &lt;&gt; Concentration in chains:&quot;</span><span class="p">,</span> <span class="n">conc_chain</span>
+							<span class="k">print</span> <span class="s">&quot;   |- &lt;&gt; Concentration of autocatalyst:&quot;</span><span class="p">,</span> <span class="n">conc_selfCat</span>
+							<span class="k">print</span> <span class="s">&quot;   |- &lt;&gt; Number of endo condensations:&quot;</span><span class="p">,</span> <span class="n">endo_condensation_counter</span>
+							<span class="k">print</span> <span class="s">&quot;   |- &lt;&gt; Number of condensations:&quot;</span><span class="p">,</span> <span class="n">condensation_counter</span>
+							<span class="k">print</span> <span class="s">&quot;   |- &lt;&gt; Number of endo cleavages:&quot;</span><span class="p">,</span> <span class="n">endo_cleavage_counter</span>
+							<span class="k">print</span> <span class="s">&quot;   |- &lt;&gt; Number of cleavages:&quot;</span><span class="p">,</span> <span class="n">cleavage_counter</span>
+						<span class="k">print</span> <span class="s">&quot;      &lt;&gt; -----------------------------------------------&quot;</span>						
+								
+						<span class="n">inDegreeMean</span> <span class="o">=</span> <span class="n">mean</span><span class="p">(</span><span class="n">Gcatpro</span><span class="o">.</span><span class="n">in_degree</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+								
+						<span class="k">print</span> <span class="s">&quot;   |- &lt;&gt; Mean IN-DEGREE:&quot;</span><span class="p">,</span> <span class="n">inDegreeMean</span>
+				
+						<span class="c">#print graph at the end of the analysis (the final situation is always stored)</span>
+						<span class="k">print</span> <span class="s">&quot;   |- &lt;&gt; File &quot;</span><span class="p">,</span> <span class="n">rctParamFile</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s">&quot; has been processed. Final Dimension: &quot;</span><span class="p">,</span> <span class="n">graph</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+						
+						<span class="n">fid</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+						<span class="n">saveGraphToFile</span><span class="p">()</span>
+						<span class="n">saveGraphSUBToFile</span><span class="p">()</span>
+								
+				     				
+						
+					<span class="c"># Close species file</span>
+					<span class="n">fidSpecies</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+						
+					<span class="k">print</span> <span class="s">&quot;   |- &lt;&gt; ID over threshold (influx is not taken into account)&quot;</span>
+					<span class="k">print</span> <span class="n">IDsOverThreshold</span>
+					<span class="k">print</span> <span class="n">overThreshold</span>
+					<span class="k">print</span> <span class="n">overThresholdTOT</span>
+					<span class="k">print</span> <span class="s">&quot;   |- Species file length&quot;</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">speciesFiles</span><span class="p">))</span>
+					<span class="n">meanOverThreshold</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">overThreshold</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">speciesFiles</span><span class="p">))</span>
+												
+					<span class="n">strToWrite</span> <span class="o">=</span> <span class="n">tmpDir</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">rp</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">nrgConc</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">+</span>  <span class="nb">str</span><span class="p">(</span><span class="n">meanOverThreshold</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">overThresholdTOT</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span> 
+					<span class="n">strToWrite</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">realSccs</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">prod_inSCC</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">prod_bySCC</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">prod_chain</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">prod_overlap</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">autocatalysis</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span>
+					<span class="n">strToWrite</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">prod_inSCC_weight</span><span class="p">))</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">prod_bySCC_weight</span><span class="p">))</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">prod_chain_weight</span><span class="p">))</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">prod_overlap_weight</span><span class="p">))</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">self_loop_weight</span><span class="p">))</span> <span class="o">+</span><span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span>
+					<span class="n">strToWrite</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">conc_inSCC</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">conc_bySCC</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">conc_chain</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">conc_selfCat</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span>
+					<span class="n">strToWrite</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">endo_condensation_counter</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">condensation_counter</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">endo_cleavage_counter</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">cleavage_counter</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">wasteSpecies</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span>
+					
+					<span class="n">cmdFileFid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">strToWrite</span><span class="p">)</span>
+					
+				<span class="k">print</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">****</span><span class="se">\n\n</span><span class="s"> ANALYSIS of the SIMULATION&quot;</span><span class="p">,</span>  <span class="nb">str</span><span class="p">(</span><span class="n">tmpDir</span><span class="p">),</span> <span class="s">&quot; IS FINISHED</span><span class="se">\n</span><span class="s">&quot;</span>
+				
+	<span class="n">cmdFileFid</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Alessandro Filisetti.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

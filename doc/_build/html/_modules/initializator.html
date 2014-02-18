@@ -1,0 +1,296 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>initializator &mdash; ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '20140204.004',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for initializator</h1><div class="highlight"><pre>
+	<span class="c">#!/usr/bin/env python</span>
+<span class="c"># -*- coding: latin-1 -*-</span>
+<span class="sd">&#39;&#39;&#39;Script to order the analysis of the divergences in time. </span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span> <span class="c"># Standard librar</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span> <span class="c"># Scientific library</span>
+<span class="kn">import</span> <span class="nn">itertools</span> <span class="kn">as</span> <span class="nn">it</span>
+<span class="kn">import</span> <span class="nn">random</span> <span class="kn">as</span> <span class="nn">ran</span>
+
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="o">*</span> 
+<span class="kn">from</span> <span class="nn">argparse</span> <span class="kn">import</span> <span class="n">ArgumentParser</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">pylab</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="k">pass</span>
+   
+<span class="kn">from</span> <span class="nn">lib.graph</span> <span class="kn">import</span> <span class="n">raf</span>
+<span class="kn">from</span> <span class="nn">lib.graph</span> <span class="kn">import</span> <span class="n">scc</span>
+<span class="kn">from</span> <span class="nn">lib.graph</span> <span class="kn">import</span> <span class="n">network</span>
+<span class="kn">from</span> <span class="nn">lib.dyn</span> <span class="kn">import</span> <span class="n">dynamics</span> <span class="k">as</span> <span class="n">dn</span>
+<span class="kn">from</span> <span class="nn">lib.model</span> <span class="kn">import</span> <span class="n">species</span> <span class="k">as</span> <span class="n">sp</span>
+<span class="kn">from</span> <span class="nn">lib.model</span> <span class="kn">import</span> <span class="n">reactions</span>
+<span class="kn">from</span> <span class="nn">lib.IO</span> <span class="kn">import</span> <span class="o">*</span>
+
+
+<span class="c">#æInput parameters definition </span>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+	<span class="n">parser</span> <span class="o">=</span> <span class="n">ArgumentParser</span><span class="p">(</span>
+				<span class="n">description</span><span class="o">=</span><span class="s">&#39;This script re-arrange results in a more friendly way from the angle analysis in time.&#39;</span>
+				<span class="p">,</span> <span class="n">epilog</span><span class="o">=</span><span class="s">&#39;&#39;&#39;File with angle trajectories are created. &#39;&#39;&#39;</span><span class="p">)</span> 
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-a&#39;</span><span class="p">,</span> <span class="s">&#39;--sysType&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;System Architecture [1:CLOSE, 2:PROTO, 3:CSTR], deafult: 1&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;1&#39;</span><span class="p">)</span>
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-k&#39;</span><span class="p">,</span> <span class="s">&#39;--creationMethod&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Network creation method (1: Filisetti, 2: Wim, 3: WimNoRevs, 4: WIM_RAFinREV_noRAFinNOrev, DEF: 1)&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;1&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-d&#39;</span><span class="p">,</span> <span class="s">&#39;--directRctDirection&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Direction of the forward reaction where necessary (1: cleavage, 0: condensation, 2: random with probability 0.5,Default: 1)&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;1&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-K&#39;</span><span class="p">,</span> <span class="s">&#39;--chemistriesWithRAF&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Number of Chemistries with RAF to create&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;0&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-f&#39;</span><span class="p">,</span> <span class="s">&#39;--lastFood&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;max food species length (deafult: 2)&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;2&#39;</span><span class="p">)</span>
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-n&#39;</span><span class="p">,</span> <span class="s">&#39;--noCat&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Non catalytic max length (default: 2)&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;2&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-N&#39;</span><span class="p">,</span> <span class="s">&#39;--initAmount&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Default Initial Amount&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;600&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-s&#39;</span><span class="p">,</span> <span class="s">&#39;--initSet&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Max Dimension of the initial set (Default: 4)&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;4&#39;</span><span class="p">)</span>
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-m&#39;</span><span class="p">,</span> <span class="s">&#39;--maxDim&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Max Dimension of the systems (Default: 6)&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;6&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-o&#39;</span><span class="p">,</span> <span class="s">&#39;--strOut&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Path for output file storing (Default: ./)&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;./&#39;</span><span class="p">)</span>
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-I&#39;</span><span class="p">,</span> <span class="s">&#39;--conf&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Configuration File (Default: ./acsm2s.conf)&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;./acsm2s.conf&#39;</span><span class="p">)</span>
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-H&#39;</span><span class="p">,</span> <span class="s">&#39;--chemistries&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Number of distinct chemistries to create&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;4&#39;</span><span class="p">)</span>
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-i&#39;</span><span class="p">,</span> <span class="s">&#39;--iteration&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Number of initial conditions (Default: 1)&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;1&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+ 	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-v&#39;</span><span class="p">,</span> <span class="s">&#39;--avgCon&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Catalysis level (deafult: 1), i.e. average reactions catalyzed per species&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;1&#39;</span><span class="p">)</span>
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-c&#39;</span><span class="p">,</span> <span class="s">&#39;--rctRatio&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Ratio between cleavages and condensations (default: 0, it means that the actual ratio is used)&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;0&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-C&#39;</span><span class="p">,</span> <span class="s">&#39;--core&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Number of core on which simulations are distributed&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;2&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>	
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-F&#39;</span><span class="p">,</span> <span class="s">&#39;--folderName&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Simulation Folder Name (Deafault: SIMS)&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;SIMS&#39;</span><span class="p">)</span>
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-R&#39;</span><span class="p">,</span> <span class="s">&#39;--revRcts&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Reverse reactions are allowed to be created for chance(1: Yes, 0: No, Deafult: No)&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;0&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>	
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-P&#39;</span><span class="p">,</span> <span class="s">&#39;--rafPresence&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Force the presence of RAF of 1 dimension, i.e. self-catalysis (1), or bigger (2...N) or no RAF at all (0), Default: 0&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;0&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-r&#39;</span><span class="p">,</span> <span class="s">&#39;--randomSeed&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;random seed&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+	<span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+	
+	<span class="n">_AVOGADRO_</span> <span class="o">=</span> <span class="mf">6.022141e23</span>
+	
+	<span class="c"># SIMULATION FOLDER CREATION</span>
+	<span class="n">folderName</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">strOut</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">folderName</span><span class="p">)</span>
+	<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">folderName</span><span class="p">):</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">folderName</span><span class="p">)</span>
+		<span class="k">except</span><span class="p">:</span>
+			<span class="k">print</span> <span class="s">&quot;Impossible to create statistic directory&quot;</span><span class="p">,</span> <span class="n">folderName</span><span class="p">;</span> <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+			
+	<span class="c"># FOR EACH NETWORK</span>
+	<span class="n">fid_run</span> <span class="o">=</span> <span class="p">[]</span>
+	<span class="k">for</span> <span class="n">sngCore</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">core</span><span class="p">):</span>
+		<span class="n">zeroBeforeName</span> <span class="o">=</span>  <span class="n">readfiles</span><span class="o">.</span><span class="n">zeroBeforeStrNum</span><span class="p">(</span><span class="n">sngCore</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">core</span><span class="p">)</span>
+		<span class="n">runFileName</span> <span class="o">=</span> <span class="n">zeroBeforeName</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">sngCore</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;_simulation.sh&#39;</span>
+		<span class="n">fname_run</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folderName</span><span class="p">,</span> <span class="n">runFileName</span><span class="p">)</span>
+		<span class="n">fid_run</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">fname_run</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">))</span>
+		
+	<span class="c"># Read Conf File</span>
+	<span class="n">parameters</span> <span class="o">=</span> <span class="n">readfiles</span><span class="o">.</span><span class="n">read_sims_conf_file</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">conf</span><span class="p">)</span>
+	
+	<span class="n">fidid</span> <span class="o">=</span> <span class="mi">0</span> <span class="c"># Core on which the chemistry will run</span>
+	
+	<span class="n">fname_initRafRes</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folderName</span><span class="p">,</span> <span class="s">&#39;0_theoreticalRAFanalysis.csv&#39;</span><span class="p">)</span>
+	<span class="n">fid_initRafRes</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname_initRafRes</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+	<span class="n">strToWrite</span> <span class="o">=</span> <span class="s">&quot;RAFsize</span><span class="se">\t</span><span class="s">Closure</span><span class="se">\t</span><span class="s">Cats</span><span class="se">\t</span><span class="s">RAF(unique)</span><span class="se">\t</span><span class="s">RAF</span><span class="se">\n</span><span class="s">&quot;</span>
+	<span class="n">fid_initRafRes</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">strToWrite</span><span class="p">)</span>
+	
+	<span class="k">for</span> <span class="n">singlechem</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">chemistries</span><span class="p">):</span>
+		<span class="c"># CREATE CHEMIST FOLDER</span>
+		<span class="k">print</span> <span class="s">&quot;|- ARTIFICIAL CHEMISTRY &quot;</span><span class="p">,</span> <span class="n">singlechem</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="s">&quot; Creation...&quot;</span>
+		<span class="n">zeroBeforeName</span> <span class="o">=</span>  <span class="n">readfiles</span><span class="o">.</span><span class="n">zeroBeforeStrNum</span><span class="p">(</span><span class="n">singlechem</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">chemistries</span><span class="p">)</span>
+		<span class="n">chemFolder</span> <span class="o">=</span> <span class="s">&#39;CH&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">zeroBeforeName</span><span class="p">)</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">singlechem</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+		<span class="n">chemFolderPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folderName</span><span class="p">,</span> <span class="n">chemFolder</span><span class="p">)</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">chemFolderPath</span><span class="p">):</span>
+			<span class="k">try</span><span class="p">:</span>
+				<span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">chemFolderPath</span><span class="p">)</span>
+			<span class="k">except</span><span class="p">:</span>
+				<span class="k">print</span> <span class="s">&quot;Impossible to create statistic directory&quot;</span><span class="p">,</span> <span class="n">chemFolderPath</span><span class="p">;</span> <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>	
+		
+		<span class="c"># CREATE ARTIFICIAL CHEMISTRY</span>
+		<span class="c"># Create foodlist</span>
+		<span class="n">foodList</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">lastFood</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">-</span><span class="mi">2</span><span class="p">))</span>
+		<span class="c"># Create species List</span>
+		<span class="n">speciesList</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">createCompleteSpeciesPopulation</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">maxDim</span><span class="p">,</span> <span class="n">parameters</span><span class="p">[</span><span class="mi">14</span><span class="p">])</span>
+		<span class="n">originalSpeciesList</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">speciesList</span><span class="p">)</span>
+		<span class="c"># Crate chemist</span>
+		<span class="c"># compute population cardinality</span>
+		<span class="n">totSpecies</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">getTotNumberOfSpeciesFromCompletePop</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">maxDim</span><span class="p">)</span>
+		
+		<span class="c"># Compute overall conceivable number of reactions</span>
+		<span class="n">totCleavage</span> <span class="o">=</span> <span class="n">reactions</span><span class="o">.</span><span class="n">getNumOfCleavages</span><span class="p">(</span><span class="n">originalSpeciesList</span><span class="p">)</span>
+		
+		<span class="c"># Compute the number of reactions according to the chemistry type adopted</span>
+		<span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">creationMethod</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="n">totCond</span> <span class="o">=</span> <span class="n">reactions</span><span class="o">.</span><span class="n">getNumOfCondensations</span><span class="p">(</span><span class="n">totSpecies</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span> <span class="n">totCond</span> <span class="o">=</span> <span class="mi">0</span>
+		<span class="n">totRcts</span> <span class="o">=</span> <span class="n">totCleavage</span> <span class="o">+</span> <span class="n">totCond</span>
+		
+		<span class="c"># If the reaction probability is 0, it is set to the critical value of 1 reaction per species on average</span>
+		<span class="k">if</span> <span class="n">parameters</span><span class="p">[</span><span class="mi">21</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="n">prob</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">totRcts</span><span class="p">))</span> <span class="o">*</span> <span class="n">args</span><span class="o">.</span><span class="n">avgCon</span>
+		<span class="k">else</span><span class="p">:</span> <span class="n">prob</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="mi">21</span><span class="p">]</span>
+		<span class="n">rctToCat</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">totSpecies</span> <span class="o">*</span> <span class="n">args</span><span class="o">.</span><span class="n">avgCon</span><span class="p">))</span>
+
+		<span class="c"># Create chemistry </span>
+		<span class="n">chemFound</span> <span class="o">=</span> <span class="bp">False</span>
+		<span class="k">if</span> <span class="n">singlechem</span> <span class="o">&lt;</span> <span class="n">args</span><span class="o">.</span><span class="n">chemistriesWithRAF</span><span class="p">:</span>
+			<span class="n">scanned</span> <span class="o">=</span> <span class="mi">0</span>
+			<span class="k">while</span> <span class="n">chemFound</span> <span class="o">==</span> <span class="bp">False</span><span class="p">:</span>
+				<span class="k">if</span> <span class="n">scanned</span> <span class="o">%</span> <span class="mi">100</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="k">print</span> <span class="s">&quot;</span><span class="se">\t\t</span><span class="s"> tried chemistries to find RAFs -&gt; &quot;</span><span class="p">,</span> <span class="n">scanned</span>
+				<span class="n">rcts</span><span class="p">,</span> <span class="n">cats</span><span class="p">,</span> <span class="n">speciesList</span><span class="p">,</span> <span class="n">rcts_no_rev</span><span class="p">,</span> <span class="n">cats_no_rev</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">create_chemistry</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">originalSpeciesList</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">rctToCat</span><span class="p">,</span> <span class="n">totCleavage</span><span class="p">,</span> <span class="n">totCond</span><span class="p">)</span>
+				<span class="n">food</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">foodList</span><span class="p">)</span>
+				<span class="n">rafset</span> <span class="o">=</span> <span class="n">raf</span><span class="o">.</span><span class="n">rafsearch</span><span class="p">(</span><span class="n">rcts</span><span class="p">,</span> <span class="n">cats</span><span class="p">,</span> <span class="n">food</span><span class="p">)</span> <span class="c"># RAF search</span>
+				<span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">creationMethod</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span> 
+					<span class="n">food</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">foodList</span><span class="p">)</span>
+					<span class="c">#print cats[200:,:]</span>
+					<span class="c">#print cats_no_rev[100:,:]</span>
+					<span class="n">rafset_no_rev</span> <span class="o">=</span> <span class="n">raf</span><span class="o">.</span><span class="n">rafsearch</span><span class="p">(</span><span class="n">rcts_no_rev</span><span class="p">,</span> <span class="n">cats_no_rev</span><span class="p">,</span> <span class="n">food</span><span class="p">)</span> <span class="c"># RAF search</span>
+					
+				<span class="c"># IF the RAF has been found the chemistry is valid, is creationMethod == 4 no RAF at all must be present in the chemistry without reverse reactions</span>
+				
+				<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">rafset</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">&gt;=</span> <span class="n">args</span><span class="o">.</span><span class="n">rafPresence</span><span class="p">:</span>
+					<span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">creationMethod</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+						<span class="c">#print &quot;\t\t\t&quot;, rafset</span>
+						<span class="c">#print &quot;\t\t\t&quot;, rafset_no_rev</span>
+						<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">rafset_no_rev</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+							<span class="n">chemFound</span> <span class="o">=</span> <span class="bp">True</span>
+					<span class="k">else</span><span class="p">:</span>		
+						<span class="c">#print &quot;\t\t\t&quot;, rafset</span>
+						<span class="n">chemFound</span> <span class="o">=</span> <span class="bp">True</span>
+					
+				<span class="n">scanned</span> <span class="o">+=</span> <span class="mi">1</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">scanned</span> <span class="o">=</span> <span class="mi">0</span>
+			<span class="k">while</span> <span class="n">chemFound</span> <span class="o">==</span> <span class="bp">False</span><span class="p">:</span>
+				<span class="k">if</span> <span class="n">scanned</span> <span class="o">%</span> <span class="mi">100</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="k">print</span> <span class="s">&quot;</span><span class="se">\t\t</span><span class="s"> tried chemistries -&gt; &quot;</span><span class="p">,</span> <span class="n">scanned</span>
+				<span class="n">rcts</span><span class="p">,</span> <span class="n">cats</span><span class="p">,</span> <span class="n">speciesList</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">create_chemistry</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">originalSpeciesList</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">rctToCat</span><span class="p">,</span> <span class="n">totCleavage</span><span class="p">,</span> <span class="n">totCond</span><span class="p">)</span>
+				<span class="n">food</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">foodList</span><span class="p">)</span>
+				<span class="n">rafset</span> <span class="o">=</span> <span class="n">raf</span><span class="o">.</span><span class="n">rafsearch</span><span class="p">(</span><span class="n">rcts</span><span class="p">,</span> <span class="n">cats</span><span class="p">,</span> <span class="n">food</span><span class="p">)</span> <span class="c"># RAF search</span>
+				<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">rafset</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+					<span class="n">chemFound</span> <span class="o">=</span> <span class="bp">True</span>
+				<span class="n">scanned</span> <span class="o">+=</span> <span class="mi">1</span>
+				
+		<span class="n">strToWrite</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">rafset</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">rafset</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">rafset</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">rafset</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">rafset</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span>
+		<span class="n">fid_initRafRes</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">strToWrite</span><span class="p">)</span>
+		
+		<span class="c"># CREATE DISTINCT INITIAL CONDITIONS		</span>
+		<span class="k">for</span> <span class="n">singleCond</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">iteration</span><span class="p">):</span>
+			<span class="k">print</span> <span class="s">&quot; :- Iteration &quot;</span><span class="p">,</span> <span class="n">singleCond</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="s">&quot; Creation...&quot;</span>
+			<span class="c"># CREATE CONDITION FOLDER</span>
+			<span class="n">zeroBeforeName</span> <span class="o">=</span>  <span class="n">readfiles</span><span class="o">.</span><span class="n">zeroBeforeStrNum</span><span class="p">(</span><span class="n">singleCond</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">iteration</span><span class="p">)</span>
+			<span class="n">tmpCondFolder</span> <span class="o">=</span> <span class="n">zeroBeforeName</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">singleCond</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;_condition&#39;</span>
+		
+			<span class="n">condFolderPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">chemFolderPath</span><span class="p">,</span> <span class="n">tmpCondFolder</span><span class="p">)</span>
+			<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">condFolderPath</span><span class="p">):</span>
+				<span class="k">try</span><span class="p">:</span>
+					<span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">condFolderPath</span><span class="p">)</span>
+				<span class="k">except</span><span class="p">:</span>
+					<span class="k">print</span> <span class="s">&quot;Impossible to create statistic directory&quot;</span><span class="p">,</span> <span class="n">condFolderPath</span><span class="p">;</span> <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+					
+			<span class="n">resFolder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">condFolderPath</span><span class="p">,</span> <span class="s">&#39;res&#39;</span><span class="p">)</span>
+			<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">resFolder</span><span class="p">):</span>
+				<span class="k">try</span><span class="p">:</span>
+					<span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">resFolder</span><span class="p">)</span>
+				<span class="k">except</span><span class="p">:</span>
+					<span class="k">print</span> <span class="s">&quot;Impossible to create statistic directory&quot;</span><span class="p">,</span> <span class="n">resFolder</span><span class="p">;</span> <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+			
+			<span class="c"># -----------------------------</span>
+			<span class="c"># ARTIFICIAL CHEMISTRY CREATION</span>
+			<span class="c"># -----------------------------</span>
+			<span class="n">writefiles</span><span class="o">.</span><span class="n">write_acsms_file</span><span class="p">(</span><span class="n">condFolderPath</span><span class="p">,</span><span class="o">*</span><span class="n">parameters</span><span class="p">)</span> <span class="c"># Save config file. </span>
+			<span class="n">writefiles</span><span class="o">.</span><span class="n">write_and_create_std_nrgFile</span><span class="p">(</span><span class="n">condFolderPath</span><span class="p">)</span> <span class="c"># Save energy file.</span>
+			<span class="n">sp</span><span class="o">.</span><span class="n">createFileSpecies</span><span class="p">(</span><span class="n">condFolderPath</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">singleCond</span><span class="p">,</span> <span class="n">speciesList</span><span class="p">)</span>
+			<span class="n">writefiles</span><span class="o">.</span><span class="n">write_and_createInfluxFile</span><span class="p">(</span><span class="n">condFolderPath</span><span class="p">,</span> <span class="n">foodList</span><span class="p">)</span>		
+			<span class="n">writefiles</span><span class="o">.</span><span class="n">write_acsCatalysis_file</span><span class="p">(</span><span class="n">condFolderPath</span><span class="p">,</span> <span class="n">cats</span><span class="p">)</span>	
+			<span class="n">writefiles</span><span class="o">.</span><span class="n">write_acsReactions_file</span><span class="p">(</span><span class="n">condFolderPath</span><span class="p">,</span> <span class="n">rcts</span><span class="p">)</span>	
+			
+			<span class="c"># UPDATE SIMULATION LUNCHER</span>
+			<span class="n">str2w</span> <span class="o">=</span> <span class="s">&quot;echo &#39;Simulation &quot;</span> <span class="o">+</span> <span class="n">condFolderPath</span> <span class="o">+</span> <span class="s">&quot;&#39;</span><span class="se">\n</span><span class="s">nice ./carness ../.&quot;</span> <span class="o">+</span> <span class="n">condFolderPath</span> <span class="o">+</span> <span class="s">&quot;/ ../.&quot;</span> <span class="o">+</span> <span class="n">condFolderPath</span> <span class="o">+</span> <span class="s">&quot;/res/ ../.&quot;</span> <span class="o">+</span> <span class="n">condFolderPath</span> <span class="o">+</span>\
+					<span class="s">&quot;/ &gt; &quot;</span> <span class="o">+</span> <span class="n">chemFolder</span> <span class="o">+</span> <span class="s">&#39;_&#39;</span> <span class="o">+</span> <span class="n">tmpCondFolder</span> <span class="o">+</span> <span class="s">&quot;.log</span><span class="se">\n</span><span class="s">&quot;</span>
+			
+			<span class="n">fid_run</span><span class="p">[</span><span class="n">fidid</span><span class="p">]</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">str2w</span><span class="p">)</span>
+			<span class="n">fidid</span> <span class="o">+=</span> <span class="mi">1</span>
+			<span class="k">if</span> <span class="n">fidid</span> <span class="o">==</span> <span class="n">args</span><span class="o">.</span><span class="n">core</span><span class="p">:</span> <span class="n">fidid</span> <span class="o">=</span> <span class="mi">0</span> 
+	
+	<span class="c"># Close fid runs	</span>
+	<span class="n">fid_initRafRes</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>	
+	<span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">close</span><span class="p">(),</span><span class="n">fid_run</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Alessandro Filisetti.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

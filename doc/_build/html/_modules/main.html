@@ -1,0 +1,449 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>main &mdash; ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '20140204.004',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for main</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python</span>
+<span class="c"># -*- coding: latin-1 -*-</span>
+<span class="sd">&#39;&#39;&#39; MAIN analysis script package for CaRNeSS simulations</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span> <span class="c"># Standard library</span>
+<span class="kn">import</span> <span class="nn">datetime</span> <span class="kn">as</span> <span class="nn">dt</span>
+<span class="kn">import</span> <span class="nn">linecache</span> <span class="kn">as</span> <span class="nn">lc</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">from</span> <span class="nn">argparse</span> <span class="kn">import</span> <span class="n">ArgumentParser</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span> <span class="c"># Scientific library</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="o">*</span> 
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">pylab</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="k">pass</span>
+   
+<span class="kn">from</span> <span class="nn">lib.IO</span> <span class="kn">import</span> <span class="o">*</span> 
+<span class="kn">from</span> <span class="nn">lib.graph</span> <span class="kn">import</span> <span class="n">raf</span>
+<span class="kn">from</span> <span class="nn">lib.graph</span> <span class="kn">import</span> <span class="n">network</span>
+<span class="kn">from</span> <span class="nn">lib.dyn</span> <span class="kn">import</span> <span class="n">dynamics</span> <span class="k">as</span> <span class="n">dm</span>
+
+<span class="c">#ÊInput parameters definition </span>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+	<span class="n">parser</span> <span class="o">=</span> <span class="n">ArgumentParser</span><span class="p">(</span>
+				<span class="n">description</span><span class="o">=</span><span class="s">&#39;Main script of ACS analysis.&#39;</span>
+				<span class="p">,</span> <span class="n">epilog</span><span class="o">=</span><span class="s">&#39;&#39;&#39;ACS ANALYSIS Main File. &#39;&#39;&#39;</span><span class="p">)</span> 
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-i&#39;</span><span class="p">,</span> <span class="s">&#39;--initanal&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Analysis of the initial structures (def: 0)&#39;</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-e&#39;</span><span class="p">,</span> <span class="s">&#39;--exhaustive&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Analysis of the dynamic structures (def: 1)&#39;</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-d&#39;</span><span class="p">,</span> <span class="s">&#39;--decay&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Decay time (def: 0)&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-t&#39;</span><span class="p">,</span> <span class="s">&#39;--timeWindow&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Dynamical time window (def: 10 seconds)&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-m&#39;</span><span class="p">,</span> <span class="s">&#39;--maxDim&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Max Dimension of the system (def: 4)&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;4&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-p&#39;</span><span class="p">,</span> <span class="s">&#39;--strPath&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Path where files are stored (def: ./)&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;./&#39;</span><span class="p">)</span>
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-r&#39;</span><span class="p">,</span> <span class="s">&#39;--resFolder&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Name of the result folder (def: res)&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;res&#39;</span><span class="p">)</span>
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-b&#39;</span><span class="p">,</span> <span class="s">&#39;--debug&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Debug Mode (Def: 0)&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+	
+	<span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+	
+	<span class="c"># Create absolute paths</span>
+	<span class="n">strPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">strPath</span><span class="p">)</span>
+	<span class="n">tmpDirs</span> <span class="o">=</span> <span class="n">sort</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">strPath</span><span class="p">))</span>
+	
+	<span class="c"># Goes into the simulation folder</span>
+	<span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">strPath</span><span class="p">)</span>
+	
+	<span class="c"># Create stas folders</span>
+	<span class="n">ndn</span> <span class="o">=</span> <span class="s">&#39;_0_new_allStatResults&#39;</span>
+	<span class="n">newdirAllResults</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">strPath</span><span class="p">,</span> <span class="n">ndn</span><span class="p">)</span>
+	<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">newdirAllResults</span><span class="p">):</span>
+		<span class="k">try</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">newdirAllResults</span><span class="p">)</span>
+		<span class="k">except</span><span class="p">:</span> <span class="k">print</span> <span class="s">&quot;Impossible to create statistic directory&quot;</span><span class="p">,</span> <span class="n">newdirAllResults</span><span class="p">;</span> <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+	<span class="k">print</span> <span class="s">&quot;</span><span class="se">\n\n</span><span class="s">********************</span><span class="se">\n\n</span><span class="s">|- Simulation Folder: &quot;</span><span class="p">,</span> <span class="n">strPath</span>
+	<span class="c"># System Type</span>
+	<span class="n">_CLOSE_</span> <span class="o">=</span> <span class="mi">0</span>
+	<span class="n">_PROTO_</span> <span class="o">=</span> <span class="mi">1</span>
+	<span class="n">_CSTR_</span> <span class="o">=</span> <span class="mi">2</span>
+	
+	<span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">initanal</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+		<span class="n">fname_initRafRes</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">newdirAllResults</span><span class="p">,</span> <span class="s">&#39;0_initRafAnalysis.csv&#39;</span><span class="p">)</span>
+		<span class="n">fname_initRafResLIST</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">newdirAllResults</span><span class="p">,</span> <span class="s">&#39;0_initRafAnalysisLIST.csv&#39;</span><span class="p">)</span>
+		<span class="n">fname_initRafResALL</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">newdirAllResults</span><span class="p">,</span> <span class="s">&#39;0_initRafAnalysisALL.csv&#39;</span><span class="p">)</span>
+		<span class="n">fid_initRafRes</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname_initRafRes</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+		<span class="n">fid_initRafResLIST</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname_initRafResLIST</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+		<span class="n">fid_initRafResALL</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname_initRafResALL</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+		<span class="n">strToWrite</span> <span class="o">=</span> <span class="s">&quot;Folder</span><span class="se">\t</span><span class="s">P</span><span class="se">\t</span><span class="s">AC</span><span class="se">\t</span><span class="s">M</span><span class="se">\t</span><span class="s">RAFsize</span><span class="se">\t</span><span class="s">ClosureSize</span><span class="se">\t</span><span class="s">CatsSize</span><span class="se">\t</span><span class="s">uRAF</span><span class="se">\t</span><span class="s">SCC</span><span class="se">\t</span><span class="s">AutoCat</span><span class="se">\n</span><span class="s">&quot;</span>
+		<span class="n">fid_initRafRes</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">strToWrite</span><span class="p">)</span>
+	
+	<span class="k">for</span> <span class="n">tmpDir</span> <span class="ow">in</span> <span class="n">tmpDirs</span><span class="p">:</span>
+		
+		<span class="n">totDirName</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">strPath</span><span class="p">,</span><span class="n">tmpDir</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">totDirName</span><span class="p">):</span>
+			<span class="c"># Move to the directory </span>
+			<span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">totDirName</span><span class="p">)</span>
+			
+			<span class="c"># SIMULATION DYNAMICS FOLDER</span>
+			<span class="n">resDirPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s">&quot;./&quot;</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">resFolder</span><span class="p">))</span>
+			<span class="k">print</span> <span class="s">&quot; \- Results Folder: &quot;</span><span class="p">,</span> <span class="n">totDirName</span>
+			<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">resDirPath</span><span class="p">):</span>
+				
+				<span class="c"># Analysis of the initial structures </span>
+				<span class="n">conf</span> <span class="o">=</span> <span class="n">readfiles</span><span class="o">.</span><span class="n">readConfFile</span><span class="p">(</span><span class="n">totDirName</span><span class="p">)</span> <span class="c"># Configuration file upload</span>
+				<span class="c"># System type recognition</span>
+				<span class="k">if</span> <span class="p">(</span><span class="n">conf</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">conf</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span> <span class="n">sysType</span> <span class="o">=</span> <span class="n">_PROTO_</span>
+				<span class="k">elif</span> <span class="p">(</span><span class="n">conf</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">conf</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span> <span class="n">sysType</span> <span class="o">=</span> <span class="n">_CSTR_</span>
+				<span class="k">elif</span> <span class="p">(</span><span class="n">conf</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">conf</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span> <span class="n">sysType</span> <span class="o">=</span> <span class="n">_CLOSE_</span>
+				<span class="n">foodList</span> <span class="o">=</span> <span class="n">dm</span><span class="o">.</span><span class="n">generateFluxList</span><span class="p">(</span><span class="n">totDirName</span><span class="p">,</span> <span class="n">sysType</span><span class="p">)</span>
+								
+				<span class="c"># Initial Analysis are turned ON (RAF ANALYSIS)</span>
+				<span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">initanal</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+					<span class="k">print</span> <span class="s">&quot;   |- LOADING init structures...&quot;</span>
+					<span class="n">rcts</span> <span class="o">=</span> <span class="n">readfiles</span><span class="o">.</span><span class="n">loadAllData</span><span class="p">(</span><span class="n">totDirName</span><span class="p">,</span><span class="s">&#39;_acsreactions.csv&#39;</span><span class="p">)</span> <span class="c"># reaction file upload</span>
+					<span class="n">cats</span> <span class="o">=</span> <span class="n">readfiles</span><span class="o">.</span><span class="n">loadAllData</span><span class="p">(</span><span class="n">totDirName</span><span class="p">,</span><span class="s">&#39;_acscatalysis.csv&#39;</span><span class="p">)</span> <span class="c"># catalysis file upload</span>
+					<span class="c"># REAL RAF COMPUTATION (!!!!!! 1 is average connectivity)</span>
+					<span class="n">network</span><span class="o">.</span><span class="n">net_analysis_of_static_graphs</span><span class="p">(</span><span class="n">fid_initRafRes</span><span class="p">,</span> <span class="n">fid_initRafResALL</span><span class="p">,</span> <span class="n">fid_initRafResLIST</span><span class="p">,</span> <span class="n">tmpDir</span><span class="p">,</span> <span class="n">conf</span><span class="p">[</span><span class="mi">9</span><span class="p">],</span> <span class="mi">1</span><span class="p">,</span> <span class="n">rcts</span><span class="p">,</span> <span class="n">cats</span><span class="p">,</span> <span class="n">foodList</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">maxDim</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">debug</span><span class="p">)</span>
+					
+				<span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">resDirPath</span><span class="p">)</span>
+				<span class="k">print</span> <span class="s">&quot;    \-Outcomes Folder &quot;</span><span class="p">,</span> <span class="n">resDirPath</span>
+				<span class="c"># Find the number of generations</span>
+				<span class="n">numberOfGen</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">resDirPath</span><span class="p">,</span><span class="s">&#39;times_*&#39;</span><span class="p">)))</span>
+				<span class="c"># For each generation</span>
+				<span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">resDirPath</span><span class="p">)</span>
+				
+				<span class="c"># Analysis of the dynamics</span>
+				<span class="k">if</span> <span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">exhaustive</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">decay</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+					<span class="k">print</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">|- Analysis of the dynamics...&quot;</span>
+					<span class="k">for</span> <span class="n">ngen</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">numberOfGen</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+						<span class="k">print</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">|-Generation &quot;</span><span class="p">,</span> <span class="n">ngen</span>
+						<span class="n">strZeros</span> <span class="o">=</span> <span class="n">readfiles</span><span class="o">.</span><span class="n">zeroBeforeStrNum</span><span class="p">(</span><span class="n">ngen</span><span class="p">,</span> <span class="n">numberOfGen</span><span class="p">)</span>
+						<span class="c"># IF CATALYIS </span>
+						<span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">exhaustive</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+							<span class="c"># Saving File Creation</span>
+							<span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">exhaustive</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+								<span class="k">print</span> <span class="s">&quot;</span><span class="se">\t\t</span><span class="s">|- Analysis of the ongoing data structures... &quot;</span>
+								<span class="n">fName</span> <span class="o">=</span> <span class="s">&#39;RAF_structuresInTime_analysis_gen_&#39;</span> <span class="o">+</span> <span class="n">strZeros</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ngen</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;.csv&#39;</span>
+								<span class="n">fname_inTimeRafRes</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">newdirAllResults</span><span class="p">,</span> <span class="n">fName</span><span class="p">)</span>
+								<span class="n">fid_inTimeRafRes</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname_inTimeRafRes</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+								<span class="k">if</span> <span class="n">conf</span><span class="p">[</span><span class="mi">10</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span> 
+									<span class="n">strToWrite</span> <span class="o">=</span> <span class="s">&quot;t</span><span class="se">\t</span><span class="s">#CL</span><span class="se">\t</span><span class="s">#RAF</span><span class="se">\t</span><span class="s">#SCC</span><span class="se">\t</span><span class="s">#SelfCats</span><span class="se">\t</span><span class="s">SCCinRAF</span><span class="se">\t</span><span class="s">RAF</span><span class="se">\n</span><span class="s">&quot;</span>
+									<span class="n">potential</span> <span class="o">=</span> <span class="bp">False</span>
+								<span class="k">else</span><span class="p">:</span> 
+									<span class="n">strToWrite</span> <span class="o">=</span> <span class="s">&quot;t</span><span class="se">\t</span><span class="s">#CL</span><span class="se">\t</span><span class="s">#RAF</span><span class="se">\t</span><span class="s">#PCL</span><span class="se">\t</span><span class="s">#PRAF</span><span class="se">\t</span><span class="s">#SCC</span><span class="se">\t</span><span class="s">#SelfCats</span><span class="se">\t</span><span class="s">SCCinRAF</span><span class="se">\t</span><span class="s">RAF</span><span class="se">\n</span><span class="s">&quot;</span>
+									<span class="n">potential</span> <span class="o">=</span> <span class="bp">True</span>
+								<span class="n">fid_inTimeRafRes</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">strToWrite</span><span class="p">)</span>
+							<span class="c"># reactions file loading</span>
+							<span class="k">if</span> <span class="n">ngen</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+						  		<span class="n">strRctZero</span> <span class="o">=</span> <span class="s">&#39;reactions_&#39;</span> <span class="o">+</span> <span class="n">strZeros</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;*&#39;</span>
+						  		<span class="n">strCatZero</span> <span class="o">=</span> <span class="s">&#39;catalysis_&#39;</span> <span class="o">+</span> <span class="n">strZeros</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;*&#39;</span>
+						  		<span class="n">rctFilesZero</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">resDirPath</span><span class="p">,</span><span class="n">strRctZero</span><span class="p">)))</span>
+						  		<span class="n">catFilesZero</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">resDirPath</span><span class="p">,</span><span class="n">strCatZero</span><span class="p">)))</span>
+							<span class="n">strRct</span> <span class="o">=</span> <span class="s">&#39;reactions_&#39;</span> <span class="o">+</span> <span class="n">strZeros</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ngen</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;*&#39;</span>  
+							<span class="n">strCat</span> <span class="o">=</span> <span class="s">&#39;catalysis_&#39;</span> <span class="o">+</span> <span class="n">strZeros</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ngen</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;*&#39;</span>  
+						  	<span class="c"># Searching for files</span>
+						  	<span class="n">rctFiles</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">resDirPath</span><span class="p">,</span><span class="n">strRct</span><span class="p">)))</span>
+						  	<span class="n">catFiles</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">resDirPath</span><span class="p">,</span><span class="n">strCat</span><span class="p">)))</span>
+						  	
+						  	<span class="k">if</span> <span class="n">ngen</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="c"># If the generation is the first one the 0000 files must be uploaded too</span>
+					  			<span class="n">rctFiles</span> <span class="o">=</span> <span class="n">rctFilesZero</span> <span class="o">+</span> <span class="n">rctFiles</span>
+					  			<span class="n">catFiles</span> <span class="o">=</span> <span class="n">catFilesZero</span> <span class="o">+</span> <span class="n">catFiles</span>
+					  		
+					  		<span class="n">sngTime</span> <span class="o">=</span> <span class="n">conf</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">rctFiles</span><span class="p">))</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+						  	<span class="n">actTime</span> <span class="o">=</span> <span class="mi">0</span>
+					  		
+					  		<span class="k">for</span> <span class="nb">id</span><span class="p">,</span> <span class="n">sngFile</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">rctFiles</span><span class="p">):</span>
+					  			<span class="c"># Load files</span>
+					  			<span class="n">rcts</span> <span class="o">=</span> <span class="n">readfiles</span><span class="o">.</span><span class="n">loadAllData</span><span class="p">(</span><span class="n">totDirName</span><span class="p">,</span><span class="n">sngFile</span><span class="p">)</span> <span class="c"># reaction file upload</span>
+								<span class="n">cats</span> <span class="o">=</span> <span class="n">readfiles</span><span class="o">.</span><span class="n">loadAllData</span><span class="p">(</span><span class="n">totDirName</span><span class="p">,</span><span class="n">catFiles</span><span class="p">[</span><span class="nb">id</span><span class="p">])</span> <span class="c"># catalysis file upload</span>
+								<span class="n">foodList</span> <span class="o">=</span> <span class="n">dm</span><span class="o">.</span><span class="n">generateFluxList</span><span class="p">(</span><span class="n">totDirName</span><span class="p">,</span> <span class="n">sysType</span><span class="p">)</span>
+								<span class="c"># Reshape rcts according to the reactions really occurred</span>
+								<span class="n">procrcts</span> <span class="o">=</span> <span class="n">rcts</span><span class="p">[</span><span class="n">rcts</span><span class="p">[:,</span><span class="mi">5</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,:]</span>
+								<span class="n">proccats</span> <span class="o">=</span> <span class="n">cats</span><span class="p">[</span><span class="n">cats</span><span class="p">[:,</span><span class="mi">3</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,:]</span>
+								<span class="n">R</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">net_analysis_of_dynamic_graphs</span><span class="p">(</span><span class="n">fid_inTimeRafRes</span><span class="p">,</span> <span class="n">actTime</span><span class="p">,</span> <span class="n">procrcts</span><span class="p">[:,</span><span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">],</span> <span class="n">proccats</span><span class="p">[:,</span><span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">],</span> \
+																		   <span class="n">foodList</span><span class="p">,</span> <span class="n">potential</span><span class="p">,</span> <span class="n">rcts</span><span class="p">,</span> <span class="n">cats</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">debug</span><span class="p">)</span>
+								<span class="c">#print R</span>
+								<span class="n">actTime</span> <span class="o">+=</span> <span class="n">sngTime</span>
+							
+							<span class="c"># Upload latest file</span>
+						  	<span class="n">lastRct</span> <span class="o">=</span> <span class="n">readfiles</span><span class="o">.</span><span class="n">loadAllData</span><span class="p">(</span><span class="n">totDirName</span><span class="p">,</span><span class="n">rctFiles</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="c"># reaction file upload</span>
+						  	<span class="n">lastCat</span> <span class="o">=</span> <span class="n">readfiles</span><span class="o">.</span><span class="n">loadAllData</span><span class="p">(</span><span class="n">totDirName</span><span class="p">,</span><span class="n">catFiles</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="c"># reaction file upload</span>
+						<span class="k">else</span><span class="p">:</span>
+							<span class="c"># Last reaction File is however loaded</span>
+							<span class="n">strRct</span> <span class="o">=</span> <span class="s">&#39;reactions_&#39;</span> <span class="o">+</span> <span class="n">strZeros</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ngen</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;*&#39;</span>  
+							<span class="n">strCat</span> <span class="o">=</span> <span class="s">&#39;catalysis_&#39;</span> <span class="o">+</span> <span class="n">strZeros</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ngen</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;*&#39;</span>  
+						  	<span class="c"># Searching for files</span>
+						  	<span class="n">rctFiles</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">resDirPath</span><span class="p">,</span><span class="n">strRct</span><span class="p">)))</span>
+						  	<span class="n">catFiles</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">resDirPath</span><span class="p">,</span><span class="n">strCat</span><span class="p">)))</span>
+						  	<span class="c"># Upload latest file</span>
+						  	<span class="n">lastRct</span> <span class="o">=</span> <span class="n">readfiles</span><span class="o">.</span><span class="n">loadAllData</span><span class="p">(</span><span class="n">totDirName</span><span class="p">,</span><span class="n">rctFiles</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="c"># reaction file upload</span>
+						  	<span class="n">lastCat</span> <span class="o">=</span> <span class="n">readfiles</span><span class="o">.</span><span class="n">loadAllData</span><span class="p">(</span><span class="n">totDirName</span><span class="p">,</span><span class="n">catFiles</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="c"># reaction file upload</span>
+							
+						<span class="c"># If decay analysis is TURNED ON (rections are added step by step to the graph and they are removed </span>
+						<span class="c"># if they do not occur twice within the decay time</span>
+						<span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">decay</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+							<span class="k">print</span> <span class="s">&quot;</span><span class="se">\t\t</span><span class="s">|- Analysis of the reactions actually occurred according to the decay time equal to &quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">decay</span><span class="p">)</span>
+							<span class="n">fName</span> <span class="o">=</span> <span class="s">&#39;RAF_dynamics_analysis_&#39;</span><span class="o">+</span> <span class="n">tmpDir</span> <span class="o">+</span><span class="s">&#39;_gen_&#39;</span> <span class="o">+</span> <span class="n">strZeros</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ngen</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;.csv&#39;</span>
+							<span class="n">fname_dynRafRes</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">newdirAllResults</span><span class="p">,</span> <span class="n">fName</span><span class="p">)</span>
+							<span class="n">fid_dynRafRes</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname_dynRafRes</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+							
+							<span class="c"># FILE FIRST RAW</span>
+							<span class="n">strToWrite</span> <span class="o">=</span> <span class="s">&quot;t</span><span class="se">\t</span><span class="s">#CL</span><span class="se">\t</span><span class="s">#RAF</span><span class="se">\t</span><span class="s">#SCC</span><span class="se">\t</span><span class="s">#SelfCats</span><span class="se">\t</span><span class="s">RAF</span><span class="se">\n</span><span class="s">&quot;</span>
+							<span class="n">fid_dynRafRes</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">strToWrite</span><span class="p">)</span>
+							
+							<span class="n">strRctPar</span> <span class="o">=</span> <span class="s">&#39;reactions_parameters_&#39;</span> <span class="o">+</span> <span class="n">strZeros</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ngen</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;*&#39;</span>
+							<span class="n">rctParamFile</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">resDirPath</span><span class="p">,</span><span class="n">strRctPar</span><span class="p">)))</span>
+							<span class="n">fid</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">rctParamFile</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+							<span class="n">previousTime</span> <span class="o">=</span> <span class="mi">0</span>
+							<span class="n">decayTime</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">decay</span>
+							<span class="n">condensation_counter</span> <span class="o">=</span> <span class="mi">0</span>
+							<span class="n">endo_condensation_counter</span> <span class="o">=</span> <span class="mi">0</span>
+							<span class="n">cleavage_counter</span> <span class="o">=</span> <span class="mi">0</span>
+							<span class="n">endo_cleavage_counter</span> <span class="o">=</span> <span class="mi">0</span>
+							<span class="n">nAnal</span> <span class="o">=</span> <span class="mi">1</span>
+							<span class="n">rctCurrID</span> <span class="o">=</span> <span class="mi">0</span>
+							<span class="n">catCurrID</span> <span class="o">=</span> <span class="mi">0</span>
+							<span class="n">realRctl</span> <span class="o">=</span> <span class="mi">0</span>
+							<span class="k">for</span> <span class="n">rctL</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">fid</span><span class="p">):</span>								 
+								<span class="c"># Load single reaction parameters</span>
+								<span class="n">reaction</span><span class="p">,</span> <span class="n">rtime</span><span class="p">,</span> <span class="n">cc</span><span class="p">,</span> <span class="n">cat</span><span class="p">,</span> <span class="n">mol_I</span><span class="p">,</span> <span class="n">mol_II</span><span class="p">,</span> <span class="n">mol_III</span><span class="p">,</span> <span class="n">loadedMolsConc</span><span class="p">,</span> <span class="n">loadedMols</span><span class="p">,</span>\
+		   						<span class="n">gillMean</span><span class="p">,</span> <span class="n">gillSD</span><span class="p">,</span> <span class="n">gillEntropy</span><span class="p">,</span> <span class="n">newSpeciesCreationProb</span><span class="p">,</span> <span class="n">reverseProbability</span> <span class="o">=</span> <span class="n">readfiles</span><span class="o">.</span><span class="n">splitRctParsLine</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+		   						
+		   						<span class="k">if</span> <span class="n">cc</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">:</span> 
+								
+									<span class="k">if</span> <span class="n">rctL</span> <span class="o">%</span> <span class="mi">10000</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="k">print</span> <span class="s">&quot;</span><span class="se">\t\t\t</span><span class="s">|- Reaction number &quot;</span><span class="p">,</span> <span class="n">rctL</span><span class="p">,</span> <span class="s">&quot; - Time: &quot;</span><span class="p">,</span> <span class="n">rtime</span>
+									
+									<span class="c"># update time intervals </span>
+									<span class="n">timeInterval</span> <span class="o">=</span> <span class="n">rtime</span> <span class="o">-</span> <span class="n">previousTime</span>
+									<span class="n">previousTime</span> <span class="o">=</span> <span class="n">rtime</span>
+					
+									<span class="k">if</span> <span class="n">realRctl</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+										<span class="c"># REACTIONS NOT OCCURING TWICE IN THE DACAY TIME ARE REMOVED FROM THE GRAPH</span>
+										<span class="n">graph</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">removeRareRcts</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="n">timeInterval</span><span class="p">)</span>
+										<span class="n">graphSUB</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">removeRareRcts</span><span class="p">(</span><span class="n">graphSUB</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="n">timeInterval</span><span class="p">)</span>
+										<span class="n">onrcts</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">removeRareRcts</span><span class="p">(</span><span class="n">onrcts</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="n">timeInterval</span><span class="p">)</span>
+										<span class="n">oncats</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">removeRareRcts</span><span class="p">(</span><span class="n">oncats</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="n">timeInterval</span><span class="p">)</span>
+									
+									<span class="c"># ONGOING REACTION STRUCTURES CREATION</span>
+									<span class="k">if</span> <span class="n">realRctl</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+										<span class="n">mol_I</span><span class="p">,</span> <span class="n">mol_II</span><span class="p">,</span> <span class="n">mol_III</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">fixCondensationReaction</span><span class="p">(</span><span class="n">mol_I</span><span class="p">,</span> <span class="n">mol_II</span><span class="p">,</span> <span class="n">mol_III</span><span class="p">,</span> <span class="n">lastRct</span><span class="p">)</span>
+										<span class="n">onrcts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">rctCurrID</span><span class="p">,</span> <span class="n">cc</span><span class="p">,</span> <span class="n">mol_I</span><span class="p">,</span> <span class="n">mol_II</span><span class="p">,</span> <span class="n">mol_III</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">1</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+										<span class="n">oncats</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">catCurrID</span><span class="p">,</span> <span class="n">cat</span><span class="p">,</span> <span class="n">onrcts</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">1</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+										<span class="n">rctCurrID</span> <span class="o">+=</span> <span class="mi">1</span>
+										<span class="n">catCurrID</span> <span class="o">+=</span> <span class="mi">1</span>
+									<span class="k">else</span><span class="p">:</span>
+										<span class="c"># !!! ONCSTR ANALYSIS</span>
+										<span class="n">mol_I</span><span class="p">,</span> <span class="n">mol_II</span><span class="p">,</span> <span class="n">mol_III</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">fixCondensationReaction</span><span class="p">(</span><span class="n">mol_I</span><span class="p">,</span> <span class="n">mol_II</span><span class="p">,</span> <span class="n">mol_III</span><span class="p">,</span> <span class="n">lastRct</span><span class="p">)</span>
+										<span class="k">if</span> <span class="nb">sum</span><span class="p">((</span><span class="n">onrcts</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">cc</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">onrcts</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">mol_I</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">onrcts</span><span class="p">[:,</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="n">mol_II</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+											<span class="n">positionR</span> <span class="o">=</span> <span class="p">((</span><span class="n">onrcts</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">cc</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">onrcts</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">mol_I</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">onrcts</span><span class="p">[:,</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="n">mol_II</span><span class="p">))</span>	
+											<span class="n">onrcts</span><span class="p">[</span><span class="n">positionR</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">onrcts</span><span class="p">[</span><span class="n">positionR</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">cc</span><span class="p">,</span> <span class="n">mol_I</span><span class="p">,</span> <span class="n">mol_II</span><span class="p">,</span> <span class="n">mol_III</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="n">onrcts</span><span class="p">[</span><span class="n">positionR</span><span class="p">,</span><span class="mi">8</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>	
+										<span class="k">else</span><span class="p">:</span>
+											<span class="k">if</span> <span class="n">rctCurrID</span> <span class="ow">in</span> <span class="n">onrcts</span><span class="p">[:</span><span class="mi">0</span><span class="p">]:</span> 
+												<span class="k">print</span> <span class="n">onrcts</span>
+												<span class="k">print</span> <span class="n">rctCurrID</span><span class="p">,</span> <span class="n">cc</span><span class="p">,</span> <span class="n">mol_I</span><span class="p">,</span> <span class="n">mol_II</span><span class="p">,</span> <span class="n">mol_III</span>
+												<span class="k">print</span> <span class="n">rctL</span>
+											<span class="n">onrcts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">onrcts</span><span class="p">,(</span><span class="n">rctCurrID</span><span class="p">,</span> <span class="n">cc</span><span class="p">,</span> <span class="n">mol_I</span><span class="p">,</span> <span class="n">mol_II</span><span class="p">,</span> <span class="n">mol_III</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">1</span><span class="p">)])</span>	
+											<span class="n">positionR</span> <span class="o">=</span> <span class="n">onrcts</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">rctCurrID</span>
+											<span class="n">rctCurrID</span> <span class="o">+=</span> <span class="mi">1</span>	
+																				
+										<span class="c"># !!! ONCAT ANALYSIS</span>
+										<span class="k">if</span> <span class="nb">sum</span><span class="p">((</span><span class="n">oncats</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">cat</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">oncats</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">onrcts</span><span class="p">[</span><span class="n">positionR</span><span class="p">,</span><span class="mi">0</span><span class="p">]))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+											<span class="n">position</span> <span class="o">=</span> <span class="p">((</span><span class="n">oncats</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">cat</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">oncats</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">onrcts</span><span class="p">[</span><span class="n">positionR</span><span class="p">,</span><span class="mi">0</span><span class="p">]))</span>	
+											<span class="n">oncats</span><span class="p">[</span><span class="n">position</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">oncats</span><span class="p">[</span><span class="n">position</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">cat</span><span class="p">,</span> <span class="n">onrcts</span><span class="p">[</span><span class="n">positionR</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="n">oncats</span><span class="p">[</span><span class="n">position</span><span class="p">,</span><span class="mi">6</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>	
+										<span class="k">else</span><span class="p">:</span>
+											<span class="c">#print positionR</span>
+											<span class="n">oncats</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">oncats</span><span class="p">,(</span><span class="n">catCurrID</span><span class="p">,</span> <span class="n">cat</span><span class="p">,</span> <span class="n">onrcts</span><span class="p">[</span><span class="n">positionR</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">1</span><span class="p">)])</span>
+											<span class="n">catCurrID</span> <span class="o">+=</span> <span class="mi">1</span>
+									
+									
+									
+									<span class="c"># RAF and SCC ANALYSIS	</span>
+									<span class="k">if</span> <span class="n">rtime</span> <span class="o">&gt;=</span> <span class="nb">float</span><span class="p">((</span><span class="n">args</span><span class="o">.</span><span class="n">timeWindow</span> <span class="o">*</span> <span class="n">nAnal</span><span class="p">)):</span>
+										<span class="k">print</span> <span class="s">&quot;</span><span class="se">\t\t\t</span><span class="s">|- RAF analysis...&quot;</span><span class="p">,</span> <span class="s">&quot; &quot;</span><span class="p">,</span> <span class="n">rtime</span><span class="p">,</span> <span class="s">&quot; - Reaction &quot;</span><span class="p">,</span> <span class="n">rctL</span>
+										<span class="n">foodList</span> <span class="o">=</span> <span class="n">dm</span><span class="o">.</span><span class="n">generateFluxList</span><span class="p">(</span><span class="n">totDirName</span><span class="p">,</span> <span class="n">sysType</span><span class="p">)</span>
+										<span class="n">netouts</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">net_analysis_of_dynamic_graphs</span><span class="p">(</span><span class="n">fid_dynRafRes</span><span class="p">,</span> <span class="n">rtime</span><span class="p">,</span> <span class="n">onrcts</span><span class="p">[:,</span><span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">],</span> <span class="n">oncats</span><span class="p">[:,</span><span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">],</span> <span class="n">foodList</span><span class="p">,</span>\
+																				   <span class="bp">False</span><span class="p">,</span> <span class="n">completeRCTS</span><span class="o">=</span><span class="n">lastRct</span> <span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">debug</span><span class="p">)</span>
+										
+										<span class="n">nAnal</span> <span class="o">+=</span> <span class="mi">1</span>
+									
+									<span class="c"># REACTION GRAPH CREATION</span>
+									
+									<span class="k">if</span> <span class="p">(</span><span class="n">cc</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span><span class="o">|</span><span class="p">(</span><span class="n">cc</span> <span class="o">==</span> <span class="mi">7</span><span class="p">):</span> <span class="c"># CONDENSATION and ENDO CONDENSATION</span>
+										<span class="k">if</span> <span class="n">cc</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+											<span class="n">condensation_counter</span> <span class="o">+=</span> <span class="mi">1</span>
+										<span class="k">else</span><span class="p">:</span>
+											<span class="n">endo_condensation_counter</span> <span class="o">+=</span>  <span class="mi">1</span>
+											
+										<span class="k">if</span> <span class="n">realRctl</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="c">#If it is the first reaction nparray (matrix) is created</span>
+											<span class="n">graph</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">cat</span><span class="p">,</span> <span class="n">mol_I</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+											<span class="n">graphSUB</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">mol_II</span><span class="p">,</span> <span class="n">mol_I</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+											<span class="k">if</span> <span class="n">mol_II</span> <span class="o">!=</span> <span class="n">mol_III</span><span class="p">:</span>
+												<span class="n">graphSUB</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">graphSUB</span><span class="p">,(</span><span class="n">mol_III</span><span class="p">,</span> <span class="n">mol_I</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">1</span><span class="p">)])</span> <span class="c"># Substrate 2 (If different from 1)</span>
+										<span class="k">else</span><span class="p">:</span> 
+											<span class="c">#!!! CAT -&gt; PRO, Otherwise if the reaction is already present its parameters are updated</span>
+											<span class="k">if</span> <span class="nb">sum</span><span class="p">((</span><span class="n">graph</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">cat</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">graph</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">mol_I</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+												<span class="n">position</span> <span class="o">=</span> <span class="p">((</span><span class="n">graph</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">cat</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">graph</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">mol_I</span><span class="p">))</span>
+												<span class="n">graph</span><span class="p">[</span><span class="n">position</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">cat</span><span class="p">,</span> <span class="n">mol_I</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="n">graph</span><span class="p">[</span><span class="n">position</span><span class="p">,</span><span class="mi">5</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+											<span class="k">else</span><span class="p">:</span>
+												<span class="c"># Otherwise a new reaction is added at the end of the matrix</span>
+												<span class="n">graph</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">graph</span><span class="p">,(</span><span class="n">cat</span><span class="p">,</span> <span class="n">mol_I</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">1</span><span class="p">)])</span>
+								
+											<span class="c">#!!! SUB -&gt; PRO, Otherwise if the reaction is already present its parameters are updated</span>
+											<span class="k">if</span> <span class="nb">sum</span><span class="p">((</span><span class="n">graphSUB</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">mol_II</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">graphSUB</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">mol_I</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+												<span class="n">position</span> <span class="o">=</span> <span class="p">((</span><span class="n">graphSUB</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">mol_II</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">graphSUB</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">mol_I</span><span class="p">))</span>
+												<span class="n">graphSUB</span><span class="p">[</span><span class="n">position</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">mol_II</span><span class="p">,</span> <span class="n">mol_I</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="n">graphSUB</span><span class="p">[</span><span class="n">position</span><span class="p">,</span><span class="mi">5</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+											<span class="k">else</span><span class="p">:</span>
+												<span class="c"># Otherwise a new reaction is added at the end of the matrix</span>
+												<span class="n">graphSUB</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">graphSUB</span><span class="p">,(</span><span class="n">mol_II</span><span class="p">,</span> <span class="n">mol_I</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">1</span><span class="p">)])</span>
+											<span class="k">if</span> <span class="n">mol_II</span> <span class="o">!=</span> <span class="n">mol_III</span><span class="p">:</span>
+												<span class="k">if</span> <span class="nb">sum</span><span class="p">((</span><span class="n">graphSUB</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">mol_III</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">graphSUB</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">mol_I</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+													<span class="n">position</span> <span class="o">=</span> <span class="p">((</span><span class="n">graphSUB</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">mol_III</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">graphSUB</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">mol_I</span><span class="p">))</span>
+													<span class="n">graphSUB</span><span class="p">[</span><span class="n">position</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">mol_III</span><span class="p">,</span> <span class="n">mol_I</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="n">graphSUB</span><span class="p">[</span><span class="n">position</span><span class="p">,</span><span class="mi">5</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+												<span class="k">else</span><span class="p">:</span>
+													<span class="n">graphSUB</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">graphSUB</span><span class="p">,(</span><span class="n">mol_III</span><span class="p">,</span> <span class="n">mol_I</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">1</span><span class="p">)])</span>	
+															
+											
+									<span class="k">else</span><span class="p">:</span> <span class="c"># CLEAVAGE (The same of condensation expected for the double computation due to the presence of two products</span>
+										<span class="k">if</span> <span class="n">cc</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
+											<span class="n">endo_cleavage_counter</span> <span class="o">+=</span> <span class="mi">1</span>
+										<span class="k">else</span><span class="p">:</span>
+											<span class="n">cleavage_counter</span> <span class="o">+=</span>  <span class="mi">1</span>
+											
+										<span class="k">if</span> <span class="n">realRctl</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="c"># If it is the first reaction nparray is created</span>
+											<span class="c"># CAT -&gt; PROD</span>
+											<span class="n">graph</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">cat</span><span class="p">,</span> <span class="n">mol_II</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span> <span class="c"># Product 1</span>
+											<span class="k">if</span> <span class="n">mol_II</span> <span class="o">!=</span> <span class="n">mol_III</span><span class="p">:</span>
+												<span class="n">graph</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">graph</span><span class="p">,(</span><span class="n">cat</span><span class="p">,</span> <span class="n">mol_III</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">1</span><span class="p">)])</span> <span class="c"># Product 2 (If different from 1)</span>
+											<span class="c"># SUB -&gt; PRO</span>
+											<span class="n">graphSUB</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">mol_I</span><span class="p">,</span> <span class="n">mol_II</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+											<span class="k">if</span> <span class="n">mol_II</span> <span class="o">!=</span> <span class="n">mol_III</span><span class="p">:</span>
+												<span class="n">graphSUB</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">graphSUB</span><span class="p">,(</span><span class="n">mol_I</span><span class="p">,</span> <span class="n">mol_III</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">1</span><span class="p">)])</span> <span class="c"># Sub 2 (If different from 1)					</span>
+										<span class="k">else</span><span class="p">:</span>
+											<span class="k">if</span> <span class="nb">sum</span><span class="p">((</span><span class="n">graph</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">cat</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">graph</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">mol_II</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+												<span class="n">position</span> <span class="o">=</span> <span class="p">((</span><span class="n">graph</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">cat</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">graph</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">mol_II</span><span class="p">))</span>
+												<span class="n">graph</span><span class="p">[</span><span class="n">position</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">cat</span><span class="p">,</span> <span class="n">mol_II</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="n">graph</span><span class="p">[</span><span class="n">position</span><span class="p">,</span><span class="mi">5</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+											<span class="k">else</span><span class="p">:</span>
+												<span class="n">graph</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">graph</span><span class="p">,(</span><span class="n">cat</span><span class="p">,</span> <span class="n">mol_II</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">1</span><span class="p">)])</span>				
+											<span class="k">if</span> <span class="n">mol_II</span> <span class="o">!=</span> <span class="n">mol_III</span><span class="p">:</span>
+												<span class="k">if</span> <span class="nb">sum</span><span class="p">((</span><span class="n">graph</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">cat</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">graph</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">mol_III</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+													<span class="n">position</span> <span class="o">=</span> <span class="p">((</span><span class="n">graph</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">cat</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">graph</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">mol_III</span><span class="p">))</span>
+													<span class="n">graph</span><span class="p">[</span><span class="n">position</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">cat</span><span class="p">,</span> <span class="n">mol_III</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="n">graph</span><span class="p">[</span><span class="n">position</span><span class="p">,</span><span class="mi">5</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+												<span class="k">else</span><span class="p">:</span>
+													<span class="n">graph</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">graph</span><span class="p">,(</span><span class="n">cat</span><span class="p">,</span> <span class="n">mol_III</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">1</span><span class="p">)])</span>
+											<span class="c"># SUB -&gt; PRO, Otherwise if the reaction is already present its parameters are updated</span>
+											<span class="k">if</span> <span class="nb">sum</span><span class="p">((</span><span class="n">graphSUB</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">mol_I</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">graphSUB</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">mol_II</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+												<span class="n">position</span> <span class="o">=</span> <span class="p">((</span><span class="n">graphSUB</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">mol_I</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">graphSUB</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">mol_II</span><span class="p">))</span>
+												<span class="n">graphSUB</span><span class="p">[</span><span class="n">position</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">mol_I</span><span class="p">,</span> <span class="n">mol_II</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="n">graphSUB</span><span class="p">[</span><span class="n">position</span><span class="p">,</span><span class="mi">5</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+											<span class="k">else</span><span class="p">:</span>
+												<span class="c"># Otherwise a new reaction is added at the end of the matrix</span>
+												<span class="n">graphSUB</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">graphSUB</span><span class="p">,(</span><span class="n">mol_I</span><span class="p">,</span> <span class="n">mol_II</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">1</span><span class="p">)])</span>
+											<span class="k">if</span> <span class="n">mol_II</span> <span class="o">!=</span> <span class="n">mol_III</span><span class="p">:</span>
+												<span class="k">if</span> <span class="nb">sum</span><span class="p">((</span><span class="n">graphSUB</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">mol_I</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">graphSUB</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">mol_III</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+													<span class="n">position</span> <span class="o">=</span> <span class="p">((</span><span class="n">graphSUB</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">mol_I</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">graphSUB</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">mol_III</span><span class="p">))</span>
+													<span class="n">graphSUB</span><span class="p">[</span><span class="n">position</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">mol_I</span><span class="p">,</span> <span class="n">mol_III</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="n">graphSUB</span><span class="p">[</span><span class="n">position</span><span class="p">,</span><span class="mi">5</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+												<span class="k">else</span><span class="p">:</span>
+													<span class="n">graphSUB</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">graphSUB</span><span class="p">,(</span><span class="n">mol_I</span><span class="p">,</span> <span class="n">mol_III</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">decayTime</span><span class="p">,</span> <span class="mi">1</span><span class="p">)])</span>	
+									<span class="n">realRctl</span> <span class="o">+=</span> <span class="mi">1</span>
+									
+	
+							<span class="n">fid</span><span class="o">.</span><span class="n">close</span><span class="p">()</span> <span class="c"># close fid</span>
+							<span class="k">del</span> <span class="n">graph</span>
+							<span class="k">del</span> <span class="n">graphSUB</span>
+							<span class="k">del</span> <span class="n">onrcts</span>
+							<span class="k">del</span> <span class="n">oncats</span>
+		
+					
+	<span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">initanal</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> 
+		<span class="n">fid_initRafRes</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+		<span class="n">fid_initRafResLIST</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+		<span class="n">fid_initRafResALL</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	
+	<span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">exhaustive</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="n">fid_inTimeRafRes</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	
+					
+				  	
+				  	
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Alessandro Filisetti.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

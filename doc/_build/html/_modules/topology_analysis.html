@@ -1,0 +1,363 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>topology_analysis &mdash; ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '20140204.004',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for topology_analysis</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/python</span>
+<span class="c"># -*- coding: latin-1 -*-</span>
+<span class="sd">&#39;&#39;&#39;Script to order the analysis of the divergences in time. </span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span> <span class="c"># Standard librar</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span> <span class="c"># Scientific library</span>
+<span class="kn">import</span> <span class="nn">itertools</span> <span class="kn">as</span> <span class="nn">it</span>
+<span class="kn">import</span> <span class="nn">random</span> <span class="kn">as</span> <span class="nn">ran</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="o">*</span> 
+<span class="kn">from</span> <span class="nn">argparse</span> <span class="kn">import</span> <span class="n">ArgumentParser</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">pylab</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="k">pass</span>
+   
+<span class="kn">from</span> <span class="nn">lib.graph</span> <span class="kn">import</span> <span class="n">raf</span>
+<span class="kn">from</span> <span class="nn">lib.graph</span> <span class="kn">import</span> <span class="n">scc</span>
+<span class="kn">from</span> <span class="nn">lib.graph</span> <span class="kn">import</span> <span class="n">network</span>
+<span class="kn">from</span> <span class="nn">lib.dyn</span> <span class="kn">import</span> <span class="n">dynamics</span> <span class="k">as</span> <span class="n">dn</span>
+<span class="kn">from</span> <span class="nn">lib.model</span> <span class="kn">import</span> <span class="n">species</span> <span class="k">as</span> <span class="n">sp</span>
+<span class="kn">from</span> <span class="nn">lib.model</span> <span class="kn">import</span> <span class="n">reactions</span>
+
+
+<span class="c">#  Input parameters definition </span>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+	<span class="n">parser</span> <span class="o">=</span> <span class="n">ArgumentParser</span><span class="p">(</span>
+				<span class="n">description</span><span class="o">=</span><span class="s">&#39;This script perform a topological analysis of random catalytic reaction networks.&#39;</span>
+				<span class="p">,</span> <span class="n">epilog</span><span class="o">=</span><span class="s">&#39;&#39;&#39;Random Catalytic Reaction Networks Topological Assessment &#39;&#39;&#39;</span><span class="p">)</span> 
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-k&#39;</span><span class="p">,</span> <span class="s">&#39;--creationMethod&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Network creation method (1: Filisetti, 2: Wim, 3: WimNoRevs, 4: Filisetti with revs, DEF: 1)&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;1&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-f&#39;</span><span class="p">,</span> <span class="s">&#39;--lastFood&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Last food species ID (deafult: 5)&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;5&#39;</span><span class="p">)</span>
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-o&#39;</span><span class="p">,</span> <span class="s">&#39;--strOut&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Path for output file storing (Default: ./)&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;./&#39;</span><span class="p">)</span>
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-M&#39;</span><span class="p">,</span> <span class="s">&#39;--maxDim&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Max Dimension of the systems (Default: 10)&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;10&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-m&#39;</span><span class="p">,</span> <span class="s">&#39;--minDim&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;min Dimension of the systems (Default: 5)&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;5&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-i&#39;</span><span class="p">,</span> <span class="s">&#39;--iteration&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;How many network instances per dimension are created (Default: 10)&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;10&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-n&#39;</span><span class="p">,</span> <span class="s">&#39;--noCat&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Non catalytic max length (default: 2)&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;2&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-c&#39;</span><span class="p">,</span> <span class="s">&#39;--rctRatio&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Ratio between cleavages and condensations (default: 0, it means that the actual ratio is used)&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;0&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>	
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-r&#39;</span><span class="p">,</span> <span class="s">&#39;--randomSeed&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;random seed&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+	<span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+	
+	<span class="k">print</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">System Initialization...&quot;</span>
+	<span class="n">ran</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">randomSeed</span><span class="p">)</span>
+	
+	<span class="c"># Create stas folders</span>
+	<span class="n">ndn</span> <span class="o">=</span> <span class="s">&#39;_topological_assessment_&#39;</span> <span class="o">+</span>  <span class="nb">str</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">creationMethod</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">lastFood</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">noCat</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">rctRatio</span><span class="p">)</span>
+	<span class="n">newdirAllResults</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">strOut</span><span class="p">,</span> <span class="n">ndn</span><span class="p">)</span>
+	<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">newdirAllResults</span><span class="p">):</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">newdirAllResults</span><span class="p">)</span>
+		<span class="k">except</span><span class="p">:</span>
+			<span class="k">print</span> <span class="s">&quot;Impossible to create statistic directory&quot;</span><span class="p">,</span> <span class="n">newdirAllResults</span><span class="p">;</span> <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+	
+	<span class="k">print</span> <span class="s">&quot;|- Output Folder: &quot;</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">strOut</span>
+
+	<span class="n">fname_initRafRes</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">newdirAllResults</span><span class="p">,</span> <span class="s">&#39;0_initRafAnalysis.csv&#39;</span><span class="p">)</span>
+	<span class="n">fname_initRafResSUM</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">newdirAllResults</span><span class="p">,</span> <span class="s">&#39;0_initRafAnalysisSUM.csv&#39;</span><span class="p">)</span>
+	<span class="n">fname_initRafResLIST</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">newdirAllResults</span><span class="p">,</span> <span class="s">&#39;0_initRafAnalysisLIST.csv&#39;</span><span class="p">)</span>
+	<span class="n">fname_initRafResALL</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">newdirAllResults</span><span class="p">,</span> <span class="s">&#39;0_initRafAnalysisALL.csv&#39;</span><span class="p">)</span>
+	<span class="n">fid_initRafRes</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname_initRafRes</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+	<span class="n">fid_initRafResSUM</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname_initRafResSUM</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+	<span class="n">fid_initRafResLIST</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname_initRafResLIST</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+	<span class="n">fid_initRafResALL</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname_initRafResALL</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+	<span class="n">strToWrite</span> <span class="o">=</span> <span class="s">&quot;Folder</span><span class="se">\t</span><span class="s">P</span><span class="se">\t</span><span class="s">AC</span><span class="se">\t</span><span class="s">M</span><span class="se">\t</span><span class="s">RAFsize</span><span class="se">\t</span><span class="s">Closure</span><span class="se">\t</span><span class="s">Cats</span><span class="se">\t</span><span class="s">uRAF</span><span class="se">\t</span><span class="s">SCC</span><span class="se">\t</span><span class="s">AutoCat</span><span class="se">\n</span><span class="s">&quot;</span>
+	<span class="n">fid_initRafRes</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">strToWrite</span><span class="p">)</span>
+	<span class="n">strToWrite</span> <span class="o">=</span> <span class="s">&quot;P</span><span class="se">\t</span><span class="s">M</span><span class="se">\t</span><span class="s">AC</span><span class="se">\t</span><span class="s">RAF%</span><span class="se">\t</span><span class="s">SCC%</span><span class="se">\t</span><span class="s">%SCCinRAF</span><span class="se">\t</span><span class="s">%SelfInRAF</span><span class="se">\t</span><span class="s">TIME</span><span class="se">\n</span><span class="s">&quot;</span>
+	<span class="n">fid_initRafResSUM</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">strToWrite</span><span class="p">)</span>
+	
+	<span class="k">for</span> <span class="n">maxlength</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">minDim</span><span class="p">,</span><span class="n">args</span><span class="o">.</span><span class="n">maxDim</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span> 
+		<span class="c">#sys.stdout.flush() # Force save data on file</span>
+		<span class="n">increaseYet</span> <span class="o">=</span> <span class="bp">True</span> 
+		<span class="n">averageConn</span> <span class="o">=</span> <span class="mf">0.1</span>
+		<span class="k">while</span> <span class="p">(</span><span class="n">increaseYet</span> <span class="o">==</span> <span class="bp">True</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">averageConn</span> <span class="o">&lt;=</span> <span class="mi">4</span><span class="p">):</span>
+			<span class="n">time1</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+			<span class="n">raffound</span> <span class="o">=</span> <span class="mi">0</span>
+			<span class="n">sccfound</span> <span class="o">=</span> <span class="mi">0</span>
+			<span class="n">sccinraffound</span> <span class="o">=</span> <span class="mi">0</span>
+			<span class="n">self_sccinraffound</span> <span class="o">=</span> <span class="mi">0</span>
+			<span class="n">iterations</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">args</span><span class="o">.</span><span class="n">iteration</span><span class="o">/</span><span class="p">(</span><span class="n">maxlength</span><span class="o">+</span><span class="mi">1</span><span class="o">-</span><span class="n">args</span><span class="o">.</span><span class="n">minDim</span><span class="p">)))</span>
+			<span class="k">for</span> <span class="n">instanceID</span><span class="p">,</span> <span class="n">instance</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">((</span><span class="nb">range</span><span class="p">(</span><span class="n">iterations</span><span class="p">))):</span> 
+				<span class="n">nCleavage</span> <span class="o">=</span> <span class="mi">0</span>
+				<span class="n">nCondensa</span> <span class="o">=</span> <span class="mi">0</span>
+				
+				<span class="c"># Create the complete population of species according to the Max Length and the alphabet</span>
+				<span class="n">alphabet</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;A&#39;</span><span class="p">,</span> <span class="s">&#39;B&#39;</span><span class="p">]</span>
+				<span class="n">species</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">createCompleteSpeciesPopulation</span><span class="p">(</span><span class="n">maxlength</span><span class="p">,</span> <span class="n">alphabet</span><span class="p">)</span>
+				
+				<span class="c"># compute population carinality</span>
+				<span class="n">totSpecies</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">getTotNumberOfSpeciesFromCompletePop</span><span class="p">(</span><span class="n">maxlength</span><span class="p">)</span>
+				
+				<span class="c"># Compute overall conceivable number of reactions</span>
+				<span class="n">totCleavage</span> <span class="o">=</span> <span class="n">reactions</span><span class="o">.</span><span class="n">getNumOfCleavages</span><span class="p">(</span><span class="n">species</span><span class="p">)</span>
+				
+				<span class="k">if</span> <span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">creationMethod</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">creationMethod</span> <span class="o">==</span> <span class="mi">4</span><span class="p">):</span> <span class="n">totCond</span> <span class="o">=</span> <span class="n">reactions</span><span class="o">.</span><span class="n">getNumOfCondensations</span><span class="p">(</span><span class="n">totSpecies</span><span class="p">)</span>
+				<span class="k">else</span><span class="p">:</span> <span class="n">totCond</span> <span class="o">=</span> <span class="mi">0</span>
+				<span class="n">totRcts</span> <span class="o">=</span> <span class="n">totCleavage</span> <span class="o">+</span> <span class="n">totCond</span>
+				
+				<span class="c"># If the reaction probability is 0, it is set to the critical value of 1 reaction per species on average</span>
+				<span class="n">prob</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">totRcts</span><span class="p">))</span> <span class="o">*</span> <span class="n">averageConn</span>
+				
+				
+				<span class="k">if</span> <span class="n">instanceID</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="k">print</span> <span class="s">&#39;|- Max Length: &#39;</span><span class="p">,</span> <span class="n">maxlength</span><span class="p">,</span> <span class="s">&#39; - AVG CON: &#39;</span><span class="p">,</span> <span class="n">averageConn</span><span class="p">,</span> <span class="s">&#39; - Species: &#39;</span><span class="p">,</span> \
+									<span class="n">totSpecies</span><span class="p">,</span> <span class="s">&#39;- Reactions: &#39;</span><span class="p">,</span> <span class="n">totRcts</span><span class="p">,</span> <span class="s">&#39; &lt;- Condensations: &#39;</span><span class="p">,</span> <span class="n">totCond</span><span class="p">,</span> <span class="s">&#39; - Cleavage: &#39;</span><span class="p">,</span> <span class="n">totCleavage</span>
+				<span class="c"># Compute reactions to catalyse according to the probability</span>
+				<span class="c"># rctToCat = int(round(totRcts * totSpecies * prob))</span>
+				<span class="n">rctToCat</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">totSpecies</span> <span class="o">*</span> <span class="n">averageConn</span><span class="p">))</span>
+				<span class="k">if</span> <span class="n">instanceID</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="k">print</span> <span class="s">&#39;</span><span class="se">\t\t</span><span class="s">|- P: &#39;</span><span class="p">,</span> <span class="n">prob</span><span class="p">,</span> <span class="s">&#39; , Species (&#39;</span><span class="p">,</span> <span class="n">totSpecies</span><span class="p">,</span> \
+											<span class="s">&#39;), , reactions (&#39;</span><span class="p">,</span> <span class="n">totRcts</span> <span class="p">,</span><span class="s">&#39;),&#39;</span><span class="p">,</span> <span class="n">rctToCat</span><span class="p">,</span>\
+											<span class="s">&#39; catalysis. Iteration --&gt; &#39;</span><span class="p">,</span> <span class="n">iterations</span>
+				
+				<span class="n">initSpeciesListLength</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">species</span><span class="p">)</span>
+				
+				<span class="n">conf</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2000</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">200000</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="n">args</span><span class="o">.</span><span class="n">lastFood</span><span class="p">,</span><span class="n">prob</span><span class="p">)</span>	
+				<span class="n">reactionID</span> <span class="o">=</span> <span class="mi">0</span>
+				<span class="n">catalysisID</span> <span class="o">=</span> <span class="mi">0</span>
+				<span class="c">#print &quot;\t\t|- NET creation... &quot;</span>
+				<span class="n">checkRct</span> <span class="o">=</span> <span class="bp">False</span>
+				<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">rctToCat</span><span class="p">):</span>
+					<span class="c"># Select if condensation of cleavage according to the total number of reactions</span>
+					<span class="c">#if rctToCat &gt; 1000: </span>
+					<span class="c">#	if i % 1000 == 0: print &quot;\t\t\t|- Reaction &quot;, i, &quot; - species list L: &quot;, len(species)</span>
+					<span class="n">rctType</span> <span class="o">=</span> <span class="mi">1</span>
+					<span class="k">if</span> <span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">creationMethod</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">creationMethod</span> <span class="o">==</span> <span class="mi">4</span><span class="p">):</span>
+						<span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">rctRatio</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span> 
+							<span class="k">if</span> <span class="n">ran</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">args</span><span class="o">.</span><span class="n">rctRatio</span><span class="p">:</span> <span class="n">rctType</span> <span class="o">=</span> <span class="mi">0</span>
+						<span class="k">else</span><span class="p">:</span>
+							<span class="k">if</span> <span class="p">(</span><span class="n">totCleavage</span> <span class="o">/</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">totCleavage</span><span class="p">)</span> <span class="o">+</span> <span class="n">totCond</span><span class="p">))</span> <span class="o">&lt;=</span> <span class="n">ran</span><span class="o">.</span><span class="n">random</span><span class="p">():</span> <span class="n">rctType</span> <span class="o">=</span> <span class="mi">0</span>
+					
+					 
+					<span class="c"># If cleavage</span>
+					<span class="k">if</span> <span class="p">(</span><span class="n">rctType</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">nCleavage</span> <span class="o">&lt;=</span> <span class="n">totCleavage</span><span class="p">):</span>
+						<span class="c"># Select species to cleave</span>
+						<span class="n">rctnew</span> <span class="o">=</span> <span class="bp">False</span>
+						<span class="c"># Create random cleavage</span>
+						<span class="n">molToCleav</span><span class="p">,</span> <span class="n">tmp1</span><span class="p">,</span> <span class="n">tmp2</span><span class="p">,</span> <span class="n">tmp1id</span><span class="p">,</span> <span class="n">tmp2id</span><span class="p">,</span> <span class="n">find1</span> <span class="o">=</span> <span class="n">reactions</span><span class="o">.</span><span class="n">createRandomCleavage</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">alphabet</span><span class="p">,</span> <span class="n">initSpeciesListLength</span><span class="p">)</span>
+						<span class="c"># Check if the reaction is new</span>
+						<span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="n">rctnew</span> <span class="o">=</span> <span class="bp">True</span>
+						<span class="k">else</span><span class="p">:</span>
+							<span class="k">if</span> <span class="n">find1</span> <span class="o">==</span> <span class="bp">True</span><span class="p">:</span>
+								<span class="k">if</span> <span class="nb">sum</span><span class="p">((</span><span class="n">rcts</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">rcts</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">species</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">molToCleav</span><span class="p">))</span> \
+									<span class="o">&amp;</span> <span class="p">(</span><span class="n">rcts</span><span class="p">[:,</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="n">tmp1id</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="n">rctnew</span> <span class="o">=</span> <span class="bp">True</span>
+							
+						
+						<span class="k">if</span> <span class="n">rctnew</span><span class="p">:</span>
+							<span class="k">if</span> <span class="n">reactionID</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+								<span class="n">rcts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="nb">int</span><span class="p">(</span><span class="n">reactionID</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">rctType</span><span class="p">),</span> <span class="n">species</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">molToCleav</span><span class="p">),</span> <span class="n">tmp1id</span><span class="p">,</span> <span class="n">tmp2id</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="mi">0</span><span class="p">)]])</span>
+								<span class="n">reactionID</span> <span class="o">+=</span> <span class="mi">1</span>
+							<span class="k">else</span><span class="p">:</span> 
+								<span class="n">rcts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">rcts</span><span class="p">,(</span><span class="nb">int</span><span class="p">(</span><span class="n">reactionID</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">rctType</span><span class="p">),</span> <span class="n">species</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">molToCleav</span><span class="p">),</span> <span class="n">tmp1id</span><span class="p">,</span> <span class="n">tmp2id</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="mi">0</span><span class="p">))])</span>	
+								<span class="n">reactionID</span> <span class="o">+=</span> <span class="mi">1</span>
+							<span class="n">nCleavage</span> <span class="o">+=</span> <span class="mi">1</span>
+								
+							<span class="k">if</span> <span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">creationMethod</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">creationMethod</span> <span class="o">==</span> <span class="mi">4</span><span class="p">):</span> <span class="c"># if reverse reaction are allowed (methods 2 and 4 :: WIM and OUR)</span>
+								<span class="n">rcts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">rcts</span><span class="p">,(</span><span class="nb">int</span><span class="p">(</span><span class="n">reactionID</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">species</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">molToCleav</span><span class="p">),</span> <span class="n">tmp1id</span><span class="p">,</span> <span class="n">tmp2id</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="mi">0</span><span class="p">))])</span>	
+								<span class="n">reactionID</span> <span class="o">+=</span> <span class="mi">1</span>
+								<span class="n">nCondensa</span> <span class="o">+=</span> <span class="mi">1</span>
+						<span class="k">else</span><span class="p">:</span>
+							<span class="n">rct2cat</span> <span class="o">=</span> <span class="n">rcts</span><span class="p">[(</span><span class="n">rcts</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">rcts</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">species</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">molToCleav</span><span class="p">))</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">rcts</span><span class="p">[:,</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="n">tmp1id</span><span class="p">),</span><span class="mi">0</span><span class="p">]</span>
+					<span class="k">else</span><span class="p">:</span> <span class="c"># condensation</span>
+						<span class="k">if</span> <span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">creationMethod</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">creationMethod</span> <span class="o">==</span> <span class="mi">4</span><span class="p">):</span>
+							<span class="n">rctnew</span> <span class="o">=</span> <span class="bp">False</span>
+							<span class="n">sub1</span><span class="p">,</span> <span class="n">sub2</span><span class="p">,</span> <span class="n">idsub1</span><span class="p">,</span> <span class="n">idsub2</span><span class="p">,</span> <span class="n">prod</span> <span class="o">=</span> <span class="n">reactions</span><span class="o">.</span><span class="n">createRandomCondensation</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">initSpeciesListLength</span><span class="p">)</span>
+							<span class="k">try</span><span class="p">:</span>
+								<span class="n">tmpprodid</span> <span class="o">=</span> <span class="n">species</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">prod</span><span class="p">)</span>
+							<span class="k">except</span><span class="p">:</span>
+								<span class="n">tmpprodid</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">species</span><span class="p">)</span>
+								<span class="n">species</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">prod</span><span class="p">)</span>
+							
+							<span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="n">rctnew</span> <span class="o">=</span> <span class="bp">True</span>
+							<span class="k">else</span><span class="p">:</span>
+								<span class="k">if</span> <span class="nb">sum</span><span class="p">((</span><span class="n">rcts</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">rcts</span><span class="p">[:,</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="n">idsub1</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">rcts</span><span class="p">[:,</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="n">idsub2</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="n">rctnew</span> <span class="o">=</span> <span class="bp">True</span>
+							
+							<span class="c"># Reaction Structure Creation</span>
+							<span class="k">if</span> <span class="n">rctnew</span><span class="p">:</span>
+								<span class="k">if</span> <span class="n">reactionID</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> 
+									<span class="n">rcts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="nb">int</span><span class="p">(</span><span class="n">reactionID</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">rctType</span><span class="p">),</span> <span class="n">tmpprodid</span><span class="p">,</span> <span class="n">idsub1</span><span class="p">,</span> <span class="n">idsub2</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="mi">0</span><span class="p">)]])</span>
+									<span class="n">reactionID</span> <span class="o">+=</span> <span class="mi">1</span>
+								<span class="k">else</span><span class="p">:</span> 
+									<span class="n">rcts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">rcts</span><span class="p">,(</span><span class="nb">int</span><span class="p">(</span><span class="n">reactionID</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">rctType</span><span class="p">),</span> <span class="n">tmpprodid</span><span class="p">,</span> <span class="n">idsub1</span><span class="p">,</span> <span class="n">idsub2</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="mi">0</span><span class="p">))])</span>	
+									<span class="n">reactionID</span> <span class="o">+=</span> <span class="mi">1</span>
+								<span class="n">nCondensa</span> <span class="o">+=</span> <span class="mi">1</span>
+							<span class="k">else</span><span class="p">:</span>
+								<span class="n">rct2cat</span> <span class="o">=</span> <span class="n">rcts</span><span class="p">[(</span><span class="n">rcts</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">rcts</span><span class="p">[:,</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="n">idsub1</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">rcts</span><span class="p">[:,</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="n">idsub2</span><span class="p">),</span><span class="mi">0</span><span class="p">]</span>
+								
+							<span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">creationMethod</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span> <span class="c"># if reverse reaction are allowed (methods 2 and 4 :: WIM and OUR)</span>
+								<span class="n">rcts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">rcts</span><span class="p">,(</span><span class="nb">int</span><span class="p">(</span><span class="n">reactionID</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">tmpprodid</span><span class="p">,</span> <span class="n">idsub1</span><span class="p">,</span> <span class="n">idsub2</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="mi">0</span><span class="p">))])</span>	
+								<span class="n">reactionID</span> <span class="o">+=</span> <span class="mi">1</span>
+								<span class="n">nCleavage</span> <span class="o">+=</span> <span class="mi">1</span>
+					<span class="c"># A CATALYST IS RANDOMLY ASSIGNED FROM THE SPECIES LIST</span>
+					<span class="n">catalyst</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+					<span class="n">catFound</span> <span class="o">=</span> <span class="bp">False</span>
+					
+					<span class="k">while</span> <span class="ow">not</span> <span class="n">catFound</span><span class="p">:</span> 
+						<span class="n">catalyst</span> <span class="o">=</span> <span class="n">species</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">ran</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">species</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">alphabet</span><span class="p">):]))</span>
+						<span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">species</span><span class="p">[</span><span class="n">catalyst</span><span class="p">])</span> <span class="o">&gt;</span> <span class="n">args</span><span class="o">.</span><span class="n">noCat</span><span class="p">):</span>
+							<span class="k">if</span> <span class="n">rctnew</span> <span class="o">==</span> <span class="bp">False</span><span class="p">:</span>
+								<span class="k">if</span> <span class="nb">sum</span><span class="p">((</span><span class="n">cats</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="n">catalyst</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">cats</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span><span class="o">==</span><span class="n">rct2cat</span><span class="p">))</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+									<span class="n">catFound</span> <span class="o">=</span> <span class="bp">True</span>
+							<span class="k">else</span><span class="p">:</span>
+								<span class="n">catFound</span> <span class="o">=</span> <span class="bp">True</span>
+						
+					<span class="k">if</span> <span class="n">rctnew</span><span class="p">:</span> <span class="n">rctsToCat</span> <span class="o">=</span> <span class="n">reactionID</span> <span class="o">-</span> <span class="mi">1</span>
+					<span class="k">else</span><span class="p">:</span> <span class="n">rctsToCat</span> <span class="o">=</span> <span class="n">rct2cat</span>
+					
+					<span class="k">if</span> <span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">creationMethod</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">creationMethod</span> <span class="o">==</span> <span class="mi">4</span><span class="p">):</span> <span class="n">rctsToCat</span> <span class="o">=</span> <span class="n">reactionID</span> <span class="o">-</span> <span class="mi">2</span>
+					<span class="k">if</span> <span class="n">catalysisID</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> 
+						<span class="n">cats</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="nb">int</span><span class="p">(</span><span class="n">catalysisID</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">catalyst</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">rctsToCat</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="mf">0.5</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="mf">0.25</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="mf">0.5</span><span class="p">),</span> <span class="n">ran</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)]])</span>
+						<span class="n">catalysisID</span> <span class="o">+=</span> <span class="mi">1</span>
+						<span class="k">if</span> <span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">creationMethod</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">creationMethod</span> <span class="o">==</span> <span class="mi">4</span><span class="p">):</span> <span class="c"># IF wim method</span>
+							<span class="n">cats</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">cats</span><span class="p">,(</span><span class="nb">int</span><span class="p">(</span><span class="n">catalysisID</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">catalyst</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">rctsToCat</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="mf">0.5</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="mf">0.25</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="mf">0.5</span><span class="p">),</span> <span class="n">ran</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">))])</span>
+							<span class="n">catalysisID</span> <span class="o">+=</span> <span class="mi">1</span>
+					<span class="k">else</span><span class="p">:</span> 
+						<span class="n">cats</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">cats</span><span class="p">,(</span><span class="nb">int</span><span class="p">(</span><span class="n">catalysisID</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">catalyst</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">rctsToCat</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="mf">0.5</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="mf">0.25</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="mf">0.5</span><span class="p">),</span> <span class="n">ran</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">))])</span>
+						<span class="n">catalysisID</span> <span class="o">+=</span> <span class="mi">1</span>
+						<span class="k">if</span> <span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">creationMethod</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">creationMethod</span> <span class="o">==</span> <span class="mi">4</span><span class="p">):</span>
+							<span class="n">cats</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">cats</span><span class="p">,(</span><span class="nb">int</span><span class="p">(</span><span class="n">catalysisID</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">catalyst</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">rctsToCat</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="mf">0.5</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="mf">0.25</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="mf">0.5</span><span class="p">),</span> <span class="n">ran</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">))])</span>
+							<span class="n">catalysisID</span> <span class="o">+=</span> <span class="mi">1</span>
+				<span class="c">#print rcts</span>
+				<span class="c">#print cats</span>
+				<span class="c">#print cats.shape</span>
+				<span class="c">#print rcts.shape</span>
+				<span class="c">#raw_input(&quot;ca0&quot;)</span>
+				<span class="c"># Create food list</span>
+				<span class="n">foodList</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">lastFood</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+				<span class="c">#print &quot;\t\t|- RAF searching step...&quot;</span>
+				<span class="n">netouts</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">net_analysis_of_static_graphs</span><span class="p">(</span><span class="n">fid_initRafRes</span><span class="p">,</span> <span class="n">fid_initRafResALL</span><span class="p">,</span> <span class="n">fid_initRafResLIST</span><span class="p">,</span> <span class="s">&#39;tmpDir&#39;</span><span class="p">,</span> <span class="n">prob</span><span class="p">,</span> <span class="n">averageConn</span><span class="p">,</span> <span class="n">rcts</span><span class="p">,</span> <span class="n">cats</span><span class="p">,</span> <span class="n">foodList</span><span class="p">,</span> <span class="n">maxlength</span><span class="p">)</span>
+				<span class="c">#print netouts</span>
+				<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">netouts</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span> 
+					<span class="n">raffound</span> <span class="o">+=</span> <span class="mi">1</span>
+					<span class="n">rctsRAF</span> <span class="o">=</span> <span class="n">rcts</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">rcts</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">netouts</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">],</span><span class="mi">1</span><span class="p">),</span> <span class="mi">0</span><span class="p">),</span> <span class="p">:]</span>
+					<span class="n">scc_in_raf</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">return_scc_in_raf</span><span class="p">(</span><span class="n">rctsRAF</span><span class="p">,</span> <span class="n">cats</span><span class="p">,</span> <span class="n">netouts</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+					<span class="k">if</span> <span class="n">scc_in_raf</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+						<span class="n">sccinraffound</span> <span class="o">+=</span> <span class="mi">1</span>
+					<span class="k">if</span> <span class="n">scc_in_raf</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+						<span class="n">self_sccinraffound</span> <span class="o">+=</span> <span class="mi">1</span>
+				<span class="k">if</span> <span class="n">netouts</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">4</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span> <span class="n">sccfound</span> <span class="o">+=</span> <span class="mi">1</span>
+				<span class="c">#print raffound</span>
+				<span class="c">#raw_input(&quot;ciao&quot;)</span>
+
+				<span class="k">del</span> <span class="n">rcts</span>
+				<span class="k">del</span> <span class="n">cats</span>
+		
+			<span class="n">time2</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+			<span class="n">percRAFFounds</span> <span class="o">=</span> <span class="n">raffound</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">iterations</span><span class="p">)</span>
+			<span class="n">percSccFounds</span> <span class="o">=</span> <span class="n">sccfound</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">iterations</span><span class="p">)</span>
+			<span class="k">if</span> <span class="n">raffound</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span> <span class="n">percScc_in_rafFounds</span> <span class="o">=</span> <span class="n">sccinraffound</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">raffound</span><span class="p">)</span>
+			<span class="k">else</span><span class="p">:</span> <span class="n">percScc_in_rafFounds</span> <span class="o">=</span> <span class="mi">0</span>
+			<span class="k">if</span> <span class="n">raffound</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span> <span class="n">perc_self_Scc_in_rafFounds</span> <span class="o">=</span> <span class="n">self_sccinraffound</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">raffound</span><span class="p">)</span>
+			<span class="k">else</span><span class="p">:</span> <span class="n">perc_self_Scc_in_rafFounds</span> <span class="o">=</span> <span class="mi">0</span>
+			<span class="c">#print percScc_in_rafFounds</span>
+			<span class="c">#print perc_self_Scc_in_rafFounds</span>
+			<span class="c">#raw_input(&quot;ciao&quot;)</span>
+			
+			<span class="n">timet</span> <span class="o">=</span> <span class="n">time2</span><span class="o">-</span><span class="n">time1</span>
+			<span class="k">print</span> <span class="s">&quot;</span><span class="se">\t\t\t</span><span class="s"> %RAF *** &quot;</span><span class="p">,</span> <span class="n">percRAFFounds</span><span class="p">,</span> <span class="s">&quot; *** %SCC ***&quot;</span><span class="p">,</span> <span class="n">percSccFounds</span><span class="p">,</span><span class="s">&quot; *** TIME: &quot;</span><span class="p">,</span> <span class="n">time2</span> <span class="o">-</span> <span class="n">time1</span><span class="p">,</span> <span class="s">&quot; Cleavages: &quot;</span><span class="p">,</span> <span class="n">nCleavage</span><span class="p">,</span> <span class="s">&quot; - Condensations: &quot;</span><span class="p">,</span> <span class="n">nCondensa</span>
+			<span class="k">if</span> <span class="n">percRAFFounds</span> <span class="o">&gt;=</span> <span class="mf">0.99</span><span class="p">:</span> 
+				<span class="k">print</span> <span class="s">&quot;</span><span class="se">\t\t\t</span><span class="s"> Max number of RAFs found&quot;</span>
+				<span class="n">increaseYet</span> <span class="o">=</span> <span class="bp">False</span> <span class="c"># If RAF is always found so next average conn is assessed</span>
+			<span class="n">strToWrite</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">prob</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">maxlength</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">averageConn</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">percRAFFounds</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">percSccFounds</span><span class="p">)</span> <span class="o">+</span> \
+						<span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">percScc_in_rafFounds</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">perc_self_Scc_in_rafFounds</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">timet</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span>
+			<span class="n">fid_initRafResSUM</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">strToWrite</span><span class="p">)</span>
+			<span class="n">averageConn</span> <span class="o">+=</span> <span class="mf">0.1</span>
+	<span class="c"># Close text files</span>
+	<span class="n">fid_initRafRes</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	<span class="n">fid_initRafResLIST</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	<span class="n">fid_initRafResALL</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	<span class="n">fid_initRafResSUM</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>	
+	
+		
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Alessandro Filisetti.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

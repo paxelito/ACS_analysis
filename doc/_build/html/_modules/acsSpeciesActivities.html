@@ -1,0 +1,276 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>acsSpeciesActivities &mdash; ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '20140204.004',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for acsSpeciesActivities</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python</span>
+<span class="c"># -*- coding: latin-1 -*-</span>
+<span class="sd">&#39;&#39;&#39;Function to evaluate the activity of each species during the simulation, </span>
+<span class="sd">   catalyst substrate product or nothing. Moreover the script recognize all those molecules functioning as hub</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span> <span class="c"># Standard library</span>
+<span class="kn">import</span> <span class="nn">datetime</span> <span class="kn">as</span> <span class="nn">dt</span>
+<span class="kn">import</span> <span class="nn">linecache</span> <span class="kn">as</span> <span class="nn">lc</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span> <span class="c"># Scientific library</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="o">*</span> 
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">pylab</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="k">pass</span>
+   
+<span class="c">#--------------------------------------------------------------------------------------</span>
+<div class="viewcode-block" id="zeroBeforeStrNum"><a class="viewcode-back" href="../acsSpeciesActivities.html#acsSpeciesActivities.zeroBeforeStrNum">[docs]</a><span class="k">def</span> <span class="nf">zeroBeforeStrNum</span><span class="p">(</span><span class="n">tmpl</span><span class="p">,</span> <span class="n">tmpL</span><span class="p">):</span>
+	<span class="n">strZero</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+	<span class="n">nZeros</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmpL</span><span class="p">))</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmpl</span><span class="p">))</span>
+	<span class="k">if</span> <span class="n">nZeros</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+		<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">nZeros</span><span class="p">):</span> <span class="n">strZero</span> <span class="o">=</span> <span class="n">strZero</span> <span class="o">+</span> <span class="s">&#39;0&#39;</span>
+	<span class="k">return</span> <span class="n">strZero</span>
+<span class="c">#--------------------------------------------------------------------------------------</span>
+	</div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+	<span class="n">parser</span> <span class="o">=</span> <span class="n">ArgumentParser</span><span class="p">(</span>
+				<span class="n">description</span><span class="o">=</span><span class="s">&#39;Function to evaluate the activity of each species during the simulation, </span><span class="se">\</span>
+<span class="s">				catalyst substrate product or nothing. Moreover the script recognize all those molecules functioning as hub&#39;</span>
+				<span class="p">,</span> <span class="n">epilog</span><span class="o">=</span><span class="s">&#39;&#39;&#39;File with angle trajectories are created. &#39;&#39;&#39;</span><span class="p">)</span> 
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-p&#39;</span><span class="p">,</span> <span class="s">&#39;--strPath&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Path where files are stored&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;./&#39;</span><span class="p">)</span>
+	<span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+
+
+	<span class="n">StrPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">StrPath</span><span class="p">)</span>
+		
+	<span class="n">tmpDirs</span> <span class="o">=</span> <span class="n">sort</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">StrPath</span><span class="p">))</span>
+	
+	<span class="c"># Goes into the simulation folder</span>
+	<span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">StrPath</span><span class="p">)</span>
+	
+	<span class="n">chemistry</span> <span class="o">=</span> <span class="mi">1</span>
+	
+	<span class="c"># Create stas folders</span>
+	<span class="n">ndn</span> <span class="o">=</span> <span class="s">&#39;_0_new_allStatResults&#39;</span>
+	<span class="n">newdirAllResults</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">StrPath</span><span class="p">,</span> <span class="n">ndn</span><span class="p">)</span>
+	<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">newdirAllResults</span><span class="p">):</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">newdirAllResults</span><span class="p">)</span>
+		<span class="k">except</span><span class="p">:</span>
+			<span class="k">print</span> <span class="s">&quot;Impossible to create statistic directory&quot;</span><span class="p">,</span> <span class="n">newdirAllResults</span><span class="p">;</span> <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+	
+	<span class="n">ndn</span> <span class="o">=</span> <span class="s">&#39;allSpeciesActivities&#39;</span>
+	<span class="n">newdirAllResultsInner</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">StrPath</span><span class="p">,</span><span class="s">&#39;_0_new_allStatResults&#39;</span><span class="p">,</span><span class="n">ndn</span><span class="p">)</span>
+	<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">newdirAllResultsInner</span><span class="p">):</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">newdirAllResultsInner</span><span class="p">)</span>
+		<span class="k">except</span><span class="p">:</span>
+			<span class="k">print</span> <span class="s">&quot;Impossible to create all species acts directory&quot;</span><span class="p">,</span> <span class="n">newdirAllResults</span><span class="p">;</span> <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+	
+	<span class="k">for</span> <span class="n">tmpDir</span> <span class="ow">in</span> <span class="n">tmpDirs</span><span class="p">:</span>
+	
+		<span class="n">totDirName</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">StrPath</span><span class="p">,</span><span class="n">tmpDir</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">totDirName</span><span class="p">):</span>
+			<span class="c"># Move to the directory </span>
+			<span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">totDirName</span><span class="p">)</span>
+			<span class="n">resDirPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s">&quot;./&quot;</span><span class="p">,</span> <span class="s">&quot;res&quot;</span><span class="p">))</span>
+			<span class="k">print</span> <span class="s">&quot; |- Results Folder: &quot;</span><span class="p">,</span> <span class="n">resDirPath</span>
+			<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">resDirPath</span><span class="p">):</span>
+				<span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">resDirPath</span><span class="p">)</span>
+				
+				<span class="c"># Find the number of generations</span>
+				<span class="n">numberOfGen</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">resDirPath</span><span class="p">,</span><span class="s">&#39;times_*&#39;</span><span class="p">)))</span>
+				<span class="c">#ÊFor each generation</span>
+				<span class="c"># Go into stat folders</span>
+				<span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">newdirAllResults</span><span class="p">)</span>	
+				<span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">newdirAllResultsInner</span><span class="p">)</span>	
+				<span class="n">tmpSpeciesStatsSummaryName</span> <span class="o">=</span> <span class="s">&#39;speciesStatsSummary_&#39;</span>  <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">chemistry</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;.csv&#39;</span>
+				<span class="n">tmpSpeciesStatsSummaryNameFID</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">tmpSpeciesStatsSummaryName</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+				<span class="c"># Change Chemistry</span>
+				<span class="n">tmpStr</span> <span class="o">=</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">------- CHEMISTRY &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">chemistry</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;---------</span><span class="se">\n</span><span class="s">&#39;</span>
+				<span class="n">tmpSpeciesStatsSummaryNameFID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">tmpStr</span><span class="p">)</span>
+				<span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">resDirPath</span><span class="p">)</span>
+				<span class="k">for</span> <span class="n">ngen</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">numberOfGen</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+					
+					<span class="n">tmpStr</span> <span class="o">=</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">- - - - Generation &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ngen</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;- - - - -</span><span class="se">\n</span><span class="s">&#39;</span>
+					<span class="n">tmpSpeciesStatsSummaryNameFID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">tmpStr</span><span class="p">)</span>
+						
+					<span class="n">strZeros</span> <span class="o">=</span> <span class="n">zeroBeforeStrNum</span><span class="p">(</span><span class="n">ngen</span><span class="p">,</span> <span class="n">numberOfGen</span><span class="p">)</span>
+					<span class="k">if</span> <span class="n">ngen</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+				  		<span class="n">strSpeciesZero</span> <span class="o">=</span> <span class="s">&#39;species_&#39;</span> <span class="o">+</span> <span class="n">strZeros</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;*&#39;</span>
+				  		<span class="n">speciesFilesZero</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">resDirPath</span><span class="p">,</span><span class="n">strSpeciesZero</span><span class="p">)))</span>
+	
+					<span class="n">strSpecies</span> <span class="o">=</span> <span class="s">&#39;species_&#39;</span> <span class="o">+</span> <span class="n">strZeros</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ngen</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;*&#39;</span>  
+					  
+				  	<span class="c"># Searching for files</span>
+				  	<span class="n">speciesFiles</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">resDirPath</span><span class="p">,</span><span class="n">strSpecies</span><span class="p">)))</span>
+				  	
+				  	<span class="c"># Select the last file to create the specie vector. </span>
+				  	<span class="n">lastfilespecies</span> <span class="o">=</span> <span class="n">speciesFiles</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+				  	
+				  	<span class="k">print</span> <span class="s">&#39;  |- Create species vector from: &#39;</span><span class="p">,</span> <span class="n">lastfilespecies</span>	
+					<span class="k">try</span><span class="p">:</span>
+						<span class="n">fidSpecies</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">lastfilespecies</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+					<span class="k">except</span><span class="p">:</span>
+						<span class="k">print</span> <span class="s">&#39; |- impossible to load &#39;</span><span class="p">,</span> <span class="n">lastfilespecies</span><span class="p">;</span> <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+							
+					<span class="n">seq</span> <span class="o">=</span> <span class="p">[];</span> <span class="n">nSpecies</span> <span class="o">=</span> <span class="mi">0</span>
+					<span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="n">fidSpecies</span><span class="p">:</span>
+						<span class="n">tmpID</span><span class="p">,</span> <span class="n">tmpSeq</span><span class="p">,</span> <span class="n">tmpConc</span><span class="p">,</span> <span class="n">tmpDiff</span><span class="p">,</span> <span class="n">tmpSol</span><span class="p">,</span> <span class="n">tmpCpxDiss</span><span class="p">,</span> <span class="n">tmpCpxCut</span><span class="p">,</span> <span class="n">tmpEval</span><span class="p">,</span> <span class="n">tmpAge</span><span class="p">,</span> <span class="n">tmpReb</span><span class="p">,</span> <span class="n">tmpCatID</span><span class="p">,</span> <span class="n">tmpSubID</span><span class="p">,</span> <span class="n">tmpKpho</span><span class="p">,</span> <span class="n">tmpLoadConc</span><span class="p">,</span> <span class="n">tmpConcLock</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+						<span class="n">seq</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmpSeq</span><span class="p">))</span>
+						<span class="n">nSpecies</span> <span class="o">+=</span> <span class="mi">1</span>
+						
+					<span class="c"># Create lists containing statistical data </span>
+					<span class="n">counters</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nSpecies</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span> 
+					<span class="c"># Select reaction_parameter file</span>
+					<span class="n">strRctPar</span> <span class="o">=</span> <span class="s">&#39;reactions_parameters_&#39;</span> <span class="o">+</span> <span class="n">strZeros</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ngen</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;_1.csv&#39;</span>
+					
+				  	<span class="k">print</span> <span class="s">&#39;  |- Open reactions parameter file: : &#39;</span><span class="p">,</span> <span class="n">strRctPar</span>	
+					<span class="k">try</span><span class="p">:</span>
+						<span class="n">fidRctPar</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">strRctPar</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+					<span class="k">except</span><span class="p">:</span>
+						<span class="k">print</span> <span class="s">&#39; |- impossible to load &#39;</span><span class="p">,</span> <span class="n">strRctPar</span><span class="p">;</span> <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>	
+					
+					<span class="k">for</span> <span class="n">idRct</span><span class="p">,</span> <span class="n">sngRct</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">fidRctPar</span><span class="p">):</span> 
+						<span class="n">tmpRctId</span><span class="p">,</span> <span class="n">tmpRctT</span><span class="p">,</span> <span class="n">tmpRctType</span><span class="p">,</span> <span class="n">tmpCat</span><span class="p">,</span> <span class="n">tmpS1</span><span class="p">,</span> <span class="n">tmpS2</span><span class="p">,</span> <span class="n">tmpS3</span><span class="p">,</span> <span class="n">tmpCM</span><span class="p">,</span> \
+						<span class="n">tmpCC</span><span class="p">,</span> <span class="n">tmpGil</span><span class="p">,</span> <span class="n">tmpGilSD</span><span class="p">,</span> <span class="n">tmpE</span><span class="p">,</span> <span class="n">tmpNSP</span><span class="p">,</span> <span class="n">tmpRatio</span> <span class="o">=</span> <span class="n">sngRct</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+						<span class="n">rctType</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tmpRctType</span><span class="p">)</span>
+						<span class="n">cat</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tmpCat</span><span class="p">)</span>
+						<span class="n">S1</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tmpS1</span><span class="p">)</span>
+						<span class="n">S2</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tmpS2</span><span class="p">)</span>
+						<span class="n">S3</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tmpS3</span><span class="p">)</span>
+						<span class="k">if</span> <span class="p">(</span><span class="n">rctType</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">rctType</span> <span class="o">==</span> <span class="mi">7</span><span class="p">):</span>
+							<span class="c">#catalyst</span>
+							<span class="n">counters</span><span class="p">[</span><span class="n">cat</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+							<span class="c">#sub1</span>
+							<span class="n">counters</span><span class="p">[</span><span class="n">S2</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+							<span class="c">#sub2</span>
+							<span class="n">counters</span><span class="p">[</span><span class="n">S3</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+							<span class="c">#prod</span>
+							<span class="n">counters</span><span class="p">[</span><span class="n">S1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+						<span class="k">else</span><span class="p">:</span>
+							<span class="c">#catalyst</span>
+							<span class="n">counters</span><span class="p">[</span><span class="n">cat</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+							<span class="c">#sub1</span>
+							<span class="n">counters</span><span class="p">[</span><span class="n">S2</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+							<span class="c">#prod1</span>
+							<span class="n">counters</span><span class="p">[</span><span class="n">S3</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+							<span class="c">#prod2</span>
+							<span class="n">counters</span><span class="p">[</span><span class="n">S1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>		
+					
+					
+					<span class="c"># Go into stat folders</span>
+					<span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">newdirAllResults</span><span class="p">)</span>	
+					<span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">newdirAllResultsInner</span><span class="p">)</span>		
+					
+					
+					<span class="n">tmpFileName</span> <span class="o">=</span> <span class="s">&#39;speciesStats_&#39;</span>  <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">chemistry</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;_&#39;</span> <span class="o">+</span> <span class="n">strZeros</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ngen</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;.csv&#39;</span>
+					<span class="k">print</span> <span class="s">&#39;  |- Saving result file: : &#39;</span><span class="p">,</span> <span class="n">tmpFileName</span>
+					<span class="n">tmpFileNameFID</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">tmpFileName</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+					<span class="n">ID</span> <span class="o">=</span> <span class="mi">0</span>
+					<span class="n">tmpStr</span> <span class="o">=</span> <span class="s">&#39;Total Number of Reactions</span><span class="se">\t\t\t\t</span><span class="s">&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">idRct</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span>
+					<span class="n">tmpSpeciesStatsSummaryNameFID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">tmpStr</span><span class="p">)</span>
+					<span class="n">tmpStr</span> <span class="o">=</span> <span class="s">&#39;ID</span><span class="se">\t</span><span class="s">Cat</span><span class="se">\t</span><span class="s">Sub</span><span class="se">\t</span><span class="s">Prod</span><span class="se">\n</span><span class="s">&#39;</span>
+					<span class="n">tmpSpeciesStatsSummaryNameFID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">tmpStr</span><span class="p">)</span>
+					<span class="k">for</span> <span class="n">sngCnt</span> <span class="ow">in</span> <span class="n">counters</span><span class="p">:</span>
+						<span class="n">tmpStr</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">ID</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">sngCnt</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">sngCnt</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">sngCnt</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span>
+						<span class="n">tmpFileNameFID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">tmpStr</span><span class="p">)</span>
+						<span class="k">if</span> <span class="p">(</span><span class="n">sngCnt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="p">(</span><span class="n">sngCnt</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">100</span><span class="p">))</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">sngCnt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1000</span><span class="p">):</span>
+							<span class="n">tmpSpeciesStatsSummaryNameFID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">tmpStr</span><span class="p">)</span>
+						<span class="n">ID</span> <span class="o">+=</span> <span class="mi">1</span>
+					<span class="n">tmpFileNameFID</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+					
+					<span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">resDirPath</span><span class="p">)</span>	
+				
+				<span class="n">tmpSpeciesStatsSummaryNameFID</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+				<span class="n">chemistry</span> <span class="o">+=</span> <span class="mi">1</span>	
+					
+				  	
+			  	
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Alessandro Filisetti.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

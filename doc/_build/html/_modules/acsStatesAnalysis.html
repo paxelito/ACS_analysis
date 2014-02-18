@@ -1,0 +1,574 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>acsStatesAnalysis &mdash; ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '20140204.004',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for acsStatesAnalysis</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python</span>
+<span class="c"># -*- coding: latin-1 -*-</span>
+<span class="sd">&#39;&#39;&#39;Script to compute the distance between different state of the same simulation. </span>
+<span class="sd">	comparison between t0 and t, t-1 and t adopting three different distance misure:</span>
+<span class="sd">	angle, euclidian distance and hamming distance. </span>
+<span class="sd">	Moreover the script make an analysis of all the aggregative variables. </span>
+<span class="sd">	https://help.github.com/articles/fork-a-repo</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span> <span class="c"># Standard library</span>
+<span class="kn">import</span> <span class="nn">datetime</span> <span class="kn">as</span> <span class="nn">dt</span>
+<span class="kn">import</span> <span class="nn">linecache</span> <span class="kn">as</span> <span class="nn">lc</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span> <span class="c"># Scientific library</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="o">*</span> 
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">pylab</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="k">pass</span>
+   
+<span class="kn">from</span> <span class="nn">lib.IO</span> <span class="kn">import</span> <span class="o">*</span>
+
+<div class="viewcode-block" id="zeroBeforeStrNum"><a class="viewcode-back" href="../acsStatesAnalysis.html#acsStatesAnalysis.zeroBeforeStrNum">[docs]</a><span class="k">def</span> <span class="nf">zeroBeforeStrNum</span><span class="p">(</span><span class="n">tmpl</span><span class="p">,</span> <span class="n">tmpL</span><span class="p">):</span>
+	<span class="sd">&#39;&#39;&#39; Function to create string zero string vector before graph filename.</span>
+<span class="sd">	According to the total number of reactions N zeros will be add before the instant reaction number </span>
+<span class="sd">	(e.g. reaction 130 of 10000 the string became &#39;00130&#39;)&#39;&#39;&#39;</span>
+	<span class="n">strZero</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+	<span class="n">nZeros</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmpL</span><span class="p">))</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmpl</span><span class="p">))</span>
+	<span class="k">if</span> <span class="n">nZeros</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+		<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">nZeros</span><span class="p">):</span> <span class="n">strZero</span> <span class="o">=</span> <span class="n">strZero</span> <span class="o">+</span> <span class="s">&#39;0&#39;</span>
+	<span class="k">return</span> <span class="n">strZero</span>
+</div>
+<div class="viewcode-block" id="returnZeroSpeciesList"><a class="viewcode-back" href="../acsStatesAnalysis.html#acsStatesAnalysis.returnZeroSpeciesList">[docs]</a><span class="k">def</span> <span class="nf">returnZeroSpeciesList</span><span class="p">(</span><span class="n">tmpLastSpeciesFile</span><span class="p">):</span>
+	<span class="sd">&#39;&#39;&#39;Function to create a zero vector for each species (NO COMPLEXES)&#39;&#39;&#39;</span>
+	<span class="k">try</span><span class="p">:</span>
+		<span class="n">fidSpecies</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">tmpLastSpeciesFile</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+	<span class="k">except</span><span class="p">:</span>
+		<span class="k">print</span> <span class="s">&#39; |- impossible to load &#39;</span><span class="p">,</span> <span class="n">tmpLastSpeciesFile</span><span class="p">;</span> <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+	<span class="n">tmpZeroList</span> <span class="o">=</span> <span class="p">[]</span>
+	<span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">fidSpecies</span><span class="p">:</span>
+		<span class="n">tmpID</span><span class="p">,</span> <span class="n">tmpSeq</span><span class="p">,</span> <span class="n">tmpConc</span><span class="p">,</span> <span class="n">tmpDiff</span><span class="p">,</span> <span class="n">tmpSol</span><span class="p">,</span> <span class="n">tmpCpxDiss</span><span class="p">,</span> <span class="n">tmpCpxCut</span><span class="p">,</span> <span class="n">tmpEval</span><span class="p">,</span> <span class="n">tmpAge</span><span class="p">,</span> <span class="n">tmpReb</span><span class="p">,</span> <span class="n">tmpCatID</span><span class="p">,</span> <span class="n">tmpSubID</span><span class="p">,</span> <span class="n">tmpKpho</span><span class="p">,</span> <span class="n">tmpLoadConc</span><span class="p">,</span> <span class="n">tmpConcLock</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+		<span class="k">if</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">tmpCpxCut</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+			<span class="n">tmpZeroList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+		
+	<span class="k">return</span> <span class="n">tmpZeroList</span>
+</div>
+<div class="viewcode-block" id="distanceMisures"><a class="viewcode-back" href="../acsStatesAnalysis.html#acsStatesAnalysis.distanceMisures">[docs]</a><span class="k">def</span> <span class="nf">distanceMisures</span><span class="p">(</span><span class="n">tmpSeqX</span><span class="p">,</span> <span class="n">tmpConcX</span><span class="p">,</span> <span class="n">tmpSeqY</span><span class="p">,</span> <span class="n">tmpConcY</span><span class="p">,</span> <span class="n">tmpIDs</span><span class="p">):</span>
+	<span class="sd">&#39;&#39;&#39;Function to compute the angle between two multidimensional vectors&#39;&#39;&#39;</span>
+	<span class="n">strtoW</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+	<span class="k">if</span> <span class="n">tmpIDs</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+		<span class="c"># COS BETWEEN VECTORS</span>
+		<span class="n">tmpAllList</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">tmpSeqX</span><span class="p">)</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">tmpSeqY</span><span class="p">))</span>
+		<span class="n">tmpAllList</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>	
+		<span class="n">speciesConcX</span> <span class="o">=</span> <span class="p">[]</span>
+		<span class="n">speciesConcY</span> <span class="o">=</span> <span class="p">[]</span>
+		<span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">tmpAllList</span><span class="p">:</span>
+			<span class="k">try</span><span class="p">:</span>
+				<span class="n">posX</span> <span class="o">=</span> <span class="n">tmpSeqX</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+				<span class="n">speciesConcX</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmpConcX</span><span class="p">[</span><span class="n">posX</span><span class="p">])</span>
+			<span class="k">except</span><span class="p">:</span>
+				<span class="n">speciesConcX</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+			<span class="k">try</span><span class="p">:</span>
+				<span class="n">posY</span> <span class="o">=</span> <span class="n">tmpSeqY</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+				<span class="n">speciesConcY</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmpConcY</span><span class="p">[</span><span class="n">posY</span><span class="p">])</span>
+			<span class="k">except</span><span class="p">:</span>
+				<span class="n">speciesConcY</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+		 
+		<span class="n">vecX</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">speciesConcX</span><span class="p">)</span>
+		<span class="n">vecY</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">speciesConcY</span><span class="p">)</span>
+		<span class="n">tmpCos</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">vecX</span><span class="p">,</span><span class="n">vecY</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">vecX</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">vecY</span><span class="p">)))</span>	
+		<span class="k">if</span> <span class="n">tmpCos</span> <span class="o">&gt;=</span> <span class="mf">1.0</span><span class="p">:</span> <span class="n">tmpCos</span> <span class="o">=</span> <span class="mf">1.0</span>		
+		<span class="n">strtoW</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">tmpCos</span><span class="p">)</span>  <span class="o">*</span> <span class="mf">360.00</span> <span class="o">/</span> <span class="mf">6.28</span>
+		
+		<span class="c"># HAMMING DISTANCE and EUCLIDEAN DISTANCE</span>
+		<span class="n">tmpHD</span> <span class="o">=</span> <span class="mi">0</span>
+		<span class="n">tmpEU</span> <span class="o">=</span> <span class="mi">0</span>
+		<span class="k">for</span> <span class="n">pos</span><span class="p">,</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">speciesConcX</span><span class="p">):</span>
+			<span class="k">if</span> <span class="p">((</span><span class="n">x</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">speciesConcY</span><span class="p">[</span><span class="n">pos</span><span class="p">]</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">))</span> <span class="o">|</span> <span class="p">((</span><span class="n">x</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">speciesConcY</span><span class="p">[</span><span class="n">pos</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">)):</span>
+				<span class="n">tmpHD</span> <span class="o">+=</span> <span class="mi">1</span>
+			<span class="n">tmpEU</span> <span class="o">+=</span> <span class="nb">pow</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">speciesConcY</span><span class="p">[</span><span class="n">pos</span><span class="p">],</span><span class="mi">2</span><span class="p">)</span>
+			
+		<span class="n">strtoW</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmpHD</span>
+		<span class="n">strtoW</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="nb">pow</span><span class="p">(</span><span class="n">tmpEU</span><span class="p">,</span><span class="mf">0.5</span><span class="p">)</span>
+					
+	<span class="k">else</span><span class="p">:</span>
+		<span class="n">strtoW</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+		<span class="n">strtoW</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+		<span class="n">strtoW</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+		
+	<span class="k">return</span> <span class="n">strtoW</span>
+
+</div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+	<span class="n">parser</span> <span class="o">=</span> <span class="n">ArgumentParser</span><span class="p">(</span>
+				<span class="n">description</span><span class="o">=</span><span class="s">&#39;Function to evaluate the activity of each species during the simulation, </span><span class="se">\</span>
+<span class="s">				catalyst substrate product or nothing. Moreover the script recognize all those molecules functioning as hub&#39;</span>
+				<span class="p">,</span> <span class="n">epilog</span><span class="o">=</span><span class="s">&#39;&#39;&#39;File with angle trajectories are created. &#39;&#39;&#39;</span><span class="p">)</span> 
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-p&#39;</span><span class="p">,</span> <span class="s">&#39;--strPath&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Path where files are stored&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;./&#39;</span><span class="p">)</span>
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-l&#39;</span><span class="p">,</span> <span class="s">&#39;--tmpMaxFluxL&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Max length of the incoming flux&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+	<span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+	
+	<span class="k">print</span> <span class="s">&quot;Simulation Results Path: &quot;</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">StrPath</span>
+	
+	<span class="n">today</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">today</span><span class="p">()</span>
+	
+	<span class="n">StrPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">StrPath</span><span class="p">)</span>
+	<span class="n">tmpMaxFluxL</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">tmpMaxFluxL</span>
+		
+	<span class="n">tmpDirs</span> <span class="o">=</span> <span class="n">sort</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">StrPath</span><span class="p">))</span>
+	
+	<span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">StrPath</span><span class="p">)</span>
+	 
+	<span class="k">print</span> <span class="s">&#39;&#39;</span>
+	<span class="k">print</span> <span class="s">&#39;ACS STATES ANALYSER&#39;</span>
+	<span class="k">print</span> <span class="s">&#39;&#39;</span>
+	<span class="k">print</span> <span class="s">&#39;|- STEP 1. Creating common sorted species list...&#39;</span>
+	
+	<span class="c">#currentDir = StrPath.split(&quot;/&quot;)[-1]</span>
+	<span class="n">currentDir</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+	<span class="n">ndn</span> <span class="o">=</span> <span class="n">currentDir</span> <span class="o">+</span> <span class="s">&#39;_0_new_allStatResults&#39;</span>
+	<span class="n">newdirAllResults</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">curdir</span><span class="p">,</span> <span class="n">ndn</span><span class="p">)</span>
+	<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">newdirAllResults</span><span class="p">):</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">newdirAllResults</span><span class="p">)</span>
+		<span class="k">except</span><span class="p">:</span>
+			<span class="k">print</span> <span class="s">&quot;Impossible to create statistic directory&quot;</span><span class="p">,</span> <span class="n">newdirAllResults</span><span class="p">;</span> <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+			
+	<span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">newdirAllResults</span><span class="p">)</span>
+	
+	<span class="c"># Open Files containing results </span>
+	<span class="n">previousFILE_FID</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;STAT_t_tminus_1.csv&#39;</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+	<span class="n">previousNOINFLUX_FILE_FID</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;STAT_t_tminus_1_NOINFLUX.csv&#39;</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+	<span class="n">startFILE_FID</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;STAT_t_start.csv&#39;</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+	<span class="n">startNOINFLUX_FILE_FID</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;STAT_t_start_NOINFLUX.csv&#39;</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+	
+	<span class="n">HAM_previousFILE_FID</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;STAT_HAM_t_tminus_1.csv&#39;</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+	<span class="n">HAM_previousNOINFLUX_FILE_FID</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;STAT_HAM_t_tminus_1_NOINFLUX.csv&#39;</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+	<span class="n">HAM_startFILE_FID</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;STAT_HAM_t_start.csv&#39;</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+	<span class="n">HAM_startNOINFLUX_FILE_FID</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;STAT_HAM_t_start_NOINFLUX.csv&#39;</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+	
+	<span class="n">EUC_previousFILE_FID</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;STAT_EUC_t_tminus_1.csv&#39;</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+	<span class="n">EUC_previousNOINFLUX_FILE_FID</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;STAT_EUC_t_tminus_1_NOINFLUX.csv&#39;</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+	<span class="n">EUC_startFILE_FID</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;STAT_EUC_t_start.csv&#39;</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+	<span class="n">EUC_startNOINFLUX_FILE_FID</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;STAT_EUC_t_start_NOINFLUX.csv&#39;</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+	
+	<span class="n">ANG_middlePreviousFILE_FID</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;STAT_ANG_t_middle_NOINFLUX.csv&#39;</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+	<span class="n">HAM_middlePreviousFILE_FID</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;STAT_HAM_t_middle_NOINFLUX.csv&#39;</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+	<span class="n">EUC_middlePreviousFILE_FID</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;STAT_EUC_t_middle_NOINFLUX.csv&#39;</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+	
+	<span class="n">previousFILE_FID_group</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;STAT_t_tminus_1_group.csv&#39;</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+	<span class="n">previousNOINFLUX_FILE_FID_group</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;STAT_t_tminus_1_NOINFLUX_group.csv&#39;</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+	<span class="n">startFILE_FID_group</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;STAT_t_start_group.csv&#39;</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+	<span class="n">startNOINFLUX_FILE_FID_group</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;STAT_t_start_NOINFLUX_group.csv&#39;</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+	
+	<span class="n">HAM_previousFILE_FID_group</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;STAT_HAM_t_tminus_1_group.csv&#39;</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+	<span class="n">HAM_previousNOINFLUX_FILE_FID_group</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;STAT_HAM_t_tminus_1_NOINFLUX_group.csv&#39;</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+	<span class="n">HAM_startFILE_FID_group</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;STAT_HAM_t_start_group.csv&#39;</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+	<span class="n">HAM_startNOINFLUX_FILE_FID_group</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;STAT_HAM_t_start_NOINFLUX_group.csv&#39;</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+	
+	<span class="n">EUC_previousFILE_FID_group</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;STAT_EUC_t_tminus_1_group.csv&#39;</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+	<span class="n">EUC_previousNOINFLUX_FILE_FID_group</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;STAT_EUC_t_tminus_1_NOINFLUX_group.csv&#39;</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+	<span class="n">EUC_startFILE_FID_group</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;STAT_EUC_t_start_group.csv&#39;</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+	<span class="n">EUC_startNOINFLUX_FILE_FID_group</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;STAT_EUC_t_start_NOINFLUX_group.csv&#39;</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+	
+	<span class="n">newSpecies_FID</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;STAT_GENERAL_newSpecies.csv&#39;</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+	<span class="n">livingSpecies_FID</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;STAT_GENERAL_livingSpecies.csv&#39;</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+	<span class="n">mols_FID</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;STAT_GENERAL_mols.csv&#39;</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+	<span class="n">totMass_FID</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;STAT_GENERAL_overallMass.csv&#39;</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+	<span class="n">totOverallMass_FID</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;STAT_GENERAL_overallTotMass.csv&#39;</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+	<span class="n">complex_FID</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;STAT_GENERAL_complex.csv&#39;</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+	<span class="n">complexMols_FID</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;STAT_GENERAL_complexMols.csv&#39;</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+	<span class="n">evaluatedFID</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;STAT_GENERAL_evaluated.csv&#39;</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+	<span class="n">zeroOneSpeciesFID</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;STAT_GENERAL_zeroOneSpecies.csv&#39;</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+	<span class="n">biodeversityFID</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;STAT_GENERAL_bioDiversity.csv&#39;</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+	
+	<span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">StrPath</span><span class="p">)</span>
+	<span class="n">validDir</span> <span class="o">=</span> <span class="mi">1</span>
+	<span class="k">for</span> <span class="n">IDdir</span><span class="p">,</span> <span class="n">tmpDir</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tmpDirs</span><span class="p">):</span>
+	
+		<span class="n">totDirName</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">StrPath</span><span class="p">,</span><span class="n">tmpDir</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">totDirName</span><span class="p">):</span>
+			<span class="c"># Move to the directory </span>
+			<span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">totDirName</span><span class="p">)</span>
+			<span class="n">resDirPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s">&quot;./&quot;</span><span class="p">,</span> <span class="s">&quot;res&quot;</span><span class="p">))</span>
+			<span class="k">print</span> <span class="s">&quot; |- Results Folder: &quot;</span><span class="p">,</span> <span class="n">resDirPath</span>
+			<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">resDirPath</span><span class="p">):</span>
+				<span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">resDirPath</span><span class="p">)</span>
+				
+				<span class="c"># Find the number of generations</span>
+				<span class="n">numberOfGen</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">resDirPath</span><span class="p">,</span><span class="s">&#39;times_*&#39;</span><span class="p">)))</span>
+				<span class="n">conf</span> <span class="o">=</span> <span class="n">readfiles</span><span class="o">.</span><span class="n">read_sims_conf_file</span><span class="p">()</span> <span class="c">#ÊConfiguration file upload</span>
+				<span class="n">tmpVolume</span> <span class="o">=</span> <span class="n">conf</span><span class="p">[</span><span class="mi">15</span><span class="p">]</span>
+				
+				<span class="n">group_A_prev</span> <span class="o">=</span> <span class="p">[];</span> <span class="n">group_HAM_prev</span> <span class="o">=</span> <span class="p">[];</span> <span class="n">group_EUC_prev</span> <span class="o">=</span> <span class="p">[];</span>
+				<span class="n">group_A_start</span> <span class="o">=</span> <span class="p">[];</span> <span class="n">group_HAM_start</span> <span class="o">=</span> <span class="p">[];</span> <span class="n">group_EUC_start</span> <span class="o">=</span> <span class="p">[];</span>
+				<span class="n">group_A_prev_NI</span> <span class="o">=</span> <span class="p">[];</span> <span class="n">group_HAM_prev_NI</span> <span class="o">=</span> <span class="p">[];</span> <span class="n">group_EUC_prev_NI</span> <span class="o">=</span> <span class="p">[];</span>
+				<span class="n">group_A_start_NI</span> <span class="o">=</span> <span class="p">[];</span> <span class="n">group_HAM_start_NI</span> <span class="o">=</span> <span class="p">[];</span> <span class="n">group_EUC_start_NI</span> <span class="o">=</span> <span class="p">[];</span>
+				
+				<span class="k">print</span> <span class="s">&quot;This Simulation is Composed of &quot;</span><span class="p">,</span> <span class="n">numberOfGen</span><span class="p">,</span> <span class="s">&quot; successive runs...&quot;</span>
+				
+				<span class="k">for</span> <span class="n">ngen</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">numberOfGen</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+				  
+					  <span class="n">strZeros</span> <span class="o">=</span> <span class="n">zeroBeforeStrNum</span><span class="p">(</span><span class="n">ngen</span><span class="p">,</span> <span class="n">numberOfGen</span><span class="p">)</span>
+					  
+					  <span class="k">if</span> <span class="n">ngen</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+					  	<span class="n">strSpeciesZero</span> <span class="o">=</span> <span class="s">&#39;species_&#39;</span> <span class="o">+</span> <span class="n">strZeros</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;*&#39;</span>
+					  	<span class="n">speciesFilesZero</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">resDirPath</span><span class="p">,</span><span class="n">strSpeciesZero</span><span class="p">)))</span>
+					  				  
+					  <span class="n">strSpecies</span> <span class="o">=</span> <span class="s">&#39;species_&#39;</span> <span class="o">+</span> <span class="n">strZeros</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ngen</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;*&#39;</span>  
+						  
+					  <span class="c"># Searching for files</span>
+					  <span class="n">speciesFiles</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">resDirPath</span><span class="p">,</span><span class="n">strSpecies</span><span class="p">)))</span>
+					  
+					  <span class="c"># Create a 0 list containing the present species</span>
+					  <span class="n">zeroList</span> <span class="o">=</span> <span class="n">returnZeroSpeciesList</span><span class="p">(</span><span class="n">speciesFiles</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+					  
+					  <span class="k">if</span> <span class="n">ngen</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+					  	<span class="n">speciesFiles</span> <span class="o">=</span> <span class="n">speciesFilesZero</span> <span class="o">+</span> <span class="n">speciesFiles</span>
+					  	
+					  <span class="c"># Create matrix with dimension (NumberOfFileSpecies X Number of species (not complexes) )</span>
+					  <span class="c"># print len(speciesFiles)</span>
+					  <span class="n">speciesConcs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">speciesFiles</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">zeroList</span><span class="p">)),</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+					  	
+					  <span class="c"># Initialize moving average lists</span>
+					  <span class="n">seqOLD</span> <span class="o">=</span> <span class="p">[];</span> <span class="n">seqOLDNOINFLUX</span> <span class="o">=</span> <span class="p">[];</span> <span class="n">concOLD</span> <span class="o">=</span> <span class="p">[]</span>
+					  <span class="n">seqSTART</span> <span class="o">=</span> <span class="p">[];</span> <span class="n">seqSTART_NOINFLUX</span> <span class="o">=</span> <span class="p">[];</span> <span class="n">concSTART</span> <span class="o">=</span> <span class="p">[]</span>
+					  <span class="n">totMass</span> <span class="o">=</span> <span class="p">[];</span> <span class="n">obsSpecies</span> <span class="o">=</span> <span class="p">[];</span>
+					  <span class="n">seqMIDDLE_NOINFLUX</span> <span class="o">=</span> <span class="p">[];</span> <span class="n">concMIDDLE</span> <span class="o">=</span> <span class="p">[];</span>
+					  
+					  <span class="n">oldNumberOfSpecies</span> <span class="o">=</span> <span class="mi">0</span>
+					  
+					  <span class="c"># FOR EACH FILE SPECIES ---------------------------</span>
+					  <span class="k">print</span> <span class="nb">len</span><span class="p">(</span><span class="n">speciesFiles</span><span class="p">),</span> <span class="s">&quot; Species files will be evaluated...&quot;</span>
+					  <span class="k">for</span> <span class="n">idS</span><span class="p">,</span> <span class="n">sngSpeciesFile</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">speciesFiles</span><span class="p">):</span>
+					  	
+					  	<span class="c">#print &#39;  |- Species File: &#39;, sngSpeciesFile	</span>
+						<span class="k">try</span><span class="p">:</span>
+							<span class="n">fidSpecies</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">sngSpeciesFile</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+						<span class="k">except</span><span class="p">:</span>
+							<span class="k">print</span> <span class="s">&#39; |- impossible to load &#39;</span><span class="p">,</span> <span class="n">sngSpeciesFile</span><span class="p">;</span> <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+							
+						<span class="n">seq</span> <span class="o">=</span> <span class="p">[];</span> <span class="n">conc</span> <span class="o">=</span> <span class="p">[];</span> <span class="n">seqNOINFLUX</span> <span class="o">=</span> <span class="p">[];</span> <span class="n">numberOfSpecies</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">tmpMass</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">tmpObsSpecies</span> <span class="o">=</span> <span class="mi">0</span>
+						<span class="n">tmpMols</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">tmpCpx</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">tmpCpxMols</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">tmpTotMass</span> <span class="o">=</span> <span class="mi">0</span>
+						<span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="n">fidSpecies</span><span class="p">:</span>
+							<span class="n">tmpID</span><span class="p">,</span> <span class="n">tmpSeq</span><span class="p">,</span> <span class="n">tmpConc</span><span class="p">,</span> <span class="n">tmpDiff</span><span class="p">,</span> <span class="n">tmpSol</span><span class="p">,</span> <span class="n">tmpCpxDiss</span><span class="p">,</span> <span class="n">tmpCpxCut</span><span class="p">,</span> <span class="n">tmpEval</span><span class="p">,</span> <span class="n">tmpAge</span><span class="p">,</span> <span class="n">tmpReb</span><span class="p">,</span> <span class="n">tmpCatID</span><span class="p">,</span> <span class="n">tmpSubID</span><span class="p">,</span> <span class="n">tmpKpho</span><span class="p">,</span> <span class="n">tmpLoadConc</span><span class="p">,</span> <span class="n">tmpConcLock</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+							<span class="k">if</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">tmpCpxCut</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">tmpConc</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+								<span class="n">seq</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmpSeq</span><span class="p">))</span>
+								<span class="n">conc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">tmpConc</span><span class="p">))</span>
+								<span class="k">if</span> <span class="n">idS</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+									<span class="n">seqSTART</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmpSeq</span><span class="p">))</span>
+									<span class="n">concSTART</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">tmpConc</span><span class="p">))</span>
+								<span class="k">if</span> <span class="n">idS</span> <span class="o">==</span> <span class="mi">50</span><span class="p">:</span>
+									<span class="n">concMIDDLE</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">tmpConc</span><span class="p">))</span>							
+								<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmpSeq</span><span class="p">))</span> <span class="o">&gt;</span> <span class="n">tmpMaxFluxL</span><span class="p">:</span>
+									<span class="n">seqNOINFLUX</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmpSeq</span><span class="p">))</span>	
+									<span class="k">if</span> <span class="n">idS</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+										<span class="n">seqSTART_NOINFLUX</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmpSeq</span><span class="p">))</span>
+									<span class="k">if</span> <span class="n">idS</span> <span class="o">==</span> <span class="mi">50</span><span class="p">:</span>
+										<span class="n">seqMIDDLE_NOINFLUX</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmpSeq</span><span class="p">))</span>
+								<span class="c"># Set 1 in zeroList (species has been created at least once)</span>
+								<span class="n">zeroList</span><span class="p">[</span><span class="n">numberOfSpecies</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+								<span class="c"># Update species concentrations matrix</span>
+								<span class="k">if</span> <span class="n">idS</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="n">speciesConcs</span><span class="p">[</span><span class="n">idS</span><span class="p">,</span> <span class="n">numberOfSpecies</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmpID</span>
+								<span class="k">if</span> <span class="n">speciesConcs</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfSpecies</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="n">speciesConcs</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfSpecies</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmpID</span>
+								<span class="n">speciesConcs</span><span class="p">[</span><span class="n">idS</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">numberOfSpecies</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmpConc</span>
+								<span class="c"># Update systems mass</span>
+								<span class="n">tmpMass</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmpSeq</span><span class="p">))</span> <span class="o">*</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">tmpConc</span><span class="p">)</span> <span class="o">*</span> <span class="mf">6.022e23</span> <span class="o">*</span> <span class="n">tmpVolume</span><span class="p">))</span>
+								<span class="n">tmpMols</span> <span class="o">+=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">tmpConc</span><span class="p">)</span> <span class="o">*</span> <span class="mf">6.022e23</span> <span class="o">*</span> <span class="n">tmpVolume</span><span class="p">))</span>
+							<span class="k">if</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">tmpCpxCut</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">tmpConc</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+								<span class="n">tmpCpx</span> <span class="o">+=</span> <span class="mi">1</span>
+								<span class="n">tmpCpxMols</span> <span class="o">+=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">tmpConc</span><span class="p">)</span> <span class="o">*</span> <span class="mf">6.022e23</span> <span class="o">*</span> <span class="n">tmpVolume</span><span class="p">))</span>
+							<span class="k">if</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">tmpConc</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+								<span class="n">tmpTotMass</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmpSeq</span><span class="p">))</span> <span class="o">*</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">tmpConc</span><span class="p">)</span> <span class="o">*</span> <span class="mf">6.022e23</span> <span class="o">*</span> <span class="n">tmpVolume</span><span class="p">))</span>
+							<span class="c"># If the species is not a complex, the number of species is updated	</span>
+							<span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">tmpCpxCut</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+								<span class="n">numberOfSpecies</span> <span class="o">+=</span> <span class="mi">1</span>	
+							<span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">tmpCpxCut</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="n">tmpEval</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+								<span class="n">tmpObsSpecies</span> <span class="o">+=</span> <span class="mi">1</span>		
+						
+						<span class="c"># Compute biodiversity index</span>
+						<span class="n">bioDivInd</span> <span class="o">=</span> <span class="mi">0</span>
+						<span class="k">for</span> <span class="n">sngConc</span> <span class="ow">in</span> <span class="n">conc</span><span class="p">:</span>
+							<span class="n">bioDivInd</span> <span class="o">+=</span> <span class="nb">pow</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">sngConc</span><span class="p">)</span> <span class="o">*</span> <span class="mf">6.022e23</span> <span class="o">*</span> <span class="n">tmpVolume</span><span class="p">)</span> <span class="o">/</span> <span class="n">tmpMols</span><span class="p">),</span><span class="mi">2</span><span class="p">)</span>
+						<span class="n">bioDivInd</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">bioDivInd</span><span class="p">)</span>
+						
+						<span class="c"># Compute number of new species		</span>
+						<span class="n">deltaNspecies</span> <span class="o">=</span> <span class="n">numberOfSpecies</span> <span class="o">-</span> <span class="n">oldNumberOfSpecies</span>
+						<span class="n">oldNumberOfSpecies</span> <span class="o">=</span> <span class="n">numberOfSpecies</span> 
+						<span class="n">strtoW</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">deltaNspecies</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span>
+						<span class="n">newSpecies_FID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">strtoW</span><span class="p">)</span>	
+						<span class="n">strtoW</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">conc</span><span class="p">))</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span>
+						<span class="n">livingSpecies_FID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">strtoW</span><span class="p">)</span>		
+						<span class="n">strtoW</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">tmpMass</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span>
+						<span class="n">totMass_FID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">strtoW</span><span class="p">)</span>	
+						<span class="n">strtoW</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">tmpMols</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span>
+						<span class="n">mols_FID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">strtoW</span><span class="p">)</span>
+						<span class="n">strtoW</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">tmpObsSpecies</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span>
+						<span class="n">evaluatedFID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">strtoW</span><span class="p">)</span>	
+						<span class="n">strtoW</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">bioDivInd</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span>
+						<span class="n">biodeversityFID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">strtoW</span><span class="p">)</span>
+						<span class="n">strtoW</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">tmpCpx</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span>
+						<span class="n">complex_FID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">strtoW</span><span class="p">)</span>
+						<span class="n">strtoW</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">tmpCpxMols</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span>
+						<span class="n">complexMols_FID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">strtoW</span><span class="p">)</span>
+						<span class="n">strtoW</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">tmpTotMass</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span>
+						<span class="n">totOverallMass_FID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">strtoW</span><span class="p">)</span>			
+						
+						<span class="c"># ------------------------------------------------------					</span>
+						<span class="c"># PREVIOUS ONE Defining concentration of the two vectors</span>
+						<span class="n">tmpMisure</span> <span class="o">=</span> <span class="n">distanceMisures</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="n">conc</span><span class="p">,</span> <span class="n">seqOLD</span><span class="p">,</span> <span class="n">concOLD</span><span class="p">,</span> <span class="n">idS</span><span class="p">)</span>
+						<span class="n">previousFILE_FID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmpMisure</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">);</span> <span class="n">group_A_prev</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmpMisure</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+						<span class="n">HAM_previousFILE_FID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmpMisure</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">);</span> <span class="n">group_HAM_prev</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmpMisure</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+						<span class="n">EUC_previousFILE_FID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmpMisure</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">);</span> <span class="n">group_EUC_prev</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmpMisure</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>			
+						<span class="c"># START Defining concentration of the two vectors</span>
+						<span class="n">tmpMisure</span> <span class="o">=</span> <span class="n">distanceMisures</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="n">conc</span><span class="p">,</span> <span class="n">seqSTART</span><span class="p">,</span> <span class="n">concSTART</span><span class="p">,</span> <span class="n">idS</span><span class="p">)</span>
+						<span class="n">startFILE_FID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmpMisure</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">);</span> <span class="n">group_A_start</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmpMisure</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+						<span class="n">HAM_startFILE_FID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmpMisure</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">);</span> <span class="n">group_HAM_start</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmpMisure</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+						<span class="n">EUC_startFILE_FID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmpMisure</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">);</span> <span class="n">group_EUC_start</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmpMisure</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>	
+						<span class="c"># PREVIOUS ONE (NO INFLUX) Defining concentration of the two vectors</span>
+						<span class="n">tmpMisure</span> <span class="o">=</span> <span class="n">distanceMisures</span><span class="p">(</span><span class="n">seqNOINFLUX</span><span class="p">,</span> <span class="n">conc</span><span class="p">,</span> <span class="n">seqOLDNOINFLUX</span><span class="p">,</span> <span class="n">concOLD</span><span class="p">,</span> <span class="n">idS</span><span class="p">)</span>
+						<span class="n">previousNOINFLUX_FILE_FID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmpMisure</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">);</span> <span class="n">group_A_prev_NI</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmpMisure</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+						<span class="n">HAM_previousNOINFLUX_FILE_FID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmpMisure</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">);</span> <span class="n">group_HAM_prev_NI</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmpMisure</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+						<span class="n">EUC_previousNOINFLUX_FILE_FID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmpMisure</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">);</span> <span class="n">group_EUC_prev_NI</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmpMisure</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>		
+						<span class="c"># START (NO INFLUX) Defining concentration of the two vectors</span>
+						<span class="n">tmpMisure</span> <span class="o">=</span> <span class="n">distanceMisures</span><span class="p">(</span><span class="n">seqNOINFLUX</span><span class="p">,</span> <span class="n">conc</span><span class="p">,</span> <span class="n">seqSTART_NOINFLUX</span><span class="p">,</span> <span class="n">concSTART</span><span class="p">,</span> <span class="n">idS</span><span class="p">)</span>
+						<span class="n">startNOINFLUX_FILE_FID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmpMisure</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">);</span> <span class="n">group_A_start_NI</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmpMisure</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+						<span class="n">HAM_startNOINFLUX_FILE_FID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmpMisure</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">);</span> <span class="n">group_HAM_start_NI</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmpMisure</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+						<span class="n">EUC_startNOINFLUX_FILE_FID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmpMisure</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">);</span> <span class="n">group_EUC_start_NI</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmpMisure</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+						<span class="c"># MIDDLE (NO INFLUX) Defining concentration of the two vectors</span>
+						<span class="k">if</span> <span class="n">idS</span> <span class="o">&gt;=</span> <span class="mi">50</span><span class="p">:</span>
+							<span class="n">tmpMisure</span> <span class="o">=</span> <span class="n">distanceMisures</span><span class="p">(</span><span class="n">seqNOINFLUX</span><span class="p">,</span> <span class="n">conc</span><span class="p">,</span> <span class="n">seqMIDDLE_NOINFLUX</span><span class="p">,</span> <span class="n">concMIDDLE</span><span class="p">,</span> <span class="n">idS</span><span class="p">)</span>
+							<span class="n">ANG_middlePreviousFILE_FID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmpMisure</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">)</span>
+							<span class="n">HAM_middlePreviousFILE_FID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmpMisure</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">)</span>
+					  		<span class="n">EUC_middlePreviousFILE_FID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmpMisure</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">)</span>
+						<span class="c"># Compute and save floating average values</span>
+						<span class="k">if</span> <span class="n">idS</span> <span class="o">%</span> <span class="mi">10</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+							<span class="k">if</span> <span class="n">idS</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+								<span class="n">previousFILE_FID_group</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">group_A_prev</span><span class="p">))</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">)</span>
+								<span class="n">previousNOINFLUX_FILE_FID_group</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">group_A_prev_NI</span><span class="p">))</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">)</span>
+								<span class="n">startFILE_FID_group</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">group_A_start</span><span class="p">))</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">)</span>
+								<span class="n">startNOINFLUX_FILE_FID_group</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">group_A_start_NI</span><span class="p">))</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">)</span>
+								<span class="n">HAM_previousFILE_FID_group</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">group_HAM_prev</span><span class="p">))</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">)</span>
+								<span class="n">HAM_previousNOINFLUX_FILE_FID_group</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">group_HAM_prev_NI</span><span class="p">))</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">)</span>
+								<span class="n">HAM_startFILE_FID_group</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">group_HAM_start</span><span class="p">))</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">)</span>
+								<span class="n">HAM_startNOINFLUX_FILE_FID_group</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">group_HAM_start_NI</span><span class="p">))</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">)</span>
+								<span class="n">EUC_previousFILE_FID_group</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">group_EUC_prev</span><span class="p">))</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">)</span>
+								<span class="n">EUC_previousNOINFLUX_FILE_FID_group</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">group_EUC_prev_NI</span><span class="p">))</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">)</span>
+								<span class="n">EUC_startFILE_FID_group</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">group_EUC_start</span><span class="p">))</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">)</span>
+								<span class="n">EUC_startNOINFLUX_FILE_FID_group</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">group_EUC_start_NI</span><span class="p">))</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">)</span>	
+								<span class="n">group_A_prev</span> <span class="o">=</span> <span class="p">[];</span> <span class="n">group_HAM_prev</span> <span class="o">=</span> <span class="p">[];</span> <span class="n">group_EUC_prev</span> <span class="o">=</span> <span class="p">[];</span>
+								<span class="n">group_A_start</span> <span class="o">=</span> <span class="p">[];</span> <span class="n">group_HAM_start</span> <span class="o">=</span> <span class="p">[];</span> <span class="n">group_EUC_start</span> <span class="o">=</span> <span class="p">[];</span>
+								<span class="n">group_A_prev_NI</span> <span class="o">=</span> <span class="p">[];</span> <span class="n">group_HAM_prev_NI</span> <span class="o">=</span> <span class="p">[];</span> <span class="n">group_EUC_prev_NI</span> <span class="o">=</span> <span class="p">[];</span>
+								<span class="n">group_A_start_NI</span> <span class="o">=</span> <span class="p">[];</span> <span class="n">group_HAM_start_NI</span> <span class="o">=</span> <span class="p">[];</span> <span class="n">group_EUC_start_NI</span> <span class="o">=</span> <span class="p">[];</span>
+								
+								  
+						<span class="c"># the new lists becomes the old one</span>
+						<span class="n">seqOLD</span> <span class="o">=</span> <span class="n">seq</span><span class="p">[:]</span>
+						<span class="n">seqOLDNOINFLUX</span> <span class="o">=</span> <span class="n">seqNOINFLUX</span><span class="p">[:]</span>
+						<span class="n">concOLD</span> <span class="o">=</span> <span class="n">conc</span><span class="p">[:]</span>
+						<span class="c"># Close file species		  					  </span>
+					  	<span class="n">fidSpecies</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+					  
+					  <span class="c"># Write newline char on result files</span>
+					  <span class="n">previousFILE_FID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+					  <span class="n">previousNOINFLUX_FILE_FID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+					  <span class="n">startFILE_FID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+					  <span class="n">startNOINFLUX_FILE_FID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+					  
+					  <span class="n">newSpecies_FID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+					  <span class="n">livingSpecies_FID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+					  <span class="n">totMass_FID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+					  <span class="n">mols_FID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+					  <span class="n">evaluatedFID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+					  <span class="n">biodeversityFID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+					  <span class="n">complex_FID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+					  <span class="n">complexMols_FID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+					  <span class="n">totOverallMass_FID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+					  
+					  <span class="n">HAM_previousFILE_FID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+					  <span class="n">HAM_previousNOINFLUX_FILE_FID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+					  <span class="n">HAM_startFILE_FID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+					  <span class="n">HAM_startNOINFLUX_FILE_FID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+					  
+					  <span class="n">EUC_previousFILE_FID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+					  <span class="n">EUC_previousNOINFLUX_FILE_FID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+					  <span class="n">EUC_startFILE_FID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+					  <span class="n">EUC_startNOINFLUX_FILE_FID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+					  
+					  <span class="k">if</span> <span class="n">idS</span> <span class="o">&gt;=</span> <span class="mi">50</span><span class="p">:</span>
+					  	<span class="n">ANG_middlePreviousFILE_FID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+					  	<span class="n">HAM_middlePreviousFILE_FID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+					  	<span class="n">EUC_middlePreviousFILE_FID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+					  
+					  <span class="n">previousFILE_FID_group</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+					  <span class="n">previousNOINFLUX_FILE_FID_group</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+					  <span class="n">startFILE_FID_group</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+					  <span class="n">startNOINFLUX_FILE_FID_group</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+					  
+					  <span class="n">HAM_previousFILE_FID_group</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+					  <span class="n">HAM_previousNOINFLUX_FILE_FID_group</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+					  <span class="n">HAM_startFILE_FID_group</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+					  <span class="n">HAM_startNOINFLUX_FILE_FID_group</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+					  
+					  <span class="n">EUC_previousFILE_FID_group</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+					  <span class="n">EUC_previousNOINFLUX_FILE_FID_group</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+					  <span class="n">EUC_startFILE_FID_group</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+					  <span class="n">EUC_startNOINFLUX_FILE_FID_group</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+					  
+					  <span class="c"># Write zeroOneList on file</span>
+					  <span class="k">for</span> <span class="n">zol</span> <span class="ow">in</span> <span class="n">zeroList</span><span class="p">:</span>
+						<span class="n">strtoW</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">zol</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span>
+						<span class="n">zeroOneSpeciesFID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">strtoW</span><span class="p">)</span>
+					  <span class="n">zeroOneSpeciesFID</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+					  
+					  <span class="c"># clean concentrations matrix from always zero species</span>
+					  <span class="n">speciesConcs</span> <span class="o">=</span> <span class="n">speciesConcs</span><span class="p">[:,</span><span class="n">speciesConcs</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">!=</span><span class="mi">0</span><span class="p">]</span>
+					  <span class="c"># Save concentrations matrix</span>
+					  <span class="n">filename</span> <span class="o">=</span> <span class="s">&quot;STAT_species_Concentrations_&quot;</span>  <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">validDir</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ngen</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;.csv&quot;</span>
+					  <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">StrPath</span><span class="p">,</span><span class="n">ndn</span><span class="p">,</span><span class="n">filename</span><span class="p">),</span> <span class="n">speciesConcs</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s">&#39;</span><span class="si">%.10f</span><span class="s">&#39;</span><span class="p">)</span>
+				<span class="n">validDir</span> <span class="o">+=</span> <span class="mi">1</span>
+			<span class="k">else</span><span class="p">:</span> 
+				<span class="k">print</span> <span class="s">&quot; |- no result folder has been found&quot;</span>
+	
+	<span class="c"># CLOSE FILES</span>
+	<span class="n">previousFILE_FID</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	<span class="n">previousNOINFLUX_FILE_FID</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	<span class="n">startFILE_FID</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	<span class="n">startNOINFLUX_FILE_FID</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	
+	<span class="n">HAM_previousFILE_FID</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	<span class="n">HAM_previousNOINFLUX_FILE_FID</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	<span class="n">HAM_startFILE_FID</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	<span class="n">HAM_startNOINFLUX_FILE_FID</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	
+	<span class="n">EUC_previousFILE_FID</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	<span class="n">EUC_previousNOINFLUX_FILE_FID</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	<span class="n">EUC_startFILE_FID</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	<span class="n">EUC_startNOINFLUX_FILE_FID</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	
+	<span class="n">ANG_middlePreviousFILE_FID</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	<span class="n">HAM_middlePreviousFILE_FID</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	<span class="n">EUC_middlePreviousFILE_FID</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	
+	<span class="n">previousFILE_FID_group</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	<span class="n">previousNOINFLUX_FILE_FID_group</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	<span class="n">startFILE_FID_group</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	<span class="n">startNOINFLUX_FILE_FID_group</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	
+	<span class="n">HAM_previousFILE_FID_group</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	<span class="n">HAM_previousNOINFLUX_FILE_FID_group</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	<span class="n">HAM_startFILE_FID_group</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	<span class="n">HAM_startNOINFLUX_FILE_FID_group</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	
+	<span class="n">EUC_previousFILE_FID_group</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	<span class="n">EUC_previousNOINFLUX_FILE_FID_group</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	<span class="n">EUC_startFILE_FID_group</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	<span class="n">EUC_startNOINFLUX_FILE_FID_group</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	
+	<span class="n">newSpecies_FID</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	<span class="n">livingSpecies_FID</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	<span class="n">zeroOneSpeciesFID</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	<span class="n">totMass_FID</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	<span class="n">evaluatedFID</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	<span class="n">mols_FID</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	<span class="n">biodeversityFID</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	<span class="n">complex_FID</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	<span class="n">complexMols_FID</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	<span class="n">totOverallMass_FID</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	
+	<span class="k">print</span> <span class="s">&#39;|- FINISHED... SEE YOU NEXT TIME&#39;</span>
+
+					
+					
+
+			
+				
+
+	
+	
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Alessandro Filisetti.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
