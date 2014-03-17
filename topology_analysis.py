@@ -29,7 +29,8 @@ if __name__ == '__main__':
 				description='This script perform a topological analysis of random catalytic reaction networks.'
 				, epilog='''Random Catalytic Reaction Networks Topological Assessment ''') 
 	parser.add_argument('-k', '--creationMethod', help='Network creation method (1: Filisetti, 2: Wim, 3: WimNoRevs, 4: Filisetti with revs, DEF: 1)', default='1', type=int)
-	parser.add_argument('-f', '--lastFood', type=int, help='Last food species ID (deafult: 5)', default='5')
+	parser.add_argument('-a', '--prefAttach', help='Type of catalyst choice (1: Preferential Attachment, 0: Random attachment, DEF: 0', default='0', type=int)
+	parser.add_argument('-f', '--lastFood', type=int, help='Last food species ID (default: 5)', default='5')
 	parser.add_argument('-o', '--strOut', help='Path for output file storing (Default: ./)', default='./')
 	parser.add_argument('-M', '--maxDim', help='Max Dimension of the systems (Default: 10)', default='10', type=int)
 	parser.add_argument('-m', '--minDim', help='min Dimension of the systems (Default: 5)', default='5', type=int)
@@ -115,6 +116,7 @@ if __name__ == '__main__':
 				catalysisID = 0
 				#print "\t\t|- NET creation... "
 				checkRct = False
+				weightCat = [1]*len(species)
 				for i in range(rctToCat):
 					# Select if condensation of cleavage according to the total number of reactions
 					#if rctToCat > 1000: 
@@ -186,12 +188,23 @@ if __name__ == '__main__':
 								rcts = np.vstack([rcts,(int(reactionID), int(1), tmpprodid, idsub1, idsub2, int(0), int(0), int(0))])	
 								reactionID += 1
 								nCleavage += 1
-					# A CATALYST IS RANDOMLY ASSIGNED FROM THE SPECIES LIST
+					
+					# CATALYST ATTRIBUTION: THE CATALYST IS CHOOSEN ACCORDING TO THE prefAttach PARAMETER: 1: PREFERENTIAL ATTACHMENT, 0: RANDOM ATTRIBUTION
 					catalyst = -1
 					catFound = False
 					
-					while not catFound: 
-						catalyst = species.index(ran.choice(species[len(alphabet):]))
+					while not catFound:
+						if (args.prefAttach == 0) | (i == 0): 
+							catalyst = species.index(ran.choice(species[len(alphabet):totSpecies-1]))
+							weightCat[catalyst] += 1
+							print "reazione", i
+							print weightCat
+							print rcts
+							raw_input("ciao")
+						else:
+							
+							print weightCat
+							raw_input("ciao2")
 						if (len(species[catalyst]) > args.noCat):
 							if rctnew == False:
 								if sum((cats[:,1]==catalyst) & (cats[:,2]==rct2cat))==0:
