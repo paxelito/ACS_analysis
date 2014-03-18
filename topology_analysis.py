@@ -33,7 +33,7 @@ if __name__ == '__main__':
 	parser.add_argument('-k', '--creationMethod', help='Network creation method (1: Filisetti, 2: Wim, 3: WimNoRevs, 4: Filisetti with revs, DEF: 1)', default='1', type=int)
 	parser.add_argument('-a', '--prefAttach', help='Type of catalyst choice (1: Preferential Attachment, 0: Random attachment, DEF: 0', default='0', type=int)
 	parser.add_argument('-v', '--minavgcon', help='Initial Average Connectivity, level of catalysis, DEF: 0.1', default='0.1', type=float)
-	parser.add_argument('-V', '--maxavgcon', help='Final Average Connectivity, level of catalysis, DEF: 4.0', default='4.0', type=float)
+	parser.add_argument('-V', '--maxavgcon', help='Final Average Connectivity, level of Catalysis, DEF: 4.0', default='4.0', type=float)
 	parser.add_argument('-f', '--lastFood', type=int, help='Last food species ID (default: 5)', default='5')
 	parser.add_argument('-o', '--strOut', help='Path for output file storing (Default: ./)', default='./')
 	parser.add_argument('-M', '--maxDim', help='Max Dimension of the systems (Default: 10)', default='10', type=int)
