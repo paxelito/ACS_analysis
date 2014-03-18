@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: latin-1 -*-
-'''Script to order the analysis of the divergences in time. 
+'''This python program assess different network structures in term of topological (NON DYNAMICAL) RAF and SCC presence according 
+	to different structural parameters. 
 '''
 import sys, os # Standard librar
 import glob
@@ -9,6 +10,7 @@ import itertools as it
 import random as ran
 from time import time
 from numpy import * 
+from numpy.random import choice
 from argparse import ArgumentParser
 try:
     from pylab import *
@@ -30,6 +32,8 @@ if __name__ == '__main__':
 				, epilog='''Random Catalytic Reaction Networks Topological Assessment ''') 
 	parser.add_argument('-k', '--creationMethod', help='Network creation method (1: Filisetti, 2: Wim, 3: WimNoRevs, 4: Filisetti with revs, DEF: 1)', default='1', type=int)
 	parser.add_argument('-a', '--prefAttach', help='Type of catalyst choice (1: Preferential Attachment, 0: Random attachment, DEF: 0', default='0', type=int)
+	parser.add_argument('-v', '--minavgcon', help='Initial Average Connectivity, level of catalysis, DEF: 0.1', default='0.1', type=float)
+	parser.add_argument('-V', '--maxavgcon', help='final Average Connectivity, level of catalysis, DEF: 4.0', default='4.0', type=float)
 	parser.add_argument('-f', '--lastFood', type=int, help='Last food species ID (default: 5)', default='5')
 	parser.add_argument('-o', '--strOut', help='Path for output file storing (Default: ./)', default='./')
 	parser.add_argument('-M', '--maxDim', help='Max Dimension of the systems (Default: 10)', default='10', type=int)
@@ -70,8 +74,8 @@ if __name__ == '__main__':
 	for maxlength in range(args.minDim,args.maxDim+1): 
 		#sys.stdout.flush() # Force save data on file
 		increaseYet = True 
-		averageConn = 0.1
-		while (increaseYet == True) & (averageConn <= 4):
+		averageConn = args.minavgcon
+		while (increaseYet == True) & (averageConn <= args.maxavgcon):
 			time1 = time()
 			raffound = 0
 			sccfound = 0
@@ -117,6 +121,8 @@ if __name__ == '__main__':
 				#print "\t\t|- NET creation... "
 				checkRct = False
 				weightCat = [1]*len(species)
+				# If the network structure allows the presence of reverse reactions, hence overall reactions must be divided by 2
+				if (args.creationMethod == 2) | (args.creationMethod == 4): rctToCat = int(round(rctToCat/2))
 				for i in range(rctToCat):
 					# Select if condensation of cleavage according to the total number of reactions
 					#if rctToCat > 1000: 
@@ -197,14 +203,12 @@ if __name__ == '__main__':
 						if (args.prefAttach == 0) | (i == 0): 
 							catalyst = species.index(ran.choice(species[len(alphabet):totSpecies-1]))
 							weightCat[catalyst] += 1
-							print "reazione", i
-							print weightCat
-							print rcts
-							raw_input("ciao")
-						else:
+							pweightCat = [float(i)/sum(weightCat) for i in weightCat]
 							
-							print weightCat
-							raw_input("ciao2")
+						else:
+							catalyst = choice(range(totSpecies),p=pweightCat)
+							weightCat[catalyst] += 1
+							pweightCat = [float(i)/sum(weightCat) for i in weightCat]
 						if (len(species[catalyst]) > args.noCat):
 							if rctnew == False:
 								if sum((cats[:,1]==catalyst) & (cats[:,2]==rct2cat))==0:
@@ -228,6 +232,9 @@ if __name__ == '__main__':
 						if (args.creationMethod == 2) | (args.creationMethod == 4):
 							cats = np.vstack([cats,(int(catalysisID), int(catalyst), int(rctsToCat + 1), int(0), float(0.5), float(0.25), float(0.5), ran.randint(1,2))])
 							catalysisID += 1
+				print rcts.shape
+				raw_input("ciao")
+				#raw_input("ciao")
 				#print rcts
 				#print cats
 				#print cats.shape
