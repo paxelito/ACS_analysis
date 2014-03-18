@@ -110,7 +110,7 @@ if __name__ == '__main__':
 				# rctToCat = int(round(totRcts * totSpecies * prob))
 				rctToCat = int(round(totSpecies * averageConn))
 				if instanceID == 0: print '\t\t|- P: ', prob, ' , Species (', totSpecies, \
-											'), , reactions (', totRcts ,'),', rctToCat,\
+											'), reactions (', totRcts ,'),', rctToCat,\
 											' catalysis. Iteration --> ', iterations
 				
 				initSpeciesListLength = len(species)
