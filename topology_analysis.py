@@ -10,7 +10,7 @@ import itertools as it
 import random as ran
 from time import time
 from numpy import * 
-from numpy.random import choice
+#from numpy.random import choice  TO USE SINCE NUMPY 1.7
 from argparse import ArgumentParser
 try:
     from pylab import *
@@ -206,7 +206,8 @@ if __name__ == '__main__':
 							pweightCat = [float(i)/sum(weightCat) for i in weightCat]
 							
 						else:
-							catalyst = choice(range(totSpecies),p=pweightCat)
+							#catalyst = choice(range(totSpecies),p=pweightCat) # TO USE SINCE NUMPY 1.7
+							catalyst = sp.weightedChoice(pweightCat, range(totSpecies))
 							weightCat[catalyst] += 1
 							pweightCat = [float(i)/sum(weightCat) for i in weightCat]
 						if (len(species[catalyst]) > args.noCat):
@@ -232,8 +233,7 @@ if __name__ == '__main__':
 						if (args.creationMethod == 2) | (args.creationMethod == 4):
 							cats = np.vstack([cats,(int(catalysisID), int(catalyst), int(rctsToCat + 1), int(0), float(0.5), float(0.25), float(0.5), ran.randint(1,2))])
 							catalysisID += 1
-				print rcts.shape
-				raw_input("ciao")
+
 				#raw_input("ciao")
 				#print rcts
 				#print cats

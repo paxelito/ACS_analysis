@@ -4,6 +4,8 @@
 import sys, os # Standard library
 import itertools as it
 import numpy as np # Scientific library
+from numpy import cumsum
+from numpy.random import rand
 
 _AVOGADRO_ = 6.022141e23
 
@@ -40,3 +42,10 @@ def createFileSpecies(tmpFolder, args, pars, tmpScale=1, specieslist = None):
 		fid_initSpecies.write(str2w)   
 	fid_initSpecies.close()
 	return tempSpeciesList, tempFood
+
+def weightedChoice(weights, objects):
+    """Return a random item from objects, with the weighting defined by weights 
+    (which must sum to 1)."""
+    cs = cumsum(weights) #An array of the weights, cumulatively summed.
+    idx = sum(cs < rand()) #Find the index of the first weight over a random value.
+    return objects[idx]
