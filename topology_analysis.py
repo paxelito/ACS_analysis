@@ -125,6 +125,7 @@ if __name__ == '__main__':
 				# If the network structure allows the presence of reverse reactions, hence overall reactions must be divided by 2
 				if (args.creationMethod == 2) | (args.creationMethod == 4): rctToCat = int(round(rctToCat/2))
 				for i in range(rctToCat):
+					if i % 10 == 0: print "reazione ", i
 					# Select if condensation of cleavage according to the total number of reactions
 					#if rctToCat > 1000: 
 					#	if i % 1000 == 0: print "\t\t\t|- Reaction ", i, " - species list L: ", len(species)
@@ -203,13 +204,13 @@ if __name__ == '__main__':
 					while not catFound:
 						if (args.prefAttach == 0) | (i == 0): 
 							catalyst = species.index(ran.choice(species[len(alphabet):totSpecies-1]))
-							weightCat[catalyst] += 1
+							weightCat[catalyst] *= 2
 							pweightCat = [float(i)/sum(weightCat) for i in weightCat]
 							
 						else:
 							#catalyst = choice(range(totSpecies),p=pweightCat) # TO USE SINCE NUMPY 1.7
 							catalyst = sp.weightedChoice(pweightCat, range(totSpecies))
-							weightCat[catalyst] += 1
+							weightCat[catalyst] *= 2
 							pweightCat = [float(i)/sum(weightCat) for i in weightCat]
 						if (len(species[catalyst]) > args.noCat):
 							if rctnew == False:
@@ -234,8 +235,10 @@ if __name__ == '__main__':
 						if (args.creationMethod == 2) | (args.creationMethod == 4):
 							cats = np.vstack([cats,(int(catalysisID), int(catalyst), int(rctsToCat + 1), int(0), float(0.5), float(0.25), float(0.5), ran.randint(1,2))])
 							catalysisID += 1
-
-				#raw_input("ciao")
+				
+				print cats
+				np.savetxt("prova.csv", cats)
+				raw_input("ciao")
 				#print rcts
 				#print cats
 				#print cats.shape
