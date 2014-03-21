@@ -7,6 +7,7 @@ from copy import deepcopy
 import random as ran
 import numpy as np # Scientific library
 from numpy import * 
+#from numpy.random import choice  TO USE SINCE NUMPY 1.7
 from argparse import ArgumentParser
 try:
     from pylab import *
@@ -18,6 +19,7 @@ from ..graph import scc
 from ..dyn import dynamics as dn
 from ..IO import writefiles
 from ..model import reactions
+from lib.model import species
    
    
 def removeRareRcts(graph, dt, life, nrg, deltat):
@@ -102,12 +104,14 @@ def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavag
 	nCondensa = 0
 	rcts_no_rev = []
 	cats_no_rev = []
+	weightCat = [1]*len(originalSpeciesList)
 	#print "\t\t|- NET creation... "
 	checkRct = False
 	
 	for i in range(rctToCat):
+		if i % 10 == 0: print "reazione ", i
 		rctType = 1
-		if args.creationMethod == 1:
+		if (args.creationMethod == 1) | (args.creationMethod == 4):
 			if args.rctRatio > 0: 
 				if ran.random() > args.rctRatio: rctType = 0
 			else:
@@ -139,31 +143,27 @@ def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavag
 			elif args.directRctDirection == 0: dirrct = 0
 			else: dirrct = int(round(ran.random()))
 			
-			if rctnew:
-				if reactionID == 0:
+			if rctnew: # In the reaction is new
+				if reactionID == 0: # If the reaction is the first one
 					rcts = np.array([[int(reactionID), int(rctType), tmp1id, tmp2id, tmp3id, int(0), int(239), parameters[34]]])
 					reactionID += 1
-					nCleavage += 1
-					if args.creationMethod == 4: 
-						rcts_no_rev = np.array([[int(reactionID_no_rev), int(dirrct), tmp1id, tmp2id, tmp3id, int(0), int(239), parameters[34]]])
-						reactionID_no_rev += 1
 				else: 
 					rcts = np.vstack([rcts,(int(reactionID), int(rctType), tmp1id, tmp2id, tmp3id, int(0), int(239), parameters[34])])	
 					reactionID += 1
-					nCleavage += 1
-					if args.creationMethod == 4: 
-						rcts_no_rev = np.vstack([rcts_no_rev,(int(reactionID_no_rev), int(dirrct), tmp1id, tmp2id, tmp3id, int(0), int(239), parameters[34])])	
-						reactionID_no_rev += 1
+				nCleavage += 1
 					
 				if (args.creationMethod == 2) | (args.creationMethod == 4): # If WIM method the reverse reaction is added
-					rcts = np.vstack([rcts,(int(reactionID), int(0), tmp1id, tmp2id, tmp3id, int(0), int(239), parameters[34])])	
+					rcts = np.vstack([rcts,(int(reactionID), int(0), tmp1id, tmp2id, tmp3id, int(0), int(239), parameters[33])])	
 					reactionID += 1
 					nCondensa += 1
 			else:
 				rct2cat = rcts[(rcts[:,1] == 1) & (rcts[:,2] == tmp1id) & (rcts[:,3] == tmp2id),0]
-				rct2cat_no_rev = rcts_no_rev[(rcts_no_rev[:,1] == dirrct) & (rcts_no_rev[:,2] == tmp1id) & (rcts_no_rev[:,3] == tmp2id),0]
+				if (args.creationMethod == 2) | (args.creationMethod == 4): # If the reverse reaction is present, so the ID is stored
+					rct2cat_no_rev = rcts[(rcts[:,1] == 0) & (rcts[:,2] == tmp1id) & (rcts[:,3] == tmp2id),0]
+					
+					#rct2cat_no_rev = rcts_no_rev[(rcts_no_rev[:,1] == dirrct) & (rcts_no_rev[:,2] == tmp1id) & (rcts_no_rev[:,3] == tmp2id),0]
 		else: # condensation
-			if args.creationMethod == 1:
+			if (args.creationMethod == 1) | (args.creationMethod == 4):
 				rctnew = False
 				sub1, sub2, idsub1, idsub2, prod = reactions.createRandomCondensation(speciesList, initSpeciesListLength)
 				try:
@@ -172,6 +172,7 @@ def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavag
 					tmpprodid = len(speciesList)
 					speciesList.append(prod)
 				
+				# The reaction is new if reactinID == 0 (first reaction) or if it is not present 
 				if reactionID == 0: rctnew = True
 				else:
 					if sum((rcts[:,1] == 0) & (rcts[:,3] == idsub1) & (rcts[:,4] == idsub2)) == 0: rctnew = True
@@ -184,38 +185,54 @@ def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavag
 						rcts = np.vstack([rcts,(int(reactionID), int(rctType), tmpprodid, idsub1, idsub2, int(0), int(239), parameters[33])])	
 						reactionID += 1
 					nCondensa += 1
+					
+					 # if reverse reaction are present (methods 2 and 4 :: WIM and FILISETTI with reverse reactions)
+					if args.creationMethod == 4:
+						rcts = np.vstack([rcts,(int(reactionID), int(1), tmpprodid, idsub1, idsub2, int(0), int(239), parameters[34])])	
+						reactionID += 1
+						nCleavage += 1
+						
 				else:
 					rct2cat = rcts[(rcts[:,1] == 0) & (rcts[:,3] == idsub1) & (rcts[:,4] == idsub2),0]
-		# A CATALYST IS RANDOMLY ASSIGNED FROM THE SPECIES LIST
+					if (args.creationMethod == 2) | (args.creationMethod == 4): # If the reverse reaction is present, so the ID is stored
+						rct2cat_no_rev = rcts[(rcts[:,1] == 1) & (rcts[:,3] == idsub1) & (rcts[:,4] == idsub2),0]
+					
+		# A CATALYST IS RANDOMLY (UNIFORM or PREF ATTACHMENT network creation method) ASSIGNED FROM THE SPECIES LIST
 		catalyst = -1
-		
 		catFound = False
-		while not catFound: 
-			catalyst = speciesList.index(ran.choice(speciesList[len(parameters[14]):]))
-			if (len(speciesList[catalyst]) > args.noCat):
+		
+		while not catFound:
+			if (args.prefAttach == 0) | (i == 0): 
+				catalyst = originalSpeciesList.index(ran.choice(originalSpeciesList[len(parameters[14]):initSpeciesListLength-1]))
+				weightCat[catalyst] += 1
+				pweightCat = [float(i)/sum(weightCat) for i in weightCat]
+				
+			else:
+				#catalyst = choice(range(initSpeciesListLength),p=pweightCat) # TO USE SINCE NUMPY 1.7
+				catalyst = species.weightedChoice(pweightCat, range(initSpeciesListLength))
+				weightCat[catalyst] += 1
+				pweightCat = [float(i)/sum(weightCat) for i in weightCat]
+			# IF the selected catalyst is greater than the minimum length and the catalyst does not already catalyze the reaction
+			if (len(originalSpeciesList[catalyst]) > args.noCat):
 				if rctnew == False:
-					if sum((cats[:,1]==catalyst) & (cats[:,2]==rct2cat))==0: catFound = True
+					if sum((cats[:,1]==catalyst) & (cats[:,2]==rct2cat))==0:
+						catFound = True
 				else:
 					catFound = True
-			
-		if rctnew: rctsToCat = reactionID - 1
-		else: rctsToCat = rct2cat
 		
-		# If the creation method is WIM RAF in REV no RAF in No Rev
-		if args.creationMethod == 4:
-			if rctnew: rctsToCat_no_rev = reactionID_no_rev - 1
-			else: rctsToCat_no_rev = rct2cat_no_rev	
-		
-		if (args.creationMethod == 2) | (args.creationMethod == 4): rctsToCat = reactionID - 2
+		# Forward reaction to catalyze
+		if rctnew: 
+			if (args.creationMethod == 2) | (args.creationMethod == 4):
+				rctsToCat = reactionID - 2
+			else:
+				rctsToCat = reactionID - 1
+		else: 
+			rctsToCat = rct2cat
 		
 		if catalysisID == 0: # if this is the first catalysis
 			
 			cats = np.array([[int(catalysisID), int(catalyst), int(rctsToCat), int(0), parameters[27], parameters[28], parameters[29], int(1)]])
 			catalysisID += 1
-			
-			if (args.creationMethod == 4):
-				cats_no_rev = np.array([[int(catalysisID_no_rev), int(catalyst), int(rctsToCat_no_rev), int(0), parameters[27], parameters[28], parameters[29], int(1)]])
-				catalysisID_no_rev += 1
 				
 			if (args.creationMethod == 2) | (args.creationMethod == 4): # IF wim method
 				cats = np.vstack([cats,(int(catalysisID), int(catalyst), int(rctsToCat + 1), int(0), parameters[27], parameters[28], parameters[29], int(1))])
@@ -224,10 +241,6 @@ def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavag
 		else: 
 			cats = np.vstack([cats,(int(catalysisID), int(catalyst), int(rctsToCat), int(0), parameters[27], parameters[28], parameters[29], int(1))])
 			catalysisID += 1
-			
-			if (args.creationMethod == 4):
-				cats_no_rev = np.vstack([cats_no_rev,(int(catalysisID_no_rev), int(catalyst), int(rctsToCat_no_rev), int(0), parameters[27], parameters[28], parameters[29], int(1))])
-				catalysisID_no_rev += 1
 			
 			if (args.creationMethod == 2) | (args.creationMethod == 4):
 				cats = np.vstack([cats,(int(catalysisID), int(catalyst), int(rctsToCat + 1), int(0), parameters[27], parameters[28], parameters[29], int(1))])

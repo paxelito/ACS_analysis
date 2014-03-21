@@ -31,7 +31,9 @@ if __name__ == '__main__':
 	parser = ArgumentParser(
 				description='This script re-arrange results in a more friendly way from the angle analysis in time.'
 				, epilog='''File with angle trajectories are created. ''') 
-	parser.add_argument('-a', '--sysType', help='System Architecture [1:CLOSE, 2:PROTO, 3:CSTR], deafult: 1', default='1')
+	parser.add_argument('-t', '--sysType', help='System Architecture [1:CLOSE, 2:PROTO, 3:CSTR], deafult: 1', default='1')
+	parser.add_argument('-a', '--prefAttach', help='Type of catalyst choice (1: Preferential Attachment, 0: Random attachment, DEF: 0', default='0', type=int)
+	parser.add_argument('-o', '--strOut', help='Path for output file storing (Default: ./)', default='./')
 	parser.add_argument('-k', '--creationMethod', help='Network creation method (1: Filisetti, 2: Wim, 3: WimNoRevs, 4: WIM_RAFinREV_noRAFinNOrev, DEF: 1)', default='1', type=int)
 	parser.add_argument('-d', '--directRctDirection', help='Direction of the forward reaction where necessary (1: cleavage, 0: condensation, 2: random with probability 0.5,Default: 1)', default='1', type=int)
 	parser.add_argument('-K', '--chemistriesWithRAF', help='Number of Chemistries with RAF to create', default='0', type=int)
@@ -40,7 +42,6 @@ if __name__ == '__main__':
 	parser.add_argument('-N', '--initAmount', help='Default Initial Amount', default='600', type=int)
 	parser.add_argument('-s', '--initSet', type=int, help='Max Dimension of the initial set (Default: 4)', default='4')
 	parser.add_argument('-m', '--maxDim', help='Max Dimension of the systems (Default: 6)', default='6', type=int)
-	parser.add_argument('-o', '--strOut', help='Path for output file storing (Default: ./)', default='./')
 	parser.add_argument('-I', '--conf', help='Configuration File (Default: ./acsm2s.conf)', default='./acsm2s.conf')
 	parser.add_argument('-H', '--chemistries', help='Number of distinct chemistries to create', type=int, default='4')
 	parser.add_argument('-i', '--iteration', help='Number of initial conditions (Default: 1)', default='1', type=int)

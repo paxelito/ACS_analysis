@@ -5,6 +5,7 @@
 '''
 import sys, os # Standard librar
 import glob
+from copy import deepcopy
 import numpy as np # Scientific library
 import itertools as it
 import random as ran
@@ -31,6 +32,7 @@ if __name__ == '__main__':
 				description='This script perform a topological analysis of random catalytic reaction networks.'
 				, epilog='''Random Catalytic Reaction Networks Topological Assessment ''') 
 	parser.add_argument('-k', '--creationMethod', help='Network creation method (1: Filisetti, 2: Wim, 3: WimNoRevs, 4: Filisetti with revs, DEF: 1)', default='1', type=int)
+	parser.add_argument('-R', '--revRcts', help='Reverse reactions are allowed to be created for chance(1: Yes, 0: No, Deafult: No)', default='0', type=int)		
 	parser.add_argument('-a', '--prefAttach', help='Type of catalyst choice (1: Preferential Attachment, 0: Random attachment, DEF: 0', default='0', type=int)
 	parser.add_argument('-v', '--minavgcon', help='Initial Average Connectivity, level of catalysis, DEF: 0.1', default='0.1', type=float)
 	parser.add_argument('-V', '--maxavgcon', help='Final Average Connectivity, level of Catalysis, DEF: 4.0', default='4.0', type=float)
@@ -42,10 +44,18 @@ if __name__ == '__main__':
 	parser.add_argument('-n', '--noCat', help='Non catalytic max length (default: 2)', default='2', type=int)
 	parser.add_argument('-c', '--rctRatio', help='Ratio between cleavages and condensations (default: 0, it means that the actual ratio is used)', default='0', type=float)	
 	parser.add_argument('-r', '--randomSeed', help='random seed', type=int, default=None)
+	parser.add_argument('-d', '--directRctDirection', help='Direction of the forward reaction where necessary (1: cleavage, 0: condensation, 2: random with probability 0.5,Default: 1)', default='1', type=int)
+
 	args = parser.parse_args()
 	
 	print "\nSystem Initialization..."
 	ran.seed(args.randomSeed)
+	
+	# If the architecture of the network allows reverse reaction the revRcts parameter is automatically set to 1
+	if (args.creationMethod == 2) | (args.creationMethod == 4): 
+		args.revRcts = 1
+		print "\n\t!!! WARNING !!! Since the chosen architecture (", args.creationMethod, ") allows the presence of reverse reactions ",\
+			" the parameter args.revRcts has been automatically set to 1\n" 
 	
 	# Create stas folders
 	ndn = '_topological_assessment_' +  str(args.creationMethod) + '_' + str(args.lastFood) + '_' \
@@ -89,13 +99,14 @@ if __name__ == '__main__':
 				
 				# Create the complete population of species according to the Max Length and the alphabet
 				alphabet = ['A', 'B']
-				species = sp.createCompleteSpeciesPopulation(maxlength, alphabet)
+				speciesList = sp.createCompleteSpeciesPopulation(maxlength, alphabet)
+				originalSpeciesList = deepcopy(speciesList)
 				
 				# compute population carinality
 				totSpecies = sp.getTotNumberOfSpeciesFromCompletePop(maxlength)
 				
 				# Compute overall conceivable number of reactions
-				totCleavage = reactions.getNumOfCleavages(species)
+				totCleavage = reactions.getNumOfCleavages(speciesList)
 				
 				if (args.creationMethod == 1) | (args.creationMethod == 4): totCond = reactions.getNumOfCondensations(totSpecies)
 				else: totCond = 0
@@ -114,131 +125,135 @@ if __name__ == '__main__':
 											'), reactions (', totRcts ,'),', rctToCat,\
 											' catalysis. Iteration --> ', iterations
 				
-				initSpeciesListLength = len(species)
+				initSpeciesListLength = len(speciesList)
 				
 				conf = (1,1,2000,0,200000,0,0,2,args.lastFood,prob)	
 				reactionID = 0
 				catalysisID = 0
 				#print "\t\t|- NET creation... "
 				checkRct = False
-				weightCat = [1]*len(species)
+				weightCat = [1]*len(speciesList)
 				# If the network structure allows the presence of reverse reactions, hence overall reactions must be divided by 2
 				if (args.creationMethod == 2) | (args.creationMethod == 4): rctToCat = int(round(rctToCat/2))
-				for i in range(rctToCat):
-					if i % 10 == 0: print "reazione ", i
-					# Select if condensation of cleavage according to the total number of reactions
-					#if rctToCat > 1000: 
-					#	if i % 1000 == 0: print "\t\t\t|- Reaction ", i, " - species list L: ", len(species)
-					rctType = 1
-					if (args.creationMethod == 1) | (args.creationMethod == 4):
-						if args.rctRatio > 0: 
-							if ran.random() > args.rctRatio: rctType = 0
-						else:
-							if (totCleavage / (float(totCleavage) + totCond)) <= ran.random(): rctType = 0
-					
-					 
-					# If cleavage
-					if (rctType == 1) & (nCleavage <= totCleavage):
-						# Select species to cleave
-						rctnew = False
-						# Create random cleavage
-						molToCleav, tmp1, tmp2, tmp1id, tmp2id, find1 = reactions.createRandomCleavage(species, alphabet, initSpeciesListLength)
-						# Check if the reaction is new
-						if i == 0: rctnew = True
-						else:
-							if find1 == True:
-								if sum((rcts[:,1] == 1) & (rcts[:,2] == species.index(molToCleav)) \
-									& (rcts[:,3] == tmp1id)) == 0: rctnew = True
-							
-						
-						if rctnew:
-							if reactionID == 0:
-								rcts = np.array([[int(reactionID), int(rctType), species.index(molToCleav), tmp1id, tmp2id, int(0), int(0), int(0)]])
-								reactionID += 1
-							else: 
-								rcts = np.vstack([rcts,(int(reactionID), int(rctType), species.index(molToCleav), tmp1id, tmp2id, int(0), int(0), int(0))])	
-								reactionID += 1
-							nCleavage += 1
-								
-							if (args.creationMethod == 2) | (args.creationMethod == 4): # if reverse reaction are allowed (methods 2 and 4 :: WIM and OUR)
-								rcts = np.vstack([rcts,(int(reactionID), int(0), species.index(molToCleav), tmp1id, tmp2id, int(0), int(0), int(0))])	
-								reactionID += 1
-								nCondensa += 1
-						else:
-							rct2cat = rcts[(rcts[:,1] == 1) & (rcts[:,2] == species.index(molToCleav)) & (rcts[:,3] == tmp1id),0]
-					else: # condensation
-						if (args.creationMethod == 1) | (args.creationMethod == 4):
-							rctnew = False
-							sub1, sub2, idsub1, idsub2, prod = reactions.createRandomCondensation(species, initSpeciesListLength)
-							try:
-								tmpprodid = species.index(prod)
-							except:
-								tmpprodid = len(species)
-								species.append(prod)
-							
-							if i == 0: rctnew = True
-							else:
-								if sum((rcts[:,1] == 0) & (rcts[:,3] == idsub1) & (rcts[:,4] == idsub2)) == 0: rctnew = True
-							
-							# Reaction Structure Creation
-							if rctnew:
-								if reactionID == 0: 
-									rcts = np.array([[int(reactionID), int(rctType), tmpprodid, idsub1, idsub2, int(0), int(0), int(0)]])
-									reactionID += 1
-								else: 
-									rcts = np.vstack([rcts,(int(reactionID), int(rctType), tmpprodid, idsub1, idsub2, int(0), int(0), int(0))])	
-									reactionID += 1
-								nCondensa += 1
-							else:
-								rct2cat = rcts[(rcts[:,1] == 0) & (rcts[:,3] == idsub1) & (rcts[:,4] == idsub2),0]
-								
-							if args.creationMethod == 4: # if reverse reaction are allowed (methods 2 and 4 :: WIM and OUR)
-								rcts = np.vstack([rcts,(int(reactionID), int(1), tmpprodid, idsub1, idsub2, int(0), int(0), int(0))])	
-								reactionID += 1
-								nCleavage += 1
-					
-					# CATALYST ATTRIBUTION: THE CATALYST IS CHOOSEN ACCORDING TO THE prefAttach PARAMETER: 1: PREFERENTIAL ATTACHMENT, 0: RANDOM ATTRIBUTION
-					catalyst = -1
-					catFound = False
-					
-					while not catFound:
-						if (args.prefAttach == 0) | (i == 0): 
-							catalyst = species.index(ran.choice(species[len(alphabet):totSpecies-1]))
-							weightCat[catalyst] *= 2
-							pweightCat = [float(i)/sum(weightCat) for i in weightCat]
-							
-						else:
-							#catalyst = choice(range(totSpecies),p=pweightCat) # TO USE SINCE NUMPY 1.7
-							catalyst = sp.weightedChoice(pweightCat, range(totSpecies))
-							weightCat[catalyst] *= 2
-							pweightCat = [float(i)/sum(weightCat) for i in weightCat]
-						if (len(species[catalyst]) > args.noCat):
-							if rctnew == False:
-								if sum((cats[:,1]==catalyst) & (cats[:,2]==rct2cat))==0:
-									catFound = True
-							else:
-								catFound = True
-						
-					if rctnew: rctsToCat = reactionID - 1
-					else: rctsToCat = rct2cat
-					
-					if (args.creationMethod == 2) | (args.creationMethod == 4): rctsToCat = reactionID - 2
-					if catalysisID == 0: 
-						cats = np.array([[int(catalysisID), int(catalyst), int(rctsToCat), int(0), float(0.5), float(0.25), float(0.5), ran.randint(1,2)]])
-						catalysisID += 1
-						if (args.creationMethod == 2) | (args.creationMethod == 4): # IF wim method
-							cats = np.vstack([cats,(int(catalysisID), int(catalyst), int(rctsToCat + 1), int(0), float(0.5), float(0.25), float(0.5), ran.randint(1,2))])
-							catalysisID += 1
-					else: 
-						cats = np.vstack([cats,(int(catalysisID), int(catalyst), int(rctsToCat), int(0), float(0.5), float(0.25), float(0.5), ran.randint(1,2))])
-						catalysisID += 1
-						if (args.creationMethod == 2) | (args.creationMethod == 4):
-							cats = np.vstack([cats,(int(catalysisID), int(catalyst), int(rctsToCat + 1), int(0), float(0.5), float(0.25), float(0.5), ran.randint(1,2))])
-							catalysisID += 1
 				
-				print cats
-				np.savetxt("prova.csv", cats)
-				raw_input("ciao")
+				pars = [0]*35
+				pars[14]="AB";pars[27]=25;pars[28]=50;pars[29]=50
+				# Create chemistry
+				rcts, cats, speciesList, rcts_no_rev, cats_no_rev = network.create_chemistry(args, originalSpeciesList, pars, rctToCat, totCleavage, totCond)
+# 				for i in range(rctToCat):
+# 					if i % 10 == 0: print "reazione ", i
+# 					# Select if condensation of cleavage according to the total number of reactions
+# 					#if rctToCat > 1000: 
+# 					#	if i % 1000 == 0: print "\t\t\t|- Reaction ", i, " - species list L: ", len(species)
+# 					rctType = 1
+# 					if (args.creationMethod == 1) | (args.creationMethod == 4):
+# 						if args.rctRatio > 0: 
+# 							if ran.random() > args.rctRatio: rctType = 0
+# 						else:
+# 							if (totCleavage / (float(totCleavage) + totCond)) <= ran.random(): rctType = 0
+# 					
+# 					 
+# 					# If cleavage
+# 					if (rctType == 1) & (nCleavage <= totCleavage):
+# 						# Select species to cleave
+# 						rctnew = False
+# 						# Create random cleavage
+# 						molToCleav, tmp1, tmp2, tmp1id, tmp2id, find1 = reactions.createRandomCleavage(species, alphabet, initSpeciesListLength)
+# 						# Check if the reaction is new
+# 						if i == 0: rctnew = True
+# 						else:
+# 							if find1 == True:
+# 								if sum((rcts[:,1] == 1) & (rcts[:,2] == species.index(molToCleav)) \
+# 									& (rcts[:,3] == tmp1id)) == 0: rctnew = True
+# 							
+# 						if rctnew:
+# 							if reactionID == 0:
+# 								rcts = np.array([[int(reactionID), int(rctType), species.index(molToCleav), tmp1id, tmp2id, int(0), int(0), int(0)]])
+# 								reactionID += 1
+# 							else: 
+# 								rcts = np.vstack([rcts,(int(reactionID), int(rctType), species.index(molToCleav), tmp1id, tmp2id, int(0), int(0), int(0))])	
+# 								reactionID += 1
+# 							nCleavage += 1
+# 								
+# 							if (args.creationMethod == 2) | (args.creationMethod == 4): # if reverse reaction are allowed (methods 2 and 4 :: WIM and OUR)
+# 								rcts = np.vstack([rcts,(int(reactionID), int(0), species.index(molToCleav), tmp1id, tmp2id, int(0), int(0), int(0))])	
+# 								reactionID += 1
+# 								nCondensa += 1
+# 						else:
+# 							rct2cat = rcts[(rcts[:,1] == 1) & (rcts[:,2] == species.index(molToCleav)) & (rcts[:,3] == tmp1id),0]
+# 					else: # condensation
+# 						if (args.creationMethod == 1) | (args.creationMethod == 4):
+# 							rctnew = False
+# 							sub1, sub2, idsub1, idsub2, prod = reactions.createRandomCondensation(species, initSpeciesListLength)
+# 							try:
+# 								tmpprodid = species.index(prod)
+# 							except:
+# 								tmpprodid = len(species)
+# 								species.append(prod)
+# 							
+# 							if i == 0: rctnew = True
+# 							else:
+# 								if sum((rcts[:,1] == 0) & (rcts[:,3] == idsub1) & (rcts[:,4] == idsub2)) == 0: rctnew = True
+# 							
+# 							# Reaction Structure Creation
+# 							if rctnew:
+# 								if reactionID == 0: 
+# 									rcts = np.array([[int(reactionID), int(rctType), tmpprodid, idsub1, idsub2, int(0), int(0), int(0)]])
+# 									reactionID += 1
+# 								else: 
+# 									rcts = np.vstack([rcts,(int(reactionID), int(rctType), tmpprodid, idsub1, idsub2, int(0), int(0), int(0))])	
+# 									reactionID += 1
+# 								nCondensa += 1
+# 							else:
+# 								rct2cat = rcts[(rcts[:,1] == 0) & (rcts[:,3] == idsub1) & (rcts[:,4] == idsub2),0]
+# 								
+# 							if args.creationMethod == 4: # if reverse reaction are allowed (methods 2 and 4 :: WIM and OUR)
+# 								rcts = np.vstack([rcts,(int(reactionID), int(1), tmpprodid, idsub1, idsub2, int(0), int(0), int(0))])	
+# 								reactionID += 1
+# 								nCleavage += 1
+# 					
+# 					# CATALYST ATTRIBUTION: THE CATALYST IS CHOOSEN ACCORDING TO THE prefAttach PARAMETER: 1: PREFERENTIAL ATTACHMENT, 0: RANDOM ATTRIBUTION
+# 					catalyst = -1
+# 					catFound = False
+# 					
+# 					while not catFound:
+# 						if (args.prefAttach == 0) | (i == 0): 
+# 							catalyst = species.index(ran.choice(species[len(alphabet):totSpecies-1]))
+# 							weightCat[catalyst] += 1
+# 							pweightCat = [float(i)/sum(weightCat) for i in weightCat]
+# 							
+# 						else:
+# 							#catalyst = choice(range(totSpecies),p=pweightCat) # TO USE SINCE NUMPY 1.7
+# 							catalyst = sp.weightedChoice(pweightCat, range(totSpecies))
+# 							weightCat[catalyst] += 1
+# 							pweightCat = [float(i)/sum(weightCat) for i in weightCat]
+# 						if (len(species[catalyst]) > args.noCat):
+# 							if rctnew == False:
+# 								if sum((cats[:,1]==catalyst) & (cats[:,2]==rct2cat))==0:
+# 									catFound = True
+# 							else:
+# 								catFound = True
+# 						
+# 					if rctnew: rctsToCat = reactionID - 1
+# 					else: rctsToCat = rct2cat
+# 					
+# 					if (args.creationMethod == 2) | (args.creationMethod == 4): rctsToCat = reactionID - 2
+# 					if catalysisID == 0: 
+# 						cats = np.array([[int(catalysisID), int(catalyst), int(rctsToCat), int(0), float(0.5), float(0.25), float(0.5), ran.randint(1,2)]])
+# 						catalysisID += 1
+# 						if (args.creationMethod == 2) | (args.creationMethod == 4): # IF wim method
+# 							cats = np.vstack([cats,(int(catalysisID), int(catalyst), int(rctsToCat + 1), int(0), float(0.5), float(0.25), float(0.5), ran.randint(1,2))])
+# 							catalysisID += 1
+# 					else: 
+# 						cats = np.vstack([cats,(int(catalysisID), int(catalyst), int(rctsToCat), int(0), float(0.5), float(0.25), float(0.5), ran.randint(1,2))])
+# 						catalysisID += 1
+# 						if (args.creationMethod == 2) | (args.creationMethod == 4):
+# 							cats = np.vstack([cats,(int(catalysisID), int(catalyst), int(rctsToCat + 1), int(0), float(0.5), float(0.25), float(0.5), ran.randint(1,2))])
+# 							catalysisID += 1
+				
+				#print cats
+				#np.savetxt("prova.csv", cats)
+				#raw_input("ciao")
 				#print rcts
 				#print cats
 				#print cats.shape
