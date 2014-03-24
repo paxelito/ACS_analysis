@@ -79,21 +79,27 @@ if __name__ == '__main__':
 	fid_initRafResALL = open(fname_initRafResALL, 'w')
 	strToWrite = "Folder\tP\tAC\tM\tRAFsize\tClosure\tCats\tuRAF\tSCC\tAutoCat\n"
 	fid_initRafRes.write(strToWrite)
-	strToWrite = "P\tM\tAC\tRAF%\tSCC%\t%SCCinRAF\t%SelfInRAF\tTIME\n"
+	strToWrite = "P\tM\tAC\tRAF%\tSCC%\t%SCCinRAF\t%SelfInRAF\tTIME\tTimeCreation\tTimeAnalysis\n"
 	fid_initRafResSUM.write(strToWrite)
 	
-	for maxlength in range(args.minDim,args.maxDim+1): 
+	for maxlength in range(args.minDim,args.maxDim+1): # FOR EACH DIMENSION
 		#sys.stdout.flush() # Force save data on file
 		increaseYet = True 
 		averageConn = args.minavgcon
-		while (increaseYet == True) & (averageConn <= args.maxavgcon):
+		while (increaseYet == True) & (averageConn <= args.maxavgcon): # FOR EACH AVERAGE CONNECTIVITY (LEVEL OF CATALYSIS)
 			time1 = time()
 			raffound = 0
 			sccfound = 0
 			sccinraffound = 0
 			self_sccinraffound = 0
 			iterations = int((args.iteration/(maxlength+1-args.minDim)))
-			for instanceID, instance in enumerate((range(iterations))): 
+			timeCreatinVector = []
+			timeAnalysisVector = []
+			for instanceID, instance in enumerate((range(iterations))): # FOR EACH ITERATION
+				
+				# Flush standard output
+				sys.stdout.flush()
+				
 				nCleavage = 0
 				nCondensa = 0
 				
@@ -138,132 +144,24 @@ if __name__ == '__main__':
 				
 				pars = [0]*35
 				pars[14]="AB";pars[27]=25;pars[28]=50;pars[29]=50
-				# Create chemistry
-				rcts, cats, speciesList, rcts_no_rev, cats_no_rev = network.create_chemistry(args, originalSpeciesList, pars, rctToCat, totCleavage, totCond)
-# 				for i in range(rctToCat):
-# 					if i % 10 == 0: print "reazione ", i
-# 					# Select if condensation of cleavage according to the total number of reactions
-# 					#if rctToCat > 1000: 
-# 					#	if i % 1000 == 0: print "\t\t\t|- Reaction ", i, " - species list L: ", len(species)
-# 					rctType = 1
-# 					if (args.creationMethod == 1) | (args.creationMethod == 4):
-# 						if args.rctRatio > 0: 
-# 							if ran.random() > args.rctRatio: rctType = 0
-# 						else:
-# 							if (totCleavage / (float(totCleavage) + totCond)) <= ran.random(): rctType = 0
-# 					
-# 					 
-# 					# If cleavage
-# 					if (rctType == 1) & (nCleavage <= totCleavage):
-# 						# Select species to cleave
-# 						rctnew = False
-# 						# Create random cleavage
-# 						molToCleav, tmp1, tmp2, tmp1id, tmp2id, find1 = reactions.createRandomCleavage(species, alphabet, initSpeciesListLength)
-# 						# Check if the reaction is new
-# 						if i == 0: rctnew = True
-# 						else:
-# 							if find1 == True:
-# 								if sum((rcts[:,1] == 1) & (rcts[:,2] == species.index(molToCleav)) \
-# 									& (rcts[:,3] == tmp1id)) == 0: rctnew = True
-# 							
-# 						if rctnew:
-# 							if reactionID == 0:
-# 								rcts = np.array([[int(reactionID), int(rctType), species.index(molToCleav), tmp1id, tmp2id, int(0), int(0), int(0)]])
-# 								reactionID += 1
-# 							else: 
-# 								rcts = np.vstack([rcts,(int(reactionID), int(rctType), species.index(molToCleav), tmp1id, tmp2id, int(0), int(0), int(0))])	
-# 								reactionID += 1
-# 							nCleavage += 1
-# 								
-# 							if (args.creationMethod == 2) | (args.creationMethod == 4): # if reverse reaction are allowed (methods 2 and 4 :: WIM and OUR)
-# 								rcts = np.vstack([rcts,(int(reactionID), int(0), species.index(molToCleav), tmp1id, tmp2id, int(0), int(0), int(0))])	
-# 								reactionID += 1
-# 								nCondensa += 1
-# 						else:
-# 							rct2cat = rcts[(rcts[:,1] == 1) & (rcts[:,2] == species.index(molToCleav)) & (rcts[:,3] == tmp1id),0]
-# 					else: # condensation
-# 						if (args.creationMethod == 1) | (args.creationMethod == 4):
-# 							rctnew = False
-# 							sub1, sub2, idsub1, idsub2, prod = reactions.createRandomCondensation(species, initSpeciesListLength)
-# 							try:
-# 								tmpprodid = species.index(prod)
-# 							except:
-# 								tmpprodid = len(species)
-# 								species.append(prod)
-# 							
-# 							if i == 0: rctnew = True
-# 							else:
-# 								if sum((rcts[:,1] == 0) & (rcts[:,3] == idsub1) & (rcts[:,4] == idsub2)) == 0: rctnew = True
-# 							
-# 							# Reaction Structure Creation
-# 							if rctnew:
-# 								if reactionID == 0: 
-# 									rcts = np.array([[int(reactionID), int(rctType), tmpprodid, idsub1, idsub2, int(0), int(0), int(0)]])
-# 									reactionID += 1
-# 								else: 
-# 									rcts = np.vstack([rcts,(int(reactionID), int(rctType), tmpprodid, idsub1, idsub2, int(0), int(0), int(0))])	
-# 									reactionID += 1
-# 								nCondensa += 1
-# 							else:
-# 								rct2cat = rcts[(rcts[:,1] == 0) & (rcts[:,3] == idsub1) & (rcts[:,4] == idsub2),0]
-# 								
-# 							if args.creationMethod == 4: # if reverse reaction are allowed (methods 2 and 4 :: WIM and OUR)
-# 								rcts = np.vstack([rcts,(int(reactionID), int(1), tmpprodid, idsub1, idsub2, int(0), int(0), int(0))])	
-# 								reactionID += 1
-# 								nCleavage += 1
-# 					
-# 					# CATALYST ATTRIBUTION: THE CATALYST IS CHOOSEN ACCORDING TO THE prefAttach PARAMETER: 1: PREFERENTIAL ATTACHMENT, 0: RANDOM ATTRIBUTION
-# 					catalyst = -1
-# 					catFound = False
-# 					
-# 					while not catFound:
-# 						if (args.prefAttach == 0) | (i == 0): 
-# 							catalyst = species.index(ran.choice(species[len(alphabet):totSpecies-1]))
-# 							weightCat[catalyst] += 1
-# 							pweightCat = [float(i)/sum(weightCat) for i in weightCat]
-# 							
-# 						else:
-# 							#catalyst = choice(range(totSpecies),p=pweightCat) # TO USE SINCE NUMPY 1.7
-# 							catalyst = sp.weightedChoice(pweightCat, range(totSpecies))
-# 							weightCat[catalyst] += 1
-# 							pweightCat = [float(i)/sum(weightCat) for i in weightCat]
-# 						if (len(species[catalyst]) > args.noCat):
-# 							if rctnew == False:
-# 								if sum((cats[:,1]==catalyst) & (cats[:,2]==rct2cat))==0:
-# 									catFound = True
-# 							else:
-# 								catFound = True
-# 						
-# 					if rctnew: rctsToCat = reactionID - 1
-# 					else: rctsToCat = rct2cat
-# 					
-# 					if (args.creationMethod == 2) | (args.creationMethod == 4): rctsToCat = reactionID - 2
-# 					if catalysisID == 0: 
-# 						cats = np.array([[int(catalysisID), int(catalyst), int(rctsToCat), int(0), float(0.5), float(0.25), float(0.5), ran.randint(1,2)]])
-# 						catalysisID += 1
-# 						if (args.creationMethod == 2) | (args.creationMethod == 4): # IF wim method
-# 							cats = np.vstack([cats,(int(catalysisID), int(catalyst), int(rctsToCat + 1), int(0), float(0.5), float(0.25), float(0.5), ran.randint(1,2))])
-# 							catalysisID += 1
-# 					else: 
-# 						cats = np.vstack([cats,(int(catalysisID), int(catalyst), int(rctsToCat), int(0), float(0.5), float(0.25), float(0.5), ran.randint(1,2))])
-# 						catalysisID += 1
-# 						if (args.creationMethod == 2) | (args.creationMethod == 4):
-# 							cats = np.vstack([cats,(int(catalysisID), int(catalyst), int(rctsToCat + 1), int(0), float(0.5), float(0.25), float(0.5), ran.randint(1,2))])
-# 							catalysisID += 1
 				
-				#print cats
-				#np.savetxt("prova.csv", cats)
-				#raw_input("ciao")
-				#print rcts
-				#print cats
-				#print cats.shape
-				#print rcts.shape
-				#raw_input("ca0")
+				# ARTIFICIAL CHEMISTRY CREATION ----------
+				timeNetCreation = time()
+				rcts, cats, speciesList, rcts_no_rev, cats_no_rev = network.create_chemistry(args, originalSpeciesList, pars, rctToCat, totCleavage, totCond)
+				timeCreatinVector.append(time()-timeNetCreation)
+				#print timeCreatinVector
+				
 				# Create food list
 				foodList = range(args.lastFood+1)
+				
+				# TOPOLOGICAL ANALYSIS
 				#print "\t\t|- RAF searching step..."
+				timeAnalysis = time()
 				netouts = network.net_analysis_of_static_graphs(fid_initRafRes, fid_initRafResALL, fid_initRafResLIST, 'tmpDir', prob, averageConn, rcts, cats, foodList, maxlength)
-				#print netouts
+				timeAnalysisVector.append(time() - timeAnalysis)
+				#print timeAnalysisVector
+
+				# If RAFs are present, the presence of possible SCCs in RAF is assessed
 				if len(netouts[0][2]) > 0: 
 					raffound += 1
 					rctsRAF = rcts[np.any(rcts[:, 0] == np.expand_dims(netouts[0][2],1), 0), :]
@@ -273,13 +171,13 @@ if __name__ == '__main__':
 					if scc_in_raf[2] > 0:
 						self_sccinraffound += 1
 				if netouts[1][4] > 0: sccfound += 1
-				#print raffound
-				#raw_input("ciao")
 
 				del rcts
 				del cats
 		
 			time2 = time()
+			timeAvgCreation = sum(timeCreatinVector) / float(iterations)
+			timeAvgAnalysis = sum(timeAnalysisVector) / float(iterations)
 			percRAFFounds = raffound/float(iterations)
 			percSccFounds = sccfound/float(iterations)
 			if raffound > 0: percScc_in_rafFounds = sccinraffound / float(raffound)
@@ -296,7 +194,8 @@ if __name__ == '__main__':
 				print "\t\t\t Max number of RAFs found"
 				increaseYet = False # If RAF is always found so next average conn is assessed
 			strToWrite = str(prob) + "\t" + str(maxlength) + "\t" + str(averageConn) + "\t" + str(percRAFFounds) + "\t" + str(percSccFounds) + \
-						"\t" + str(percScc_in_rafFounds) + "\t" + str(perc_self_Scc_in_rafFounds) + "\t" + str(timet) + "\n"
+						"\t" + str(percScc_in_rafFounds) + "\t" + str(perc_self_Scc_in_rafFounds) + "\t" + str(timet) + "\t" + str(timeAvgCreation) + \
+						"\t" + str(timeAvgAnalysis) + "\n"
 			fid_initRafResSUM.write(strToWrite)
 			averageConn += 0.1
 	# Close text files

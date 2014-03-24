@@ -4,6 +4,7 @@
 import sys, os # Standard librar
 import glob
 from copy import deepcopy
+from time import time
 import random as ran
 import numpy as np # Scientific library
 from numpy import * 
@@ -109,6 +110,7 @@ def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavag
 	checkRct = False
 	
 	for i in range(rctToCat):
+		rctTime = time()
 		rctType = 1
 		if (args.creationMethod == 1) | (args.creationMethod == 4):
 			if args.rctRatio > 0: 
@@ -125,8 +127,8 @@ def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavag
 			while reactionValid == False:
 				tmp1, tmp2, tmp3, tmp1id, tmp2id, tmp3id = reactions.createRandomCleavageForCompleteFiringDisk(speciesList, parameters[14], initSpeciesListLength)
 				if reactionID > 0:
-					if args.revRcts == 0:
-						if sum((rcts[:,1] == 1) & (rcts[:,2] == tmp1id) & (rcts[:,3] == tmp3id)) == 0: reactionValid = True
+					if args.revRcts == 0: # If rev rcts are neglected, reverse reactions already present are searched
+						if sum((rcts[:,1] == 0) & (rcts[:,2] == tmp1id) & (rcts[:,3] == tmp2id)) == 0: reactionValid = True
 					else:
 						reactionValid = True
 				else:
@@ -164,7 +166,17 @@ def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavag
 		else: # condensation
 			if (args.creationMethod == 1) | (args.creationMethod == 4):
 				rctnew = False
-				sub1, sub2, idsub1, idsub2, prod = reactions.createRandomCondensation(speciesList, initSpeciesListLength)
+				while reactionValid == False:
+					sub1, sub2, idsub1, idsub2, prod = reactions.createRandomCondensation(speciesList, initSpeciesListLength)
+					if reactionID > 0:
+						if args.revRcts == 0: # If rev rcts are neglected, reverse reactions already present are searched
+							if sum((rcts[:,1] == 1) & (rcts[:,3] == idsub1) & (rcts[:,4] == idsub2)) == 0: reactionValid = True
+						else:
+							reactionValid = True
+					else:
+						reactionValid = True
+				
+				# If the reaction is valid, the ID product is selected or created according with the novelty of the product 	
 				try:
 					tmpprodid = speciesList.index(prod)
 				except:
@@ -175,7 +187,8 @@ def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavag
 				if reactionID == 0: rctnew = True
 				else:
 					if sum((rcts[:,1] == 0) & (rcts[:,3] == idsub1) & (rcts[:,4] == idsub2)) == 0: rctnew = True
-				# Reaction Structure Creation
+					
+				# New Reaction is now added (np.vstack) to the creation list (if the list is empty, so the list will be created (np.array))
 				if rctnew:
 					if reactionID == 0: 
 						rcts = np.array([[int(reactionID), int(rctType), tmpprodid, idsub1, idsub2, int(0), int(239), parameters[33]]])
@@ -190,8 +203,8 @@ def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavag
 						rcts = np.vstack([rcts,(int(reactionID), int(1), tmpprodid, idsub1, idsub2, int(0), int(239), parameters[34])])	
 						reactionID += 1
 						nCleavage += 1
-						
 				else:
+					# IF the reaction is now new, the ID is selected in order to set the catalysis
 					rct2cat = rcts[(rcts[:,1] == 0) & (rcts[:,3] == idsub1) & (rcts[:,4] == idsub2),0]
 					if (args.creationMethod == 2) | (args.creationMethod == 4): # If the reverse reaction is present, so the ID is stored
 						rct2cat_no_rev = rcts[(rcts[:,1] == 1) & (rcts[:,3] == idsub1) & (rcts[:,4] == idsub2),0]
@@ -199,26 +212,34 @@ def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavag
 		# A CATALYST IS RANDOMLY (UNIFORM or PREF ATTACHMENT network creation method) ASSIGNED FROM THE SPECIES LIST
 		catalyst = -1
 		catFound = False
-		
+				
 		while not catFound:
 			if (args.prefAttach == 0) | (i == 0): 
 				catalyst = originalSpeciesList.index(ran.choice(originalSpeciesList[len(parameters[14]):initSpeciesListLength-1]))
-				weightCat[catalyst] += 1
-				pweightCat = [float(i)/sum(weightCat) for i in weightCat]
+				if (args.prefAttach == 1):
+					weightCat[catalyst] += 1.00
+					#pweightCat = [float(i)/sum(weightCat) for i in weightCat]
+					#pweightCat = map(lambda x: float(x)/sum(weightCat), weightCat)
+					np_weightCat = np.array(weightCat)
+					pweightCat = np_weightCat / sum(np_weightCat)
 				
 			else:
 				#catalyst = choice(range(initSpeciesListLength),p=pweightCat) # TO USE SINCE NUMPY 1.7
 				catalyst = species.weightedChoice(pweightCat, range(initSpeciesListLength))
-				weightCat[catalyst] += 1
-				pweightCat = [float(i)/sum(weightCat) for i in weightCat]
+				weightCat[catalyst] += 1.00
+				
+				#pweightCat = [float(i)/sum(weightCat) for i in weightCat]
+				#pweightCat = map(lambda x: float(x)/sum(weightCat), weightCat)
+				np_weightCat = np.array(weightCat)
+				pweightCat = np_weightCat / sum(np_weightCat)
+					
 			# IF the selected catalyst is greater than the minimum length and the catalyst does not already catalyze the reaction
 			if (len(originalSpeciesList[catalyst]) > args.noCat):
 				if rctnew == False:
 					if sum((cats[:,1]==catalyst) & (cats[:,2]==rct2cat))==0:
 						catFound = True
 				else:
-					catFound = True
-		
+					catFound = True		
 		# Forward reaction to catalyze
 		if rctnew: 
 			if (args.creationMethod == 2) | (args.creationMethod == 4):
