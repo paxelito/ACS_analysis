@@ -94,7 +94,7 @@ def return_scc_in_raf(tmpRAF, tmpClosure, tmpCats):
 	sccsets = scc.diGraph_netX_stats(stdgraph)
 	return sccsets 
 
-def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavage, totCond):
+def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavage, totCond, tmpac):
 	speciesList = deepcopy(originalSpeciesList)
 	initSpeciesListLength = len(speciesList) # Initial cardinality of the species list (to avoid recursive multiple species evaluation)
 	reactionID = 0
@@ -160,9 +160,9 @@ def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavag
 			else:
 				rct2cat = rcts[(rcts[:,1] == 1) & (rcts[:,2] == tmp1id) & (rcts[:,3] == tmp2id),0]
 				if (args.creationMethod == 2) | (args.creationMethod == 4): # If the reverse reaction is present, so the ID is stored
-					rct2cat_no_rev = rcts[(rcts[:,1] == 0) & (rcts[:,2] == tmp1id) & (rcts[:,3] == tmp2id),0]
+					if rct2cat % 2 == 1: rct2cat -= 1 # If the selected reaction is already present and the ID is odd it means that the "direct" reaction is the previous one. 
+					#rct2cat_no_rev = rcts[(rcts[:,1] == 0) & (rcts[:,2] == tmp1id) & (rcts[:,3] == tmp2id),0]
 					
-					#rct2cat_no_rev = rcts_no_rev[(rcts_no_rev[:,1] == dirrct) & (rcts_no_rev[:,2] == tmp1id) & (rcts_no_rev[:,3] == tmp2id),0]
 		else: # condensation
 			if (args.creationMethod == 1) | (args.creationMethod == 4):
 				rctnew = False
@@ -207,12 +207,15 @@ def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavag
 					# IF the reaction is now new, the ID is selected in order to set the catalysis
 					rct2cat = rcts[(rcts[:,1] == 0) & (rcts[:,3] == idsub1) & (rcts[:,4] == idsub2),0]
 					if (args.creationMethod == 2) | (args.creationMethod == 4): # If the reverse reaction is present, so the ID is stored
-						rct2cat_no_rev = rcts[(rcts[:,1] == 1) & (rcts[:,3] == idsub1) & (rcts[:,4] == idsub2),0]
+						if rct2cat % 2 == 1: rct2cat -= 1 # If the selected reaction is already present and the ID is odd it means that the "direct" reaction is the previous one. 
+						#rct2cat_no_rev = rcts[(rcts[:,1] == 1) & (rcts[:,3] == idsub1) & (rcts[:,4] == idsub2),0]
 					
 		# A CATALYST IS RANDOMLY (UNIFORM or PREF ATTACHMENT network creation method) ASSIGNED FROM THE SPECIES LIST
 		catalyst = -1
 		catFound = False # Flag variable checking the validity of the catalyst
 		noSameRct = False # Flag variable to check if the catalyst has already catalysed a given reaction
+		
+		#if round(tmpac,1) == 1.1: print rcts
 				
 		while not noSameRct:
 			while not catFound:
@@ -241,7 +244,9 @@ def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavag
 						if sum((cats[:,1]==catalyst) & (cats[:,2]==rct2cat))==0:
 							catFound = True
 					else:
-						catFound = True		
+						catFound = True	
+			
+			#print catalyst	
 			# Forward reaction to catalyze
 			if rctnew: 
 				if (args.creationMethod == 2) | (args.creationMethod == 4):
@@ -278,7 +283,17 @@ def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavag
 						noSameRct = True # Reaction definitely valid!!!
 					else:
 						catFound = False # New catalyst must be found
-						print "\t\t\t WARNING: The catalyst ", int(catalyst), " already catalyses the reaction ", int(rctsToCat), ", new catalyst must be found"					
+						print "\t\t\t WARNING: The catalyst ", int(catalyst), " already catalyses the reaction ", int(rctsToCat), ", new catalyst must be found"	
+				else: # if the catalysis is valid
+					cats = np.vstack([cats,(int(catalysisID), int(catalyst), int(rctsToCat), int(0), parameters[27], parameters[28], parameters[29], int(1))])
+					catalysisID += 1
+					if (args.creationMethod == 2) | (args.creationMethod == 4):
+						cats = np.vstack([cats,(int(catalysisID), int(catalyst), int(rctsToCat + 1), int(0), parameters[27], parameters[28], parameters[29], int(1))])
+						catalysisID += 1
+		
+		#if round(tmpac,1) == 1.1: 
+		#	print cats
+		#	raw_input("ss")				
 	
 	return rcts, cats, speciesList, rcts_no_rev, cats_no_rev
 	

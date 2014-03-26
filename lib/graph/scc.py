@@ -31,13 +31,20 @@ def createNetXGraph(tmpCstr, tmpCats):
 	#print tmpCstr
 	#print tmpCats
 	for id, cat in enumerate(tmpCats):
-		if int(tmpCstr[tmpCstr[:,0] == cat[2],1]) == 1:
-			Gcatpro.add_weighted_edges_from([(int(cat[1]),int(tmpCstr[tmpCstr[:,0] == cat[2],3]),1)])
-			if int(tmpCstr[tmpCstr[:,0] == cat[2],3]) is not int(tmpCstr[tmpCstr[:,0] == cat[2],4]):
-				Gcatpro.add_weighted_edges_from([(int(cat[1]),int(tmpCstr[tmpCstr[:,0] == cat[2],4]),1)])
-		else:
-			Gcatpro.add_weighted_edges_from([(int(cat[1]),int(tmpCstr[tmpCstr[:,0] == cat[2],2]),1)])
-		#print Gcatpro.edges()
+		try:
+			if int(tmpCstr[tmpCstr[:,0] == cat[2],1]) == 1:
+				Gcatpro.add_weighted_edges_from([(int(cat[1]),int(tmpCstr[tmpCstr[:,0] == cat[2],3]),1)])
+				if int(tmpCstr[tmpCstr[:,0] == cat[2],3]) is not int(tmpCstr[tmpCstr[:,0] == cat[2],4]):
+					Gcatpro.add_weighted_edges_from([(int(cat[1]),int(tmpCstr[tmpCstr[:,0] == cat[2],4]),1)])
+			else:
+				Gcatpro.add_weighted_edges_from([(int(cat[1]),int(tmpCstr[tmpCstr[:,0] == cat[2],2]),1)])
+			#print Gcatpro.edges()
+		except:
+			print tmpCats
+			print tmpCstr
+			print cat
+			print tmpCstr[tmpCstr[:,0] == cat[2],1]
+			sys.exit(1)
 	return Gcatpro
 
 def createNetXGraphForRAF(tmpCstr, tmpClosure, tmpCats):

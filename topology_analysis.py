@@ -155,7 +155,7 @@ if __name__ == '__main__':
 				
 				# ARTIFICIAL CHEMISTRY CREATION ----------
 				timeNetCreation = time()
-				rcts, cats, speciesList, rcts_no_rev, cats_no_rev = network.create_chemistry(args, originalSpeciesList, pars, rctToCat, totCleavage, totCond)
+				rcts, cats, speciesList, rcts_no_rev, cats_no_rev = network.create_chemistry(args, originalSpeciesList, pars, rctToCat, totCleavage, totCond, averageConn)
 				timeCreatinVector.append(time()-timeNetCreation)
 				#print timeCreatinVector
 				
