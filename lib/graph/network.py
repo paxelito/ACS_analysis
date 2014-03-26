@@ -73,7 +73,7 @@ def net_analysis_of_dynamic_graphs(fid_dynRafRes, tmpTime, rcts, cats, foodList,
 	# If RAF analysis is made in dynamical temporary structures a trnaslation in real net must be done
 	if len(rafset[2]) > 0: 
 		rctsRAF = rcts[np.any(rcts[:, 0] == np.expand_dims(rafset[2],1), 0), :]
-		scc_in_raf = return_scc_in_raf(rctsRAF, cats, rafset[0])
+		scc_in_raf = return_scc_in_raf(rctsRAF, rafset[0], cats)
 	else:
 		scc_in_raf = 0,0,0,0,0,0
 	 
@@ -211,60 +211,74 @@ def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavag
 					
 		# A CATALYST IS RANDOMLY (UNIFORM or PREF ATTACHMENT network creation method) ASSIGNED FROM THE SPECIES LIST
 		catalyst = -1
-		catFound = False
+		catFound = False # Flag variable checking the validity of the catalyst
+		noSameRct = False # Flag variable to check if the catalyst has already catalysed a given reaction
 				
-		while not catFound:
-			if (args.prefAttach == 0) | (i == 0): 
-				catalyst = originalSpeciesList.index(ran.choice(originalSpeciesList[len(parameters[14]):initSpeciesListLength-1]))
-				if (args.prefAttach == 1):
+		while not noSameRct:
+			while not catFound:
+				if (args.prefAttach == 0) | (i == 0): 
+					catalyst = originalSpeciesList.index(ran.choice(originalSpeciesList[len(parameters[14]):initSpeciesListLength-1]))
+					if (args.prefAttach == 1):
+						weightCat[catalyst] += 1.00
+						#pweightCat = [float(i)/sum(weightCat) for i in weightCat]
+						#pweightCat = map(lambda x: float(x)/sum(weightCat), weightCat)
+						np_weightCat = np.array(weightCat)
+						pweightCat = np_weightCat / sum(np_weightCat)
+					
+				else:
+					#catalyst = choice(range(initSpeciesListLength),p=pweightCat) # TO USE SINCE NUMPY 1.7
+					catalyst = species.weightedChoice(pweightCat, range(initSpeciesListLength))
 					weightCat[catalyst] += 1.00
+					
 					#pweightCat = [float(i)/sum(weightCat) for i in weightCat]
 					#pweightCat = map(lambda x: float(x)/sum(weightCat), weightCat)
 					np_weightCat = np.array(weightCat)
 					pweightCat = np_weightCat / sum(np_weightCat)
-				
-			else:
-				#catalyst = choice(range(initSpeciesListLength),p=pweightCat) # TO USE SINCE NUMPY 1.7
-				catalyst = species.weightedChoice(pweightCat, range(initSpeciesListLength))
-				weightCat[catalyst] += 1.00
-				
-				#pweightCat = [float(i)/sum(weightCat) for i in weightCat]
-				#pweightCat = map(lambda x: float(x)/sum(weightCat), weightCat)
-				np_weightCat = np.array(weightCat)
-				pweightCat = np_weightCat / sum(np_weightCat)
-					
-			# IF the selected catalyst is greater than the minimum length and the catalyst does not already catalyze the reaction
-			if (len(originalSpeciesList[catalyst]) > args.noCat):
-				if rctnew == False:
-					if sum((cats[:,1]==catalyst) & (cats[:,2]==rct2cat))==0:
-						catFound = True
+						
+				# IF the selected catalyst is greater than the minimum length and the catalyst does not already catalyze the reaction
+				if (len(originalSpeciesList[catalyst]) > args.noCat):
+					if rctnew == False:
+						if sum((cats[:,1]==catalyst) & (cats[:,2]==rct2cat))==0:
+							catFound = True
+					else:
+						catFound = True		
+			# Forward reaction to catalyze
+			if rctnew: 
+				if (args.creationMethod == 2) | (args.creationMethod == 4):
+					rctsToCat = reactionID - 2
 				else:
-					catFound = True		
-		# Forward reaction to catalyze
-		if rctnew: 
-			if (args.creationMethod == 2) | (args.creationMethod == 4):
-				rctsToCat = reactionID - 2
-			else:
-				rctsToCat = reactionID - 1
-		else: 
-			rctsToCat = rct2cat
-		
-		if catalysisID == 0: # if this is the first catalysis
-			
-			cats = np.array([[int(catalysisID), int(catalyst), int(rctsToCat), int(0), parameters[27], parameters[28], parameters[29], int(1)]])
-			catalysisID += 1
+					rctsToCat = reactionID - 1
 				
-			if (args.creationMethod == 2) | (args.creationMethod == 4): # IF wim method
-				cats = np.vstack([cats,(int(catalysisID), int(catalyst), int(rctsToCat + 1), int(0), parameters[27], parameters[28], parameters[29], int(1))])
-				catalysisID += 1
-
-		else: 
-			cats = np.vstack([cats,(int(catalysisID), int(catalyst), int(rctsToCat), int(0), parameters[27], parameters[28], parameters[29], int(1))])
-			catalysisID += 1
+				noSameRct = True # correct catalysis, since the reaction is new, it is impossible that it has been already catalysed
+				
+			else: 
+				rctsToCat = rct2cat
 			
-			if (args.creationMethod == 2) | (args.creationMethod == 4):
-				cats = np.vstack([cats,(int(catalysisID), int(catalyst), int(rctsToCat + 1), int(0), parameters[27], parameters[28], parameters[29], int(1))])
+			if catalysisID == 0: # if this is the first catalysis
+				
+				cats = np.array([[int(catalysisID), int(catalyst), int(rctsToCat), int(0), parameters[27], parameters[28], parameters[29], int(1)]])
 				catalysisID += 1
+					
+				if (args.creationMethod == 2) | (args.creationMethod == 4): # IF wim method
+					cats = np.vstack([cats,(int(catalysisID), int(catalyst), int(rctsToCat + 1), int(0), parameters[27], parameters[28], parameters[29], int(1))])
+					catalysisID += 1
+				
+				noSameRct = True # correct catalysis, since the catalysis is new, it is impossible that it has been already catalysed	
+	
+			else: 
+				
+				# If the double catalysis must be assessed
+				if not noSameRct: 
+					if sum((cats[:,1]==int(int(catalyst)))&(cats[:,2]==int(rctsToCat))) == 0: # IF the reaction has not yet been catalysed by the catalyst
+						cats = np.vstack([cats,(int(catalysisID), int(catalyst), int(rctsToCat), int(0), parameters[27], parameters[28], parameters[29], int(1))])
+						catalysisID += 1
+						if (args.creationMethod == 2) | (args.creationMethod == 4):
+							cats = np.vstack([cats,(int(catalysisID), int(catalyst), int(rctsToCat + 1), int(0), parameters[27], parameters[28], parameters[29], int(1))])
+							catalysisID += 1
+						noSameRct = True # Reaction definitely valid!!!
+					else:
+						catFound = False # New catalyst must be found
+						print "\t\t\t WARNING: The catalyst ", int(catalyst), " already catalyses the reaction ", int(rctsToCat), ", new catalyst must be found"					
 	
 	return rcts, cats, speciesList, rcts_no_rev, cats_no_rev
 	
