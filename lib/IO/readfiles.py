@@ -22,7 +22,7 @@ def loadRandomSeed(tmpRndPath):
 	if os.path.exists(seedFile):
 		# Restore the previously saved sate
 		print '\n|- Found rndstate.dat, initializing random module...\n'
-		with open('rndstate.dat', 'rb') as f:
+		with open(seedFile, 'rb') as f:
 			state = pickle.load(f)
 		ran.setstate(state)
 	else:
