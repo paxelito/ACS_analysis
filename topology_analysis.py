@@ -24,6 +24,7 @@ from lib.graph import network
 from lib.dyn import dynamics as dn
 from lib.model import species as sp
 from lib.model import reactions
+from lib.IO import *
 
 
 #  Input parameters definition 
@@ -43,14 +44,13 @@ if __name__ == '__main__':
 	parser.add_argument('-i', '--iteration', help='How many network instances per dimension are created (Default: 10)', default='10', type=int)
 	parser.add_argument('-n', '--noCat', help='Non catalytic max length (default: 2)', default='2', type=int)
 	parser.add_argument('-c', '--rctRatio', help='Ratio between cleavages and condensations (default: 0, it means that the actual ratio is used)', default='0', type=float)	
-	parser.add_argument('-r', '--randomSeed', help='random seed', type=int, default=None)
+	parser.add_argument('-r', '--randomSeed', help='random seed objects path', default=None)
 	parser.add_argument('-d', '--directRctDirection', help='Direction of the forward reaction where necessary (1: cleavage, 0: condensation, 2: random with probability 0.5,Default: 1)', default='1', type=int)
 
 	args = parser.parse_args()
 	
 	print "\nSystem Initialization..."
-	ran.seed(args.randomSeed)
-	
+		
 	# If the architecture of the network allows reverse reaction the revRcts parameter is automatically set to 1
 	if (args.creationMethod == 2) | (args.creationMethod == 4): 
 		args.revRcts = 1
@@ -66,6 +66,14 @@ if __name__ == '__main__':
 			os.mkdir(newdirAllResults)
 		except:
 			print "Impossible to create statistic directory", newdirAllResults; sys.exit(1)
+	
+	# RANDOM SEED INITIALIZATION
+	if args.randomSeed == None:
+		#! Set randomly the random state and store it in a file
+		ran.seed(args.randomSeed)
+		writefiles.saveRandomSeed(newdirAllResults)
+	else:
+		readfiles.loadRandomSeed(args.randomSeed)
 	
 	print "|- Output Folder: ", args.strOut
 
@@ -147,7 +155,7 @@ if __name__ == '__main__':
 				
 				# ARTIFICIAL CHEMISTRY CREATION ----------
 				timeNetCreation = time()
-				rcts, cats, speciesList, rcts_no_rev, cats_no_rev = network.create_chemistry(args, originalSpeciesList, pars, rctToCat, totCleavage, totCond)
+				rcts, cats, speciesList, rcts_no_rev, cats_no_rev = network.create_chemistry(args, originalSpeciesList, pars, rctToCat, totCleavage, totCond, averageConn)
 				timeCreatinVector.append(time()-timeNetCreation)
 				#print timeCreatinVector
 				
@@ -165,7 +173,7 @@ if __name__ == '__main__':
 				if len(netouts[0][2]) > 0: 
 					raffound += 1
 					rctsRAF = rcts[np.any(rcts[:, 0] == np.expand_dims(netouts[0][2],1), 0), :]
-					scc_in_raf = network.return_scc_in_raf(rctsRAF, cats, netouts[0][0])
+					scc_in_raf = network.return_scc_in_raf(rctsRAF, netouts[0][0], cats)
 					if scc_in_raf[1] > 0:
 						sccinraffound += 1
 					if scc_in_raf[2] > 0:

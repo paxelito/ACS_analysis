@@ -31,24 +31,30 @@ def createNetXGraph(tmpCstr, tmpCats):
 	#print tmpCstr
 	#print tmpCats
 	for id, cat in enumerate(tmpCats):
-		if int(tmpCstr[tmpCstr[:,0] == cat[2],1]) == 1:
-			Gcatpro.add_weighted_edges_from([(int(cat[1]),int(tmpCstr[tmpCstr[:,0] == cat[2],3]),1)])
-			if int(tmpCstr[tmpCstr[:,0] == cat[2],3]) is not int(tmpCstr[tmpCstr[:,0] == cat[2],4]):
-				Gcatpro.add_weighted_edges_from([(int(cat[1]),int(tmpCstr[tmpCstr[:,0] == cat[2],4]),1)])
-		else:
-			Gcatpro.add_weighted_edges_from([(int(cat[1]),int(tmpCstr[tmpCstr[:,0] == cat[2],2]),1)])
-		#print Gcatpro.edges()
+		try:
+			if int(tmpCstr[tmpCstr[:,0] == cat[2],1]) == 1:
+				Gcatpro.add_weighted_edges_from([(int(cat[1]),int(tmpCstr[tmpCstr[:,0] == cat[2],3]),1)])
+				if int(tmpCstr[tmpCstr[:,0] == cat[2],3]) is not int(tmpCstr[tmpCstr[:,0] == cat[2],4]):
+					Gcatpro.add_weighted_edges_from([(int(cat[1]),int(tmpCstr[tmpCstr[:,0] == cat[2],4]),1)])
+			else:
+				Gcatpro.add_weighted_edges_from([(int(cat[1]),int(tmpCstr[tmpCstr[:,0] == cat[2],2]),1)])
+			#print Gcatpro.edges()
+		except:
+			print tmpCats
+			print tmpCstr
+			print cat
+			print tmpCstr[tmpCstr[:,0] == cat[2],1]
+			sys.exit(1)
 	return Gcatpro
 
-def createNetXGraphForRAF(tmpCstr, tmpCats, tmpClosure):
+def createNetXGraphForRAF(tmpCstr, tmpClosure, tmpCats):
 	"\t\t|- Cat -> Prod graph creation..."
 	Gcatpro = nx.DiGraph()
 	# Extract catalysts catalysing reactions of the RAF set. 
-		
-	for id, cat in enumerate(tmpCats):
-		if cat[1] in tmpCats:
-			if sum(tmpCstr[:,0] == cat[2]) > 0:
-				if int(tmpCstr[tmpCstr[:,0] == cat[2],1]) == 1:
+	for id, cat in enumerate(tmpCats): # For each catalysis
+		if cat[1] in tmpClosure: # IF the catalyst is in the closure
+			if sum(tmpCstr[:,0] == cat[2]) > 0:# if the are reactions catalyzed by the catalyst
+				if int(tmpCstr[tmpCstr[:,0] == cat[2],1]) == 1: 
 					Gcatpro.add_weighted_edges_from([(int(cat[1]),int(tmpCstr[tmpCstr[:,0] == cat[2],3]),1)])
 					if int(tmpCstr[tmpCstr[:,0] == cat[2],3]) is not int(tmpCstr[tmpCstr[:,0] == cat[2],4]):
 						Gcatpro.add_weighted_edges_from([(int(cat[1]),int(tmpCstr[tmpCstr[:,0] == cat[2],4]),1)])

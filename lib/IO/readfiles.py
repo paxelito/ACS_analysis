@@ -4,6 +4,8 @@
 import sys, os # Standard librar
 import glob
 import numpy as np # Scientific library
+import random as ran
+import cPickle as pickle
 from numpy import * 
 from argparse import ArgumentParser
 try:
@@ -11,6 +13,23 @@ try:
 except:
     pass
    
+
+def loadRandomSeed(tmpRndPath):
+	'''Function to load a previously saved random seed'''
+	
+	seedFile = os.path.join(tmpRndPath,"rndstate.dat")
+	
+	if os.path.exists(seedFile):
+		# Restore the previously saved sate
+		print '\n|- Found rndstate.dat, initializing random module...\n'
+		with open(seedFile, 'rb') as f:
+			state = pickle.load(f)
+		ran.setstate(state)
+	else:
+		# Use a well-known start state
+		print 'No rndstate.dat, seeding a random state'
+		ran.seed(None)
+
 def readConfFile(tmpPath):
 	#Open Parameter File
 	paramFile = os.path.join(tmpPath,"acsm2s.conf")

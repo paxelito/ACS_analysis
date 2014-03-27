@@ -5,6 +5,7 @@ import sys, os # Standard librar
 import glob
 import numpy as np # Scientific library
 import random as ran
+import cPickle as pickle
 from numpy import * 
 from argparse import ArgumentParser
 try:
@@ -12,6 +13,12 @@ try:
 except:
     pass
    
+def saveRandomSeed(tmpPath):
+	'''Function to save the random seed'''
+	
+	with open(os.path.join(tmpPath,"rndstate.dat"), 'wb') as f:
+		pickle.dump(ran.getstate(), f)
+
 def write_init_raf_list(fid, rafinfo, folder):
 	fid.write(folder + "\nCLOSURE -> ")
 	map(lambda x: fid.write((str(int(x)) + ' ')), rafinfo[0])
