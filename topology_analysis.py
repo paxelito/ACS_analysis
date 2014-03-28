@@ -45,7 +45,7 @@ if __name__ == '__main__':
 	parser.add_argument('-n', '--noCat', help='Non catalytic max length (default: 2)', default='2', type=int)
 	parser.add_argument('-c', '--rctRatio', help='Ratio between cleavages and condensations (default: 0, it means that the actual ratio is used)', default='0', type=float)	
 	parser.add_argument('-r', '--randomSeed', help='random seed objects path', default=None)
-	parser.add_argument('-d', '--directRctDirection', help='Direction of the forward reaction where necessary (1: cleavage, 0: condensation, 2: random with probability 0.5,Default: 1)', default='1', type=int)
+	parser.add_argument('-d', '--directRctDirection', help='Direction of the forward reaction where necessary (1: cleavage, 0: condensation, 2: random with probability 0.5,Default: 2)', default='2', type=int)
 
 	args = parser.parse_args()
 	
