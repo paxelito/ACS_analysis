@@ -138,11 +138,13 @@ def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavag
 			if reactionID == 0: rctnew = True
 			else: 
 				if sum((rcts[:,1] == 1) & (rcts[:,2] == tmp1id) & (rcts[:,3] == tmp2id)) == 0: rctnew = True
-				
-			# Reaction Structure Creation
-			if args.directRctDirection == 1: dirrct = 1
-			elif args.directRctDirection == 0: dirrct = 0
-			else: dirrct = int(round(ran.random()))
+			
+			# If the creation method is 3 (WIM without reverse reactions) the nature of the reaction is randomly selected
+			if (args.creationMethod == 3):
+				# Reaction Structure Creation
+				if args.directRctDirection == 1: rctType = 1
+				elif args.directRctDirection == 0: rctType = 0
+				else: rctType = int(round(ran.random()))
 			
 			if rctnew: # In the reaction is new
 				if reactionID == 0: # If the reaction is the first one
@@ -158,7 +160,7 @@ def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavag
 					reactionID += 1
 					nCondensa += 1
 			else:
-				rct2cat = rcts[(rcts[:,1] == 1) & (rcts[:,2] == tmp1id) & (rcts[:,3] == tmp2id),0]
+				rct2cat = rcts[(rcts[:,1] == rctType) & (rcts[:,2] == tmp1id) & (rcts[:,3] == tmp2id),0]
 				if (args.creationMethod == 2) | (args.creationMethod == 4): # If the reverse reaction is present, so the ID is stored
 					if rct2cat % 2 == 1: rct2cat -= 1 # If the selected reaction is already present and the ID is odd it means that the "direct" reaction is the previous one. 
 					#rct2cat_no_rev = rcts[(rcts[:,1] == 0) & (rcts[:,2] == tmp1id) & (rcts[:,3] == tmp2id),0]
