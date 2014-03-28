@@ -123,12 +123,27 @@ def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavag
 		reactionValid = False
 		if (rctType == 1) & (nCleavage <= totCleavage):
 			rctnew = False
-			# Create random cleavage
+			revType = 0 # By default the reverse reaction of the cleavage is condensation
+			# Create random cleavage (or 50% cleavage/condensation in case of creation method 3 (WIM without reverse reactions)
+			# If the creation method is 3 (WIM without reverse reactions) the nature of the reaction is randomly selected
+			if (args.creationMethod == 3):
+				# Reaction Structure Creation
+				if args.directRctDirection == 1: 
+					rctType = 1
+					revType = 0
+				elif args.directRctDirection == 0: 
+					rctType = 0
+					revType = 1
+				else: 
+					rn = ran.random()
+					rctType = int(round(rn))
+					revType = int(round(1-rn))
+				
 			while reactionValid == False:
 				tmp1, tmp2, tmp3, tmp1id, tmp2id, tmp3id = reactions.createRandomCleavageForCompleteFiringDisk(speciesList, parameters[14], initSpeciesListLength)
 				if reactionID > 0:
 					if args.revRcts == 0: # If rev rcts are neglected, reverse reactions already present are searched
-						if sum((rcts[:,1] == 0) & (rcts[:,2] == tmp1id) & (rcts[:,3] == tmp2id)) == 0: reactionValid = True
+						if sum((rcts[:,1] == revType) & (rcts[:,2] == tmp1id) & (rcts[:,3] == tmp2id)) == 0: reactionValid = True
 					else:
 						reactionValid = True
 				else:
@@ -137,14 +152,7 @@ def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavag
 			# Check if the reaction is new
 			if reactionID == 0: rctnew = True
 			else: 
-				if sum((rcts[:,1] == 1) & (rcts[:,2] == tmp1id) & (rcts[:,3] == tmp2id)) == 0: rctnew = True
-			
-			# If the creation method is 3 (WIM without reverse reactions) the nature of the reaction is randomly selected
-			if (args.creationMethod == 3):
-				# Reaction Structure Creation
-				if args.directRctDirection == 1: rctType = 1
-				elif args.directRctDirection == 0: rctType = 0
-				else: rctType = int(round(ran.random()))
+				if sum((rcts[:,1] == rctType) & (rcts[:,2] == tmp1id) & (rcts[:,3] == tmp2id)) == 0: rctnew = True
 			
 			if rctnew: # In the reaction is new
 				if reactionID == 0: # If the reaction is the first one
@@ -156,7 +164,7 @@ def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavag
 				nCleavage += 1
 					
 				if (args.creationMethod == 2) | (args.creationMethod == 4): # If WIM method the reverse reaction is added
-					rcts = np.vstack([rcts,(int(reactionID), int(0), tmp1id, tmp2id, tmp3id, int(0), int(239), parameters[33])])	
+					rcts = np.vstack([rcts,(int(reactionID), int(revType), tmp1id, tmp2id, tmp3id, int(0), int(239), parameters[33])])	
 					reactionID += 1
 					nCondensa += 1
 			else:
