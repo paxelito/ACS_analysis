@@ -161,12 +161,14 @@ def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavag
 				else: 
 					rcts = np.vstack([rcts,(int(reactionID), int(rctType), tmp1id, tmp2id, tmp3id, int(0), int(239), parameters[34])])	
 					reactionID += 1
-				nCleavage += 1
+				if rctType == 1: nCleavage += 1
+				else: nCondensa += 1
 					
 				if (args.creationMethod == 2) | (args.creationMethod == 4): # If WIM method the reverse reaction is added
 					rcts = np.vstack([rcts,(int(reactionID), int(revType), tmp1id, tmp2id, tmp3id, int(0), int(239), parameters[33])])	
 					reactionID += 1
-					nCondensa += 1
+					if revType == 1: nCleavage += 1
+					else: nCondensa += 1
 			else:
 				rct2cat = rcts[(rcts[:,1] == rctType) & (rcts[:,2] == tmp1id) & (rcts[:,3] == tmp2id),0]
 				if (args.creationMethod == 2) | (args.creationMethod == 4): # If the reverse reaction is present, so the ID is stored
