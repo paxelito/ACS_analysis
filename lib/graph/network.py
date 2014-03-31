@@ -113,8 +113,8 @@ def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavag
 		rctTime = time()
 		rctType = 1
 		if (args.creationMethod == 1) | (args.creationMethod == 4):
-			if args.rctRatio > 0: 
-				if ran.random() > args.rctRatio: rctType = 0
+			if args.rctRatio < 1: 
+				if ran.random() < args.rctRatio: rctType = 0
 			else:
 				if (totCleavage / (float(totCleavage) + totCond)) <= ran.random(): rctType = 0
 		
@@ -126,19 +126,17 @@ def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavag
 			revType = 0 # By default the reverse reaction of the cleavage is condensation
 			# Create random cleavage (or 50% cleavage/condensation in case of creation method 3 (WIM without reverse reactions)
 			# If the creation method is 3 (WIM without reverse reactions) the nature of the reaction is randomly selected
+			# according to the rctRatio parameter (0 means all cleavages) 
 			if (args.creationMethod == 3):
-				# Reaction Structure Creation
-				if args.directRctDirection == 1: 
-					rctType = 1
-					revType = 0
-				elif args.directRctDirection == 0: 
-					rctType = 0
-					revType = 1
-				else: 
-					rn = ran.random()
-					rctType = int(round(rn))
-					revType = int(round(1-rn))
-				
+				if args.rctRatio < 1:
+					if ran.random() < args.rctRatio:
+						rctType = 1
+						revType = 0
+					else:
+						rctType = 0
+						revType = 1				
+			
+			# Reaction Structure Creation	
 			while reactionValid == False:
 				tmp1, tmp2, tmp3, tmp1id, tmp2id, tmp3id = reactions.createRandomCleavageForCompleteFiringDisk(speciesList, parameters[14], initSpeciesListLength)
 				if reactionID > 0:
@@ -173,8 +171,8 @@ def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavag
 				rct2cat = rcts[(rcts[:,1] == rctType) & (rcts[:,2] == tmp1id) & (rcts[:,3] == tmp2id),0]
 				if (args.creationMethod == 2) | (args.creationMethod == 4): # If the reverse reaction is present, so the ID is stored
 					if rct2cat % 2 == 1: rct2cat -= 1 # If the selected reaction is already present and the ID is odd it means that the "direct" reaction is the previous one. 
-					#rct2cat_no_rev = rcts[(rcts[:,1] == 0) & (rcts[:,2] == tmp1id) & (rcts[:,3] == tmp2id),0]
-					
+					#rct2cat_no_rev = rcts[(rcts[:,1] == 0) & (rcts[:,2] == tmp1id) & (rcts[:,3] == tmp2id),0]	
+		
 		else: # condensation
 			if (args.creationMethod == 1) | (args.creationMethod == 4):
 				rctnew = False

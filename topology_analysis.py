@@ -43,9 +43,9 @@ if __name__ == '__main__':
 	parser.add_argument('-m', '--minDim', help='min Dimension of the systems (Default: 5)', default='5', type=int)
 	parser.add_argument('-i', '--iteration', help='How many network instances per dimension are created (Default: 10)', default='10', type=int)
 	parser.add_argument('-n', '--noCat', help='Non catalytic max length (default: 2)', default='2', type=int)
-	parser.add_argument('-c', '--rctRatio', help='Ratio between cleavages and condensations (default: 0, it means that the actual ratio is used)', default='0', type=float)	
+	parser.add_argument('-c', '--rctRatio', help='Ratio between cleavages and total number of reactions (default: 1, it means that the actual ratio is used)', default='1', type=float)	
 	parser.add_argument('-r', '--randomSeed', help='random seed objects path', default=None)
-	parser.add_argument('-d', '--directRctDirection', help='Direction of the forward reaction where necessary (1: cleavage, 0: condensation, 2: random with probability 0.5,Default: 2)', default='2', type=int)
+	#parser.add_argument('-d', '--directRctDirection', help='Direction of the forward reaction where necessary (1: cleavage, 0: condensation, 2: random with probability 0.5,Default: 2)', default='2', type=int)
 
 	args = parser.parse_args()
 	
@@ -59,7 +59,7 @@ if __name__ == '__main__':
 	
 	# Create stas folders
 	ndn = '_topological_assessment_' +  str(args.creationMethod) + '_' + str(args.lastFood) + '_' \
-			+ str(args.noCat) + '_' + str(args.rctRatio) + '_' + str(args.prefAttach)
+			+ str(args.noCat) + '_' + str(args.prefAttach) + '_' + str(args.minDim) + '_' + str(args.maxDim) + '_' + str(args.rctRatio)
 	newdirAllResults = os.path.join(args.strOut, ndn)
 	if not os.path.isdir(newdirAllResults):
 		try:
@@ -87,7 +87,7 @@ if __name__ == '__main__':
 	fid_initRafResALL = open(fname_initRafResALL, 'w')
 	strToWrite = "Folder\tP\tAC\tM\tRAFsize\tClosure\tCats\tuRAF\tSCC\tAutoCat\n"
 	fid_initRafRes.write(strToWrite)
-	strToWrite = "P\tM\tAC\tRAF%\tSCC%\t%SCCinRAF\t%SelfInRAF\tTIME\tTimeCreation\tTimeAnalysis\n"
+	strToWrite = "P\tM\tAC\tRAF%\tSCCtot%\tnoSelf%\tself%\t%SCCinRAF\t%SelfInRAF\tTIME\tTimeCreation\tTimeAnalysis\n"
 	fid_initRafResSUM.write(strToWrite)
 	
 	for maxlength in range(args.minDim,args.maxDim+1): # FOR EACH DIMENSION
@@ -98,6 +98,8 @@ if __name__ == '__main__':
 			time1 = time()
 			raffound = 0
 			sccfound = 0
+			sccselffound = 0
+			scctotfound = 0
 			sccinraffound = 0
 			self_sccinraffound = 0
 			iterations = int((args.iteration/(maxlength+1-args.minDim)))
@@ -178,7 +180,9 @@ if __name__ == '__main__':
 						sccinraffound += 1
 					if scc_in_raf[2] > 0:
 						self_sccinraffound += 1
-				if netouts[1][4] > 0: sccfound += 1
+				if netouts[1][4] > 0: scctotfound += 1
+				if netouts[1][1] > 0: sccfound += 1
+				if netouts[1][2] > 0: sccselffound += 1
 
 				del rcts
 				del cats
@@ -187,7 +191,9 @@ if __name__ == '__main__':
 			timeAvgCreation = sum(timeCreatinVector) / float(iterations)
 			timeAvgAnalysis = sum(timeAnalysisVector) / float(iterations)
 			percRAFFounds = raffound/float(iterations)
+			percSccTotFounds = scctotfound/float(iterations)
 			percSccFounds = sccfound/float(iterations)
+			percSccselffound = sccselffound/float(iterations)
 			if raffound > 0: percScc_in_rafFounds = sccinraffound / float(raffound)
 			else: percScc_in_rafFounds = 0
 			if raffound > 0: perc_self_Scc_in_rafFounds = self_sccinraffound / float(raffound)
@@ -197,13 +203,13 @@ if __name__ == '__main__':
 			#raw_input("ciao")
 			
 			timet = time2-time1
-			print "\t\t\t %RAF *** ", percRAFFounds, " *** %SCC ***", percSccFounds," *** TIME: ", time2 - time1, " Cleavages: ", nCleavage, " - Condensations: ", nCondensa
+			print "\t\t\t %RAF *** ", percRAFFounds, " *** %SCC ***", percSccTotFounds," *** TIME: ", time2 - time1, " Cleavages: ", nCleavage, " - Condensations: ", nCondensa
 			if percRAFFounds >= 0.99: 
 				print "\t\t\t Max number of RAFs found"
 				increaseYet = False # If RAF is always found so next average conn is assessed
-			strToWrite = str(prob) + "\t" + str(maxlength) + "\t" + str(averageConn) + "\t" + str(percRAFFounds) + "\t" + str(percSccFounds) + \
-						"\t" + str(percScc_in_rafFounds) + "\t" + str(perc_self_Scc_in_rafFounds) + "\t" + str(timet) + "\t" + str(timeAvgCreation) + \
-						"\t" + str(timeAvgAnalysis) + "\n"
+			strToWrite = str(prob) + "\t" + str(maxlength) + "\t" + str(averageConn) + "\t" + str(percRAFFounds) + "\t" + str(percSccTotFounds) + \
+						"\t" + str(percSccFounds) + "\t" + str(percSccselffound) + "\t" + str(percScc_in_rafFounds) + "\t" + \
+						 str(perc_self_Scc_in_rafFounds) + "\t" + str(timet) + "\t" + str(timeAvgCreation) + "\t" + str(timeAvgAnalysis) + "\n"
 			fid_initRafResSUM.write(strToWrite)
 			averageConn += 0.1
 	# Close text files

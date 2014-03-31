@@ -49,15 +49,24 @@ if __name__ == '__main__':
 				tmpfilename = '2_scc_' + tmpdir
 				gr.plot_np_txt_selcols_and_rows_allvarinrows(tmpfilename,dat,(2,4),range(args.minDim,args.maxDim+1),1,'Level of catalysis','SCCs',\
 															 range(args.minDim,args.maxDim+1),(0,1),None,tmpimgformat=args.imgFormat)
+				print "\t|- Create JUST SCC (NO SELF) graph..."
+				tmpfilename = '3_sccnoauto_' + tmpdir
+				gr.plot_np_txt_selcols_and_rows_allvarinrows(tmpfilename,dat,(2,5),range(args.minDim,args.maxDim+1),1,'Level of catalysis','SCCs without autocatalysis',\
+															 range(args.minDim,args.maxDim+1),(0,1),None,tmpimgformat=args.imgFormat)
+				
+				print "\t|- Create JUST SELF graph..."
+				tmpfilename = '4_self_' + tmpdir
+				gr.plot_np_txt_selcols_and_rows_allvarinrows(tmpfilename,dat,(2,6),range(args.minDim,args.maxDim+1),1,'Level of catalysis','Autocatalysis',\
+															 range(args.minDim,args.maxDim+1),(0,1),None,tmpimgformat=args.imgFormat)
 				
 				print "\t|- Create SCC in RAF graph..."
-				tmpfilename = '3_sccraf_' + tmpdir
-				gr.plot_np_txt_selcols_and_rows_allvarinrows(tmpfilename,dat,(2,5),range(args.minDim,args.maxDim+1),1,'Level of catalysis','SCCs in RAFs',\
+				tmpfilename = '5_sccraf_' + tmpdir
+				gr.plot_np_txt_selcols_and_rows_allvarinrows(tmpfilename,dat,(2,7),range(args.minDim,args.maxDim+1),1,'Level of catalysis','SCCs in RAFs',\
 															 range(args.minDim,args.maxDim+1),(0,1),None,tmpimgformat=args.imgFormat)
 				
 				print "\t|- Create self SCC in RAF graph..."
-				tmpfilename = '4_self_sccraf_' + tmpdir
-				gr.plot_np_txt_selcols_and_rows_allvarinrows(tmpfilename,dat,(2,6),range(args.minDim,args.maxDim+1),1,'Level of catalysis','self SCCs in RAFs',\
+				tmpfilename = '6_self_sccraf_' + tmpdir
+				gr.plot_np_txt_selcols_and_rows_allvarinrows(tmpfilename,dat,(2,8),range(args.minDim,args.maxDim+1),1,'Level of catalysis','Autocatalysis in RAFs',\
 															 range(args.minDim,args.maxDim+1),(0,1),None,tmpimgformat=args.imgFormat)
 			else:
 				print "No 0_initRafAnalysisSUM.csv in this folder"
