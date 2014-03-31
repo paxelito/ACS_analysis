@@ -94,6 +94,9 @@ def rafsearch(rcts, cats, closure,debug=False):
 	if rcts.shape[0] > 0:
 		
 		# Food list creation (first closure of F)
+		
+		if debug: "\n*****************************************\n"
+		
 		foodSet = deepcopy(closure)
 		closure = generateClosure(closure,rcts,debug)
 		RA = RAcondition(closure,rcts,cats,debug)
@@ -107,7 +110,11 @@ def rafsearch(rcts, cats, closure,debug=False):
 			print redRcts
 		
 		# If RAF set is not empty the iterative procedure can start
-		if len(RAF) > 1:
+		if len(RAF) > 0:
+			if debug:
+				print "WARNING"
+				print redRcts
+				print closure
 			RAFlpost = 0
 			while (len(RAF) > 0) & (RAFlpre > RAFlpost):
 				RAFlpre = len(RAF)
@@ -121,6 +128,7 @@ def rafsearch(rcts, cats, closure,debug=False):
 		catalists = findCatforRAF(cats, RAF, closure)
 		if debug:
 			print "4) FINAL"
+			print redRcts
 			print "\t Closure -> ", closure
 			print "\t cats -> ", catalists
 			print "\t RAF -> ", RAF

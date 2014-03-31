@@ -23,7 +23,7 @@ if __name__ == '__main__':
 	parser.add_argument('-p', '--strPath', help='Path where files are stored (def: ./)', default='./')
 	parser.add_argument('-d', '--minDim', help='Minimal Dimension Analysis (def: 5)', default='5', type=int)
 	parser.add_argument('-D', '--maxDim', help='Maximal Dimension Analysis (def: 8)', default='8', type=int)
-	parser.add_argument('-f', '--imgFormat', help='Image Format', default='eps')
+	parser.add_argument('-f', '--imgFormat', help='Image Format (def: png)', default='png')
 	
 	args = parser.parse_args()
 	
@@ -38,21 +38,29 @@ if __name__ == '__main__':
 			# move into the specific directory
 			os.chdir(os.path.join(strPath,tmpdir))
 			# load data
-			dat = np.loadtxt(open('0_initRafAnalysisSUM.csv'), delimiter='\t', skiprows=1)
-			# Create plot
-			print "\t|- Create RAF graph..."
-			tmpfilename = '1_raf_' + tmpdir
-			gr.plot_np_txt_selcols_and_rows_allvarinrows(tmpfilename,dat,(2,3),range(args.minDim,args.maxDim+1),1,'Level of catalysis','RAFs',\
-														 range(args.minDim,args.maxDim+1),(0,1),None,tmpimgformat=args.imgFormat)
-			print "\t|- Create SCC graph..."
-			tmpfilename = '2_scc_' + tmpdir
-			gr.plot_np_txt_selcols_and_rows_allvarinrows(tmpfilename,dat,(2,4),range(args.minDim,args.maxDim+1),1,'Level of catalysis','SCCs',\
-														 range(args.minDim,args.maxDim+1),(0,1),None,tmpimgformat=args.imgFormat)
-			
-			print "\t|- Create SCC in RAF graph..."
-			tmpfilename = '3_sccraf_' + tmpdir
-			gr.plot_np_txt_selcols_and_rows_allvarinrows(tmpfilename,dat,(2,5),range(args.minDim,args.maxDim+1),1,'Level of catalysis','SCCs in RAFs',\
-														 range(args.minDim,args.maxDim+1),(0,1),None,tmpimgformat=args.imgFormat)
+			if os.path.isfile('0_initRafAnalysisSUM.csv'):
+				dat = np.loadtxt(open('0_initRafAnalysisSUM.csv'), delimiter='\t', skiprows=1)
+				# Create plot
+				print "\t|- Create RAF graph..."
+				tmpfilename = '1_raf_' + tmpdir
+				gr.plot_np_txt_selcols_and_rows_allvarinrows(tmpfilename,dat,(2,3),range(args.minDim,args.maxDim+1),1,'Level of catalysis','RAFs',\
+															 range(args.minDim,args.maxDim+1),(0,1),None,tmpimgformat=args.imgFormat)
+				print "\t|- Create SCC graph..."
+				tmpfilename = '2_scc_' + tmpdir
+				gr.plot_np_txt_selcols_and_rows_allvarinrows(tmpfilename,dat,(2,4),range(args.minDim,args.maxDim+1),1,'Level of catalysis','SCCs',\
+															 range(args.minDim,args.maxDim+1),(0,1),None,tmpimgformat=args.imgFormat)
+				
+				print "\t|- Create SCC in RAF graph..."
+				tmpfilename = '3_sccraf_' + tmpdir
+				gr.plot_np_txt_selcols_and_rows_allvarinrows(tmpfilename,dat,(2,5),range(args.minDim,args.maxDim+1),1,'Level of catalysis','SCCs in RAFs',\
+															 range(args.minDim,args.maxDim+1),(0,1),None,tmpimgformat=args.imgFormat)
+				
+				print "\t|- Create self SCC in RAF graph..."
+				tmpfilename = '4_self_sccraf_' + tmpdir
+				gr.plot_np_txt_selcols_and_rows_allvarinrows(tmpfilename,dat,(2,6),range(args.minDim,args.maxDim+1),1,'Level of catalysis','self SCCs in RAFs',\
+															 range(args.minDim,args.maxDim+1),(0,1),None,tmpimgformat=args.imgFormat)
+			else:
+				print "No 0_initRafAnalysisSUM.csv in this folder"
 
 
 
