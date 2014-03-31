@@ -114,7 +114,7 @@ def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavag
 		rctType = 1
 		if (args.creationMethod == 1) | (args.creationMethod == 4):
 			if args.rctRatio < 1: 
-				if ran.random() < args.rctRatio: rctType = 0
+				if ran.random() > args.rctRatio: rctType = 0
 			else:
 				if (totCleavage / (float(totCleavage) + totCond)) <= ran.random(): rctType = 0
 		
