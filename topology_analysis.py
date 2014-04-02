@@ -164,7 +164,6 @@ if __name__ == '__main__':
 				# Create food list
 				lastSpeciesID = 2**(args.lastFood+1)-2
 				foodList = range(lastSpeciesID)
-				print foodList
 				# TOPOLOGICAL ANALYSIS
 				#print "\t\t|- RAF searching step..."
 				timeAnalysis = time()
