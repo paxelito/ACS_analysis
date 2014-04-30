@@ -99,7 +99,7 @@ if __name__ == '__main__':
 				description='Function to evaluate the activity of each species during the simulation, \
 				catalyst substrate product or nothing. Moreover the script recognize all those molecules functioning as hub'
 				, epilog='''File with angle trajectories are created. ''') 
-	parser.add_argument('-p', '--strPath', help='Path where files are stored', default='./')
+	parser.add_argument('-p', '--StrPath', help='Path where files are stored', default='./')
 	parser.add_argument('-l', '--tmpMaxFluxL', type=int, help='Max length of the incoming flux', default=2)
 	args = parser.parse_args()
 	
