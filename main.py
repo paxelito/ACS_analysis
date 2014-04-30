@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: latin-1 -*-
 ''' MAIN analysis script package for CaRNeSS simulations
+	Main file analysis
 '''
 
 import sys, os # Standard library
