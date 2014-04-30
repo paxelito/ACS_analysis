@@ -104,6 +104,8 @@ def read_sims_conf_file(paramFile='acsm2s.conf'):
 			lastFiringDiskSpeciesID = int(strLine[1])	
 		if strLine[0] == "overallConcentration":
 			overallConcentration = float(strLine[1])
+		else:
+			overallConcentration = None
 		if strLine[0] == "ECConcentration":
 			ECConcentration = float(strLine[1])
 		if strLine[0] == "alphabet":
