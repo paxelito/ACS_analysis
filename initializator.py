@@ -29,9 +29,9 @@ from lib.IO import *
 #æInput parameters definition 
 if __name__ == '__main__':
 	parser = ArgumentParser(
-				description='This script re-arrange results in a more friendly way from the angle analysis in time.'
+				description='This script initialize new simulation structures.'
 				, epilog='''File with angle trajectories are created. ''') 
-	parser.add_argument('-t', '--sysType', help='System Architecture [1:CLOSE, 2:PROTO, 3:CSTR], deafult: 1', default='1')
+	parser.add_argument('-t', '--sysType', help='System Architecture [1:CLOSE, 2:PROTO, 3:CSTR], deafult: 1', default='2')
 	parser.add_argument('-a', '--prefAttach', help='Type of catalyst choice (1: Preferential Attachment, 0: Random attachment, DEF: 0', default='0', type=int)
 	parser.add_argument('-o', '--strOut', help='Path for output file storing (Default: ./)', default='./')
 	parser.add_argument('-k', '--creationMethod', help='Network creation method (1: Filisetti, 2: Wim, 3: WimNoRevs, 4: WIM_RAFinREV_noRAFinNOrev, DEF: 1)', default='1', type=int)
@@ -51,6 +51,7 @@ if __name__ == '__main__':
 	parser.add_argument('-F', '--folderName', help='Simulation Folder Name (Deafault: SIMS)', default='SIMS')
 	parser.add_argument('-R', '--revRcts', help='Reverse reactions are allowed to be created for chance(1: Yes, 0: No, Deafult: No)', default='0', type=int)	
 	parser.add_argument('-P', '--rafPresence', help='Force the presence of RAF of 1 dimension, i.e. self-catalysis (1), or bigger (2...N) or no RAF at all (0), Default: 0', default='0', type=int)
+	parser.add_argument('-S', '--sccinraf', help='minimal dimension of the SCC within a RAF', type=int, default=0)
 	parser.add_argument('-r', '--randomSeed', help='random seed', type=int, default=None)
 	args = parser.parse_args()
 	
@@ -79,10 +80,10 @@ if __name__ == '__main__':
 	
 	fname_initRafRes = os.path.join(folderName, '0_theoreticalRAFanalysis.csv')
 	fid_initRafRes = open(fname_initRafRes, 'w')
-	strToWrite = "RAFsize\tClosure\tCats\tRAF(unique)\tRAF\n"
+	strToWrite = "RAFsize\tSCCsize\tClosure\tCats\tRAF(unique)\tRAF\n"
 	fid_initRafRes.write(strToWrite)
 	
-	for singlechem in range(args.chemistries):
+	for idchem, singlechem in enumerate(range(args.chemistries)):
 		# CREATE CHEMIST FOLDER
 		print "|- ARTIFICIAL CHEMISTRY ", singlechem+1, " Creation..."
 		zeroBeforeName =  readfiles.zeroBeforeStrNum(singlechem+1, args.chemistries)
@@ -123,40 +124,48 @@ if __name__ == '__main__':
 			scanned = 0
 			while chemFound == False:
 				if scanned % 100 == 0: print "\t\t tried chemistries to find RAFs -> ", scanned
-				rcts, cats, speciesList, rcts_no_rev, cats_no_rev = network.create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavage, totCond)
+				rcts, cats, speciesList, rcts_no_rev, cats_no_rev = network.create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavage, totCond, rctToCat)
 				food = deepcopy(foodList)
 				rafset = raf.rafsearch(rcts, cats, food) # RAF search
 				if args.creationMethod == 4: 
 					food = deepcopy(foodList)
-					#print cats[200:,:]
-					#print cats_no_rev[100:,:]
 					rafset_no_rev = raf.rafsearch(rcts_no_rev, cats_no_rev, food) # RAF search
 					
 				# IF the RAF has been found the chemistry is valid, is creationMethod == 4 no RAF at all must be present in the chemistry without reverse reactions
-				
 				if len(rafset[2]) >= args.rafPresence:
 					if args.creationMethod == 4:
-						#print "\t\t\t", rafset
-						#print "\t\t\t", rafset_no_rev
 						if len(rafset_no_rev[2]) == 0:
 							chemFound = True
 					else:		
-						#print "\t\t\t", rafset
 						chemFound = True
-					
+					# RAF SCC control 
+					if chemFound == True:
+						if args.sccinraf > 0:
+							if len(rafset[2]) > 0: 
+								rctsRAF = rcts[np.any(rcts[:, 0] == np.expand_dims(rafset[2],1), 0), :]
+								catprodgraph = scc.createNetXGraphForRAF(rctsRAF, rafset[0], cats)
+								scc_in_raf = scc.checkMinimalSCCdimension(catprodgraph, args.sccinraf)
+								if scc_in_raf[0] == False:
+									chemFound = False
+								else:
+									scc.printSCConFile(scc_in_raf[2], folderName, idchem+1)
+						else:
+							scc_in_raf = [0,0]
+						
 				scanned += 1
 		else:
 			scanned = 0
 			while chemFound == False:
 				if scanned % 100 == 0: print "\t\t tried chemistries -> ", scanned
-				rcts, cats, speciesList = network.create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavage, totCond)
+				rcts, cats, speciesList, rcts_norev, cats_norev = network.create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavage, totCond, rctToCat)
 				food = deepcopy(foodList)
 				rafset = raf.rafsearch(rcts, cats, food) # RAF search
 				if len(rafset[2]) == 0:
+					scc_in_raf = [0,0]
 					chemFound = True
 				scanned += 1
 				
-		strToWrite = str(len(rafset[2])) + "\t" + str(rafset[0]) + "\t" + str(rafset[3]) + "\t" + str(rafset[4]) + "\t" + str(rafset[2]) + "\n"
+		strToWrite = str(len(rafset[2])) + "\t" + str(scc_in_raf[1]) + "\t" + str(rafset[0]) + "\t" + str(rafset[3]) + "\t" + str(rafset[4]) + "\t" + str(rafset[2]) + "\n"
 		fid_initRafRes.write(strToWrite)
 		
 		# CREATE DISTINCT INITIAL CONDITIONS		
