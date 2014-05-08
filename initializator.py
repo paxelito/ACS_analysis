@@ -36,14 +36,14 @@ if __name__ == '__main__':
 	parser.add_argument('-o', '--strOut', help='Path for output file storing (Default: ./)', default='./')
 	parser.add_argument('-k', '--creationMethod', help='Network creation method (1: Filisetti, 2: Wim, 3: WimNoRevs, 4: WIM_RAFinREV_noRAFinNOrev, DEF: 1)', default='1', type=int)
 	parser.add_argument('-d', '--directRctDirection', help='Direction of the forward reaction where necessary (1: cleavage, 0: condensation, 2: random with probability 0.5,Default: 1)', default='1', type=int)
-	parser.add_argument('-K', '--chemistriesWithRAF', help='Number of Chemistries with RAF to create', default='0', type=int)
+	parser.add_argument('-K', '--chemistriesWithRAF', help='Number of Chemistries with RAF to create (def:0), -1 does not care about RAFs', default='0', type=int)
 	parser.add_argument('-f', '--lastFood', type=int, help='max food species length (deafult: 2)', default='2')
 	parser.add_argument('-n', '--noCat', help='Non catalytic max length (default: 2)', default='2', type=int)
-	parser.add_argument('-N', '--initAmount', help='Default Initial Amount', default='600', type=int)
+	parser.add_argument('-N', '--initAmount', help='Default Initial Amount (def:600)', default='600', type=int)
 	parser.add_argument('-s', '--initSet', type=int, help='Max Dimension of the initial set (Default: 4)', default='4')
 	parser.add_argument('-m', '--maxDim', help='Max Dimension of the systems (Default: 6)', default='6', type=int)
 	parser.add_argument('-I', '--conf', help='Configuration File (Default: ./acsm2s.conf)', default='./acsm2s.conf')
-	parser.add_argument('-H', '--chemistries', help='Number of distinct chemistries to create', type=int, default='4')
+	parser.add_argument('-H', '--chemistries', help='Number of distinct chemistries to create (Def: 4)', type=int, default='4')
 	parser.add_argument('-i', '--iteration', help='Number of initial conditions (Default: 1)', default='1', type=int)
  	parser.add_argument('-v', '--avgCon', help='Catalysis level (deafult: 1), i.e. average reactions catalyzed per species', type=float, default='1')
 	parser.add_argument('-c', '--rctRatio', help='Ratio between cleavages and condensations (default: 0, it means that the actual ratio is used)', default='0', type=float)
@@ -51,7 +51,7 @@ if __name__ == '__main__':
 	parser.add_argument('-F', '--folderName', help='Simulation Folder Name (Deafault: SIMS)', default='SIMS')
 	parser.add_argument('-R', '--revRcts', help='Reverse reactions are allowed to be created for chance(1: Yes, 0: No, Deafult: No)', default='0', type=int)	
 	parser.add_argument('-P', '--rafPresence', help='Force the presence of RAF of 1 dimension, i.e. self-catalysis (1), or bigger (2...N) or no RAF at all (0), Default: 0', default='0', type=int)
-	parser.add_argument('-S', '--sccinraf', help='minimal dimension of the SCC within a RAF', type=int, default=0)
+	parser.add_argument('-S', '--sccinraf', help='minimal dimension of the SCC within a RAF (def: 0)', type=int, default=0)
 	parser.add_argument('-r', '--randomSeed', help='random seed', type=int, default=None)
 	args = parser.parse_args()
 	
@@ -160,7 +160,7 @@ if __name__ == '__main__':
 				rcts, cats, speciesList, rcts_norev, cats_norev = network.create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavage, totCond, rctToCat)
 				food = deepcopy(foodList)
 				rafset = raf.rafsearch(rcts, cats, food) # RAF search
-				if len(rafset[2]) == 0:
+				if (len(rafset[2]) == 0) | (args.chemistriesWithRAF==-1):
 					scc_in_raf = [0,0]
 					chemFound = True
 				scanned += 1

@@ -95,6 +95,7 @@ def return_scc_in_raf(tmpRAF, tmpClosure, tmpCats):
 	return sccsets 
 
 def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavage, totCond, tmpac):
+	print '\|- Create chemistry'
 	speciesList = deepcopy(originalSpeciesList)
 	initSpeciesListLength = len(speciesList) # Initial cardinality of the species list (to avoid recursive multiple species evaluation)
 	reactionID = 0
@@ -110,6 +111,7 @@ def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavag
 	checkRct = False
 	
 	for i in range(rctToCat):
+		if i % 100 == 0: print '\t|- Reaction ', i+1
 		rctTime = time()
 		rctType = 1
 		if (args.creationMethod == 1) | (args.creationMethod == 4):
