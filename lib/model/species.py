@@ -36,7 +36,7 @@ def createFileSpecies(tmpFolder, args, pars, tmpScale=1, specieslist = None):
 		if (len(singleSpecies) > args.lastFood) & (len(singleSpecies) <= args.initSet): 
 			scalingFactor = int(args.initAmount/(10**tmpScale))
 			if scalingFactor < 1: scalingFactor = 1
-			initConc = np.random.poisson(scalingFactor) / (_AVOGADRO_ * pars[15])
+			if args.fixedConcentration == 0: initConc = np.random.poisson(scalingFactor) / (_AVOGADRO_ * pars[15])
 		if len(singleSpecies) > args.initSet: initConc = 0
 		str2w = str(id) + "\t" + singleSpecies + "\t"  + str(initConc) + "\t1\t1\t0\t0\t1\t0\t0\t0\t0\t0\t0\t" + lastc + "\n"
 		fid_initSpecies.write(str2w)   

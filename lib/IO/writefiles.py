@@ -90,7 +90,8 @@ def writeAllFilesAndCreateResFolder(pathFile, resFolderName, cats, rcts, food, s
 	
 def write_acsms_file(path_file, nGen=10, nSim=1,nSec=1000,nRct=200000000,nH=0,nA=0,rs=0,dl=0,tssi=10,ftsi=0,nspmt=1,lfds=13,oc=0.0001,ecc=0,alf="AB",v=1e-18,\
 					 vg=0,sd=0,nrg=0,rse=0,ncml=2,P=0.00103306,cp=0.5,mrevrct=0,rr=0,rrr=0,sr=0,K_ass=50,K_diss=25,K_cpx=50,K_cpxDiss=1,K_nrg=0,K_nrg_decay=0,K_spont_ass=0,\
-					 K_spont_diss=0,moleculeDecay_KineticConstant=0.02,diffusion_contribute=0,solubility_threshold=0,influx_rate=0,maxLOut=3):
+					 K_spont_diss=0,moleculeDecay_KineticConstant=0.02,diffusion_contribute=0,solubility_threshold=0,influx_rate=0,maxLOut=3,\
+					 fileAmountSaveInterval=10,saveRtcInfo=1,randInitSpeciesConc=0):
 	print "\t|- save conf file"
 	fname_conf = os.path.join(path_file, 'acsm2s.conf')
 	fid_conf = open(fname_conf, 'w')
@@ -106,6 +107,7 @@ def write_acsms_file(path_file, nGen=10, nSim=1,nSec=1000,nRct=200000000,nH=0,nA
 	str2w = "debugLevel="+str(dl)+"\n"; fid_conf.write(str2w);
 	str2w = "timeStructuresSavingInterval="+str(tssi)+"\n"; fid_conf.write(str2w);
 	str2w = "fileTimesSaveInterval="+str(ftsi)+"\n"; fid_conf.write(str2w);
+	str2w = "fileAmountSaveInterval="+str(fileAmountSaveInterval)+"\n"; fid_conf.write(str2w);
 	str2w = "newSpeciesProbMinThreshold="+str(nspmt)+"\n"; fid_conf.write(str2w);
 	str2w = "lastFiringDiskSpeciesID="+str(lfds)+"\n"; fid_conf.write(str2w);
 	str2w = "overallConcentration="+str(oc)+"\n"; fid_conf.write(str2w);
@@ -136,5 +138,7 @@ def write_acsms_file(path_file, nGen=10, nSim=1,nSec=1000,nRct=200000000,nH=0,nA
 	str2w = "solubility_threshold="+str(solubility_threshold)+"\n"; fid_conf.write(str2w);
 	str2w = "influx_rate="+str(influx_rate)+"\n"; fid_conf.write(str2w);
 	str2w = "maxLOut="+str(maxLOut)+"\n"; fid_conf.write(str2w);
+	str2w = "saveReactionParameters="+str(saveRtcInfo)+"\n"; fid_conf.write(str2w);
+	str2w = "randomInitSpeciesConcentration="+str(randInitSpeciesConc)+"\n"; fid_conf.write(str2w);
  
 	fid_conf.close()

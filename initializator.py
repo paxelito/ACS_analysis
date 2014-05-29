@@ -40,6 +40,7 @@ if __name__ == '__main__':
 	parser.add_argument('-f', '--lastFood', type=int, help='max food species length (deafult: 2)', default='2')
 	parser.add_argument('-n', '--noCat', help='Non catalytic max length (default: 2)', default='2', type=int)
 	parser.add_argument('-N', '--initAmount', help='Default Initial Amount (def:600)', default='600', type=int)
+	parser.add_argument('-x', '--fixedConcentration', help='--initAmount is the average amount (0) or the real amount (1)  (def:0)', default='0', type=int)
 	parser.add_argument('-s', '--initSet', type=int, help='Max Dimension of the initial set (Default: 4)', default='4')
 	parser.add_argument('-m', '--maxDim', help='Max Dimension of the systems (Default: 6)', default='6', type=int)
 	parser.add_argument('-I', '--conf', help='Configuration File (Default: ./acsm2s.conf)', default='./acsm2s.conf')
@@ -73,7 +74,7 @@ if __name__ == '__main__':
 		fname_run = os.path.join(folderName, runFileName)
 		fid_run.append(open(fname_run, 'w'))
 		
-	# Read Conf File
+	# Read Conf File !!!!
 	parameters = readfiles.read_sims_conf_file(args.conf)
 	
 	fidid = 0 # Core on which the chemistry will run
@@ -123,6 +124,7 @@ if __name__ == '__main__':
 		if singlechem < args.chemistriesWithRAF:
 			scanned = 0
 			while chemFound == False:
+				# CHEMISTRY CREATION
 				if scanned % 100 == 0: print "\t\t tried chemistries to find RAFs -> ", scanned
 				rcts, cats, speciesList, rcts_no_rev, cats_no_rev = network.create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavage, totCond, rctToCat)
 				food = deepcopy(foodList)

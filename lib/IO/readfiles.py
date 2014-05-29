@@ -128,6 +128,8 @@ def read_sims_conf_file(paramFile='acsm2s.conf'):
 			cleavageProbability = float(strLine[1])
 		if strLine[0] == "main_rev_rct_allowed":
 			main_rev_rct_allowed = int(strLine[1])
+		else:
+			main_rev_rct_allowed = None
 		if strLine[0] == "reverseReactions":
 			reverseReactions = int(strLine[1])	
 		if strLine[0] == "revRctRatio":
@@ -159,14 +161,21 @@ def read_sims_conf_file(paramFile='acsm2s.conf'):
 		if strLine[0] == "influx_rate":
 			influx_rate = float(strLine[1])
 		if strLine[0] == "maxLOut":
-			maxLOut = int(strLine[1])				
+			maxLOut = int(strLine[1])
+	 	if strLine[0] == "fileAmountSaveInterval":
+			fileAmountSaveInterval = int(strLine[1])
+		if strLine[0] == "saveReactionParameters":
+			saveReactionParameters = int(strLine[1])	
+		if strLine[0] == "randomInitSpeciesConcentration":
+			randomInitSpeciesConcentration = int(strLine[1])
+							
 			
-	#r1 = 0 : 9 || 10 : 17 || 11 : 24 || 25 : 36 || 37 : 39
+	#r1 = 0 : 9 || 10 : 17 || 11 : 24 || 25 : 36 || 37 : 40
 	return (nGEN,nSIM,nSeconds,nReactions,nHours,nAttempts,randomSeed,debugLevel,timeStructuresSavingInterval,fileTimesSaveInterval,\
 		    newSpeciesProbMinThreshold,lastFiringDiskSpeciesID,overallConcentration,ECConcentration,alphabet,volume,volumeGrowth,stochDivision,\
 		    energy,ratioSpeciesEnergizable,nonCatalyticMaxLength,reactionProbability,cleavageProbability,main_rev_rct_allowed,reverseReactions,\
 		    revRctRatio,spontRct,K_ass,K_diss,K_cpx,K_cpxDiss,K_nrg,K_nrg_decay,K_spont_ass,K_spont_diss,moleculeDecay_KineticConstant,\
-		    diffusion_contribute,solubility_threshold,influx_rate,maxLOut)
+		    diffusion_contribute,solubility_threshold,influx_rate,maxLOut,fileAmountSaveInterval,saveReactionParameters,randomInitSpeciesConcentration)
 
 def readInitConfFile(tmpPath):
 	#Open Parameter File
