@@ -8,6 +8,7 @@ from numpy import cumsum
 import random as ran
 
 _AVOGADRO_ = 6.022141e23
+_REDUCEDCONCENTRATION_ = 10.0
 
 def createCompleteSpeciesPopulation(M, alphabet):
 	species = []
@@ -38,7 +39,8 @@ def createFileSpecies(tmpFolder, args, pars, tmpScale=1, specieslist = None):
 			if scalingFactor < 1: scalingFactor = 1
 			if args.fixedConcentration == 0: initConc = np.random.poisson(scalingFactor) / (_AVOGADRO_ * pars[15])
 		if len(singleSpecies) > args.initSet: initConc = 0
-		str2w = str(id) + "\t" + singleSpecies + "\t"  + str(initConc) + "\t1\t1\t0\t0\t1\t0\t0\t0\t0\t0\t0\t" + lastc + "\n"
+		if len(singleSpecies) >= args.redConc: initConc = initConc / _REDUCEDCONCENTRATION_;
+ 		str2w = str(id) + "\t" + singleSpecies + "\t"  + str(initConc) + "\t1\t1\t0\t0\t1\t0\t0\t0\t0\t0\t0\t" + lastc + "\n"
 		fid_initSpecies.write(str2w)   
 	fid_initSpecies.close()
 	return tempSpeciesList, tempFood
