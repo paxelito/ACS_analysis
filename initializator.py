@@ -147,7 +147,7 @@ if __name__ == '__main__':
 							rctsRAF = rcts[np.any(rcts[:, 0] == np.expand_dims(rafset[2],1), 0), :]
 							catprodgraph = scc.createNetXGraphForRAF(rctsRAF, rafset[0], cats)
 							scc_in_raf = scc.checkMinimalSCCdimension(catprodgraph, args.sccinraf)
-							print scc_in_raf[1]
+					
 							if scc_in_raf[1] == args.sccinraf:
 								scc.printSCConFile(scc_in_raf[2], folderName, idchem+1)
 							else:
