@@ -146,14 +146,16 @@ if __name__ == '__main__':
 						if len(rafset[2]) > 0: 
 							rctsRAF = rcts[np.any(rcts[:, 0] == np.expand_dims(rafset[2],1), 0), :]
 							catprodgraph = scc.createNetXGraphForRAF(rctsRAF, rafset[0], cats)
-							scc_in_raf = scc.checkMinimalSCCdimension(catprodgraph, args.sccinraf)
-					
-							if scc_in_raf[1] == args.sccinraf:
-								scc.printSCConFile(scc_in_raf[2], folderName, idchem+1)
-							else:
-								chemFound = False 
-						else:
-							scc_in_raf = [0,0]
+							if args.sccinraf > 0:
+								scc_in_raf = scc.checkMinimalSCCdimension(catprodgraph, args.sccinraf)
+								if scc_in_raf[0] == True:
+									if scc_in_raf[1] == args.sccinraf:
+										scc.printSCConFile(scc_in_raf[2], folderName, idchem+1)
+									else:
+										chemFound = False 
+								else:
+									scc_in_raf = [0,0]
+									chemFound = False 
 						
 				scanned += 1
 		else:
