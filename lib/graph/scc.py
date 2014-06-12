@@ -82,7 +82,7 @@ def checkMinimalSCCdimension(tmpDig,tmpMinDim):
 	sccL = nx.strongly_connected_components_recursive(tmpDig)
 	if len(scc) > 0:
 		for i in scc: 
-			if len(i) > tmpMinDim:
+			if len(i) >= tmpMinDim:
 				findflag = True
 				sccSize = len(i)
 				break
