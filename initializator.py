@@ -34,21 +34,21 @@ if __name__ == '__main__':
 	parser.add_argument('-t', '--sysType', help='System Architecture [1:CLOSE, 2:PROTO, 3:CSTR], deafult: 1', default='2')
 	parser.add_argument('-a', '--prefAttach', help='Type of catalyst choice (1: Preferential Attachment, 0: Random attachment, DEF: 0', default='0', type=int)
 	parser.add_argument('-o', '--strOut', help='Path for output file storing (Default: ./)', default='./')
-	parser.add_argument('-k', '--creationMethod', help='Network creation method (1: Filisetti, 2: Wim, 3: WimNoRevs, 4: WIM_RAFinREV_noRAFinNOrev, DEF: 1)', default='1', type=int)
-	parser.add_argument('-d', '--directRctDirection', help='Direction of the forward reaction where necessary (1: cleavage, 0: condensation, 2: random with probability 0.5,Default: 1)', default='1', type=int)
+	parser.add_argument('-k', '--creationMethod', help='Network creation method (1: Filisetti, 2: Wim, 3: WimNoRevs, 4: WIM_RAFinREV_noRAFinNOrev, DEF: 3)', default='3', type=int)
+	parser.add_argument('-d', '--directRctDirection', help='Direction of the forward reaction where necessary (1: cleavage, 0: condensation, 2: random with probability 0.5,Default: 2)', default='2', type=int)
 	parser.add_argument('-K', '--chemistriesWithRAF', help='Number of Chemistries with RAF to create (def:0), -1 does not care about RAFs', default='0', type=int)
 	parser.add_argument('-f', '--lastFood', type=int, help='max food species length (deafult: 2)', default='2')
 	parser.add_argument('-s', '--initSet', type=int, help='Max Dimension of the initial set (Default: 4)', default='4')
 	parser.add_argument('-m', '--maxDim', help='Max Dimension of the systems (Default: 6)', default='6', type=int)
 	parser.add_argument('-n', '--noCat', help='Non catalytic max length (default: 2)', default='2', type=int)
-	parser.add_argument('-p', '--redConc', help='Minimal dimension with reduced concentration. If it is greater than --initset no reduced concentration will be adopted (default: 4)', default='4', type=int)
+	parser.add_argument('-p', '--redConc', help='Minimal dimension with reduced concentration. If it is greater than --initset no reduced concentration will be adopted (default: 5)', default='5', type=int)
 	parser.add_argument('-N', '--initAmount', help='Default Initial Amount (def:600)', default='600', type=int)
 	parser.add_argument('-x', '--fixedConcentration', help='--initAmount is the average amount (0) or the real amount (1)  (def:0)', default='0', type=int)
 	parser.add_argument('-I', '--conf', help='Configuration File (Default: ./acsm2s.conf)', default='./acsm2s.conf')
 	parser.add_argument('-H', '--chemistries', help='Number of distinct chemistries to create (Def: 4)', type=int, default='4')
 	parser.add_argument('-i', '--iteration', help='Number of initial conditions (Default: 1)', default='1', type=int)
  	parser.add_argument('-v', '--avgCon', help='Catalysis level (deafult: 1), i.e. average reactions catalyzed per species', type=float, default='1')
-	parser.add_argument('-c', '--rctRatio', help='Ratio between cleavages and condensations (default: 0, it means that the actual ratio is used)', default='0', type=float)
+	parser.add_argument('-c', '--rctRatio', help='Ratio between cleavages and condensations (default: 0.5)', default='0.5', type=float)
 	parser.add_argument('-C', '--core', help='Number of core on which simulations are distributed', default='2', type=int)	
 	parser.add_argument('-F', '--folderName', help='Simulation Folder Name (Deafault: SIMS)', default='SIMS')
 	parser.add_argument('-R', '--revRcts', help='Reverse reactions are allowed to be created for chance(1: Yes, 0: No, Deafult: No)', default='0', type=int)	
@@ -143,18 +143,14 @@ if __name__ == '__main__':
 						chemFound = True
 					# RAF SCC control 
 					if chemFound == True:
-						if args.sccinraf > 0:
-							if len(rafset[2]) > 0: 
-								rctsRAF = rcts[np.any(rcts[:, 0] == np.expand_dims(rafset[2],1), 0), :]
-								catprodgraph = scc.createNetXGraphForRAF(rctsRAF, rafset[0], cats)
-								scc_in_raf = scc.checkMinimalSCCdimension(catprodgraph, args.sccinraf)
-								if scc_in_raf[0] == False:
-									chemFound = False
-								else:
-									if scc_in_raf[1] == args.sccinraf:
-										scc.printSCConFile(scc_in_raf[2], folderName, idchem+1)
-									else:
-										chemFound = False 
+						if len(rafset[2]) > 0: 
+							rctsRAF = rcts[np.any(rcts[:, 0] == np.expand_dims(rafset[2],1), 0), :]
+							catprodgraph = scc.createNetXGraphForRAF(rctsRAF, rafset[0], cats)
+							scc_in_raf = scc.checkMinimalSCCdimension(catprodgraph, args.sccinraf)
+							if scc_in_raf[1] == args.sccinraf:
+								scc.printSCConFile(scc_in_raf[2], folderName, idchem+1)
+							else:
+								chemFound = False 
 						else:
 							scc_in_raf = [0,0]
 						
