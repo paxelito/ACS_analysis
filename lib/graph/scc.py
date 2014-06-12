@@ -94,7 +94,7 @@ def printSCConFile(tmpSCCL, tmpfolderName, filePrefix):
 	fname_scc = os.path.join(tmpfolderName, filename)
 	fid_fname_scc = open(fname_scc, 'w')
 	for sccid, SCC in enumerate(tmpSCCL):
-		if len(SCC) > 1:
+		if len(SCC) >= 1:
 			str2w = '\n*** Chemistry ' + str(filePrefix) + ' - SCC number ' + str(sccid+1) + '\n\n'
 			fid_fname_scc.write(str2w)
 			for scc in SCC: 

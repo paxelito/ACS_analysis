@@ -150,6 +150,7 @@ if __name__ == '__main__':
 								scc_in_raf = scc.checkMinimalSCCdimension(catprodgraph, args.sccinraf)
 								if scc_in_raf[0] == True:
 									if scc_in_raf[1] == args.sccinraf:
+										print scc_in_raf
 										scc.printSCConFile(scc_in_raf[2], folderName, idchem+1)
 									else:
 										chemFound = False 

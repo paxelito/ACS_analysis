@@ -111,7 +111,8 @@ def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavag
 	checkRct = False
 	
 	for i in range(rctToCat):
-		if i % 100 == 0: print '\t|- Reaction ', i+1
+		if i > 0:
+			if i % 100 == 0: print '\t|- Reaction ', i+1
 		rctTime = time()
 		rctType = 1
 		if (args.creationMethod == 1) | (args.creationMethod == 4):
