@@ -161,6 +161,8 @@ if __name__ == '__main__':
 								else:
 									scc_in_raf = [0,0]
 									chemFound = False 
+							else:
+								scc_in_raf = [0,0]
 						else:
 							scc_in_raf = [0,0]
 						
