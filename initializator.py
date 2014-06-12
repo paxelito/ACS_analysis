@@ -149,6 +149,9 @@ if __name__ == '__main__':
 							if args.sccinraf > 0:
 								scc_in_raf = scc.checkMinimalSCCdimension(catprodgraph, args.sccinraf)
 								if scc_in_raf[0] == True:
+									print scc_in_raf[1]
+									print scc_in_raf[2]
+									raw_input("cioa")
 									if scc_in_raf[1] == args.sccinraf:
 										scc.printSCConFile(scc_in_raf[2], folderName, idchem+1)
 									else:
