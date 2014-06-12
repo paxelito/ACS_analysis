@@ -135,7 +135,7 @@ if __name__ == '__main__':
 					rafset_no_rev = raf.rafsearch(rcts_no_rev, cats_no_rev, food) # RAF search
 					
 				# IF the RAF has been found the chemistry is valid, is creationMethod == 4 no RAF at all must be present in the chemistry without reverse reactions
-				if len(rafset[2]) >= args.rafPresence:
+				if len(rafset[2]) == args.rafPresence:
 					if args.creationMethod == 4:
 						if len(rafset_no_rev[2]) == 0:
 							chemFound = True
@@ -151,7 +151,10 @@ if __name__ == '__main__':
 								if scc_in_raf[0] == False:
 									chemFound = False
 								else:
-									scc.printSCConFile(scc_in_raf[2], folderName, idchem+1)
+									if scc_in_raf[1] == args.sccinraf:
+										scc.printSCConFile(scc_in_raf[2], folderName, idchem+1)
+									else:
+										chemFound = False 
 						else:
 							scc_in_raf = [0,0]
 						
