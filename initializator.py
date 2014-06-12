@@ -157,6 +157,7 @@ if __name__ == '__main__':
 										scc.printSCConFile(scc_in_raf[2], folderName, idchem+1)
 									else:
 										chemFound = False 
+										scc_in_raf = [0,0]
 								else:
 									scc_in_raf = [0,0]
 									chemFound = False 
