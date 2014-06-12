@@ -148,6 +148,7 @@ if __name__ == '__main__':
 							catprodgraph = scc.createNetXGraphForRAF(rctsRAF, rafset[0], cats)
 							scc_in_raf = scc.checkMinimalSCCdimension(catprodgraph, args.sccinraf)
 							if scc_in_raf[1] == args.sccinraf:
+								print scc_in_raf[1]
 								scc.printSCConFile(scc_in_raf[2], folderName, idchem+1)
 							else:
 								chemFound = False 
