@@ -105,7 +105,7 @@ def read_sims_conf_file(paramFile='acsm2s.conf'):
 		if strLine[0] == "overallConcentration":
 			overallConcentration = float(strLine[1])
 		else:
-			overallConcentration = None
+			overallConcentration = 0
 		if strLine[0] == "ECConcentration":
 			ECConcentration = float(strLine[1])
 		if strLine[0] == "alphabet":
@@ -116,6 +116,8 @@ def read_sims_conf_file(paramFile='acsm2s.conf'):
 			volumeGrowth = int(strLine[1])
 		if strLine[0] == "stochDivision":
 			stochDivision = int(strLine[1])
+		if strLine[0] == "theta":
+			theta = float(strLine[1])
 		if strLine[0] == "energy":
 			energy = int(strLine[1])
 		if strLine[0] == "ratioSpeciesEnergizable":
@@ -129,7 +131,7 @@ def read_sims_conf_file(paramFile='acsm2s.conf'):
 		if strLine[0] == "main_rev_rct_allowed":
 			main_rev_rct_allowed = int(strLine[1])
 		else:
-			main_rev_rct_allowed = None
+			main_rev_rct_allowed = 0
 		if strLine[0] == "reverseReactions":
 			reverseReactions = int(strLine[1])	
 		if strLine[0] == "revRctRatio":
@@ -168,14 +170,14 @@ def read_sims_conf_file(paramFile='acsm2s.conf'):
 			saveReactionParameters = int(strLine[1])	
 		if strLine[0] == "randomInitSpeciesConcentration":
 			randomInitSpeciesConcentration = int(strLine[1])
-							
+								
 			
-	#r1 = 0 : 9 || 10 : 17 || 11 : 24 || 25 : 36 || 37 : 40
+	#r1 = 0 : 9 || 10 : 17 || 18 : 24 || 25 : 35 || 36 : 43
 	return (nGEN,nSIM,nSeconds,nReactions,nHours,nAttempts,randomSeed,debugLevel,timeStructuresSavingInterval,fileTimesSaveInterval,\
 		    newSpeciesProbMinThreshold,lastFiringDiskSpeciesID,overallConcentration,ECConcentration,alphabet,volume,volumeGrowth,stochDivision,\
 		    energy,ratioSpeciesEnergizable,nonCatalyticMaxLength,reactionProbability,cleavageProbability,main_rev_rct_allowed,reverseReactions,\
 		    revRctRatio,spontRct,K_ass,K_diss,K_cpx,K_cpxDiss,K_nrg,K_nrg_decay,K_spont_ass,K_spont_diss,moleculeDecay_KineticConstant,\
-		    diffusion_contribute,solubility_threshold,influx_rate,maxLOut,fileAmountSaveInterval,saveReactionParameters,randomInitSpeciesConcentration)
+		    diffusion_contribute,solubility_threshold,influx_rate,maxLOut,fileAmountSaveInterval,saveReactionParameters,randomInitSpeciesConcentration,theta)
 
 def readInitConfFile(tmpPath):
 	#Open Parameter File

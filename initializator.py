@@ -43,12 +43,14 @@ if __name__ == '__main__':
 	parser.add_argument('-n', '--noCat', help='Non catalytic max length (default: 2)', default='2', type=int)
 	parser.add_argument('-p', '--redConc', help='Minimal dimension with reduced concentration. If it is greater than --initset no reduced concentration will be adopted (default: 5)', default='5', type=int)
 	parser.add_argument('-N', '--initAmount', help='Default Initial Amount (def:600)', default='600', type=int)
+	parser.add_argument('-B', '--initBufferAmount', help='Default Initial Buffer Amount (def:600)', default='600', type=int)
 	parser.add_argument('-x', '--fixedConcentration', help='--initAmount is the average amount (0) or the real amount (1)  (def:0)', default='0', type=int)
 	parser.add_argument('-I', '--conf', help='Configuration File (Default: ./acsm2s.conf)', default='./acsm2s.conf')
 	parser.add_argument('-H', '--chemistries', help='Number of distinct chemistries to create (Def: 4)', type=int, default='4')
 	parser.add_argument('-i', '--iteration', help='Number of initial conditions (Default: 1)', default='1', type=int)
  	parser.add_argument('-v', '--avgCon', help='Catalysis level (deafult: 1), i.e. average reactions catalyzed per species', type=float, default='1')
 	parser.add_argument('-c', '--rctRatio', help='Ratio between cleavages and condensations (default: 0.5)', default='0.5', type=float)
+	parser.add_argument('-A', '--alpha', help='Kinetic rate of membrane growth by means of the catalytic activity of the catalytic molecoles ', default='50', type=float)
 	parser.add_argument('-C', '--core', help='Number of core on which simulations are distributed', default='2', type=int)	
 	parser.add_argument('-F', '--folderName', help='Simulation Folder Name (Deafault: SIMS)', default='SIMS')
 	parser.add_argument('-R', '--revRcts', help='Reverse reactions are allowed to be created for chance(1: Yes, 0: No, Deafult: No)', default='0', type=int)	
@@ -57,7 +59,7 @@ if __name__ == '__main__':
 	parser.add_argument('-r', '--randomSeed', help='random seed', type=int, default=None)
 	args = parser.parse_args()
 	
-	_AVOGADRO_ = 6.022141e23
+	_AVOGADRO_ = 6.02214179e+23
 	
 	# SIMULATION FOLDER CREATION
 	folderName = os.path.join(args.strOut, args.folderName)
@@ -148,15 +150,26 @@ if __name__ == '__main__':
 							catprodgraph = scc.createNetXGraphForRAF(rctsRAF, rafset[0], cats)
 							if args.sccinraf >= 0:
 								scc_in_raf = scc.checkMinimalSCCdimension(catprodgraph, args.sccinraf)
+								#print scc_in_raf
 								if scc_in_raf[0] == True:
-									if scc_in_raf[1] == args.sccinraf:
-										scc.printSCConFile(scc_in_raf[2], folderName, idchem+1)
+									if args.sccinraf > 0:
+										if args.sccinraf in scc_in_raf[1]:
+											scc.printSCConFile(scc_in_raf[2], folderName, idchem+1)
+										else:
+											chemFound = False 
+											scc_in_raf = [0,0]
 									else:
-										chemFound = False 
-										scc_in_raf = [0,0]
+										if sum(scc_in_raf[1]) == 0:
+											scc.printSCConFile(scc_in_raf[2], folderName, idchem+1)
+										else:
+											chemFound = False 
+											scc_in_raf = [0,0]
 								else:
-									scc_in_raf = [0,0]
-									chemFound = False 
+									if args.sccinraf > 0:
+										scc_in_raf = [0,0]
+										chemFound = False
+									else:  
+										scc_in_raf = [0,0]
 							else:
 								scc_in_raf = [0,0]
 						else:
@@ -170,6 +183,12 @@ if __name__ == '__main__':
 				rcts, cats, speciesList, rcts_norev, cats_norev = network.create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavage, totCond, rctToCat)
 				food = deepcopy(foodList)
 				rafset = raf.rafsearch(rcts, cats, food) # RAF search
+				if len(rafset[2]) > 0: 
+					rctsRAF = rcts[np.any(rcts[:, 0] == np.expand_dims(rafset[2],1), 0), :]
+					catprodgraph = scc.createNetXGraphForRAF(rctsRAF, rafset[0], cats)
+					if args.sccinraf >= 0:
+						scc_in_raf = scc.checkMinimalSCCdimension(catprodgraph, args.sccinraf)
+					
 				if (len(rafset[2]) == 0) | (args.chemistriesWithRAF==-1):
 					scc_in_raf = [0,0]
 					chemFound = True
@@ -178,7 +197,14 @@ if __name__ == '__main__':
 		strToWrite = str(len(rafset[2])) + "\t" + str(scc_in_raf[1]) + "\t" + str(rafset[0]) + "\t" + str(rafset[3]) + "\t" + str(rafset[4]) + "\t" + str(rafset[2]) + "\n"
 		fid_initRafRes.write(strToWrite)
 		
-		# CREATE DISTINCT INITIAL CONDITIONS		
+		# CREATE DISTINCT INITIAL CONDITIONS	
+		# If volume growth define species contributing to the volume growth
+		if parameters[16] > 0: 
+			if len(rafset[3]) > 0:
+				selcats = [ran.choice(rafset[3]) for i in range(0,4)]	
+		else:
+			selcats = None
+				
 		for singleCond in range(args.iteration):
 			print " :- Iteration ", singleCond+1, " Creation..."
 			# CREATE CONDITION FOLDER
@@ -204,13 +230,13 @@ if __name__ == '__main__':
 			# -----------------------------
 			writefiles.write_acsms_file(condFolderPath,*parameters) # Save config file. 
 			writefiles.write_and_create_std_nrgFile(condFolderPath) # Save energy file.
-			sp.createFileSpecies(condFolderPath, args, parameters, singleCond, speciesList)
+			sp.createFileSpecies(condFolderPath, args, parameters, singleCond, speciesList, selcats)
 			writefiles.write_and_createInfluxFile(condFolderPath, foodList)		
 			writefiles.write_acsCatalysis_file(condFolderPath, cats)	
 			writefiles.write_acsReactions_file(condFolderPath, rcts)	
 			
 			# UPDATE SIMULATION LUNCHER
-			str2w = "echo 'Simulation " + condFolderPath + "'\nnice ./carness ../." + condFolderPath + "/ ../." + condFolderPath + "/res/ ../." + condFolderPath +\
+			str2w = "echo 'Simulation " + condFolderPath + "'\nnice ./carness ." + condFolderPath + "/ ." + condFolderPath + "/res/ ." + condFolderPath +\
 					"/ > " + chemFolder + '_' + tmpCondFolder + ".log\n"
 			
 			fid_run[fidid].write(str2w)

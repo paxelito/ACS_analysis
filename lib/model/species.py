@@ -19,7 +19,7 @@ def getTotNumberOfSpeciesFromCompletePop(M):
 	N = 2 ** (M + 1) - 2
 	return N
 
-def createFileSpecies(tmpFolder, args, pars, tmpScale=1, specieslist = None):
+def createFileSpecies(tmpFolder, args, pars, tmpScale=1, specieslist = None, tmpCatInRAF=None):
 	# Create species file 
 	if specieslist and len(specieslist) > 1: tempSpeciesList = specieslist
 	else: tempSpeciesList = createCompleteSpeciesPopulation(args.maxDim, pars[14])
@@ -31,16 +31,20 @@ def createFileSpecies(tmpFolder, args, pars, tmpScale=1, specieslist = None):
 	for id, singleSpecies in enumerate(tempSpeciesList):
 		lastc = "0"
 		initConc = args.initAmount / (_AVOGADRO_ * pars[15])
+		if (tmpCatInRAF) and (len(tmpCatInRAF)) > 0: 
+			if id in tmpCatInRAF: tmpAlpha = '\t' + str(args.alpha) + '\n'
+			else: tmpAlpha = '\t0\n'
 		if len(singleSpecies) <= args.lastFood: 
 			lastc = "1"
 			tempFood.append(id)
+			initConc = args.initBufferAmount / (_AVOGADRO_ * pars[15])
 		if (len(singleSpecies) > args.lastFood) & (len(singleSpecies) <= args.initSet): 
 			scalingFactor = int(args.initAmount/(10**tmpScale))
 			if scalingFactor < 1: scalingFactor = 1
 			if args.fixedConcentration == 0: initConc = np.random.poisson(scalingFactor) / (_AVOGADRO_ * pars[15])
 		if len(singleSpecies) > args.initSet: initConc = 0
 		if len(singleSpecies) >= args.redConc: initConc = initConc / _REDUCEDCONCENTRATION_;
- 		str2w = str(id) + "\t" + singleSpecies + "\t"  + str(initConc) + "\t1\t1\t0\t0\t1\t0\t0\t0\t0\t0\t0\t" + lastc + "\n"
+ 		str2w = str(id) + "\t" + singleSpecies + "\t"  + str(initConc) + "\t1\t1\t0\t0\t1\t0\t0\t0\t0\t0\t0\t" + lastc + tmpAlpha
 		fid_initSpecies.write(str2w)   
 	fid_initSpecies.close()
 	return tempSpeciesList, tempFood

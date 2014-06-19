@@ -47,30 +47,28 @@ if __name__ == '__main__':
 	#currentDir = StrPath.split("/")[-1]
 	currentDir = ''
 	ndn = currentDir + '_0_new_allStatResults'
-	newdirAllResults = os.path.join(os.curdir, ndn)
+	newdirAllResults = os.path.abspath(os.path.join(os.curdir, ndn))
 	if not os.path.isdir(newdirAllResults):
 		try:
 			os.mkdir(newdirAllResults)
 		except:
 			print "Impossible to create statistic directory", newdirAllResults; sys.exit(1)
 			
-	os.chdir(newdirAllResults)
-	# Creare file where store data
-	fid_deltat = open('deltat.csv', 'w')
-	
-	os.chdir(StrPath)
 	validDir = 1
 	for IDdir, tmpDir in enumerate(tmpDirs):
 		dupTime = []
 		totDirName = os.path.join(StrPath,tmpDir)
 		if os.path.isdir(totDirName):
 			# Move to the directory 
+			os.chdir(newdirAllResults)
+			f_name = "deltat_" + tmpDir +".csv"
+			fid_deltat = open(f_name, 'w')
+		  	os.chdir(StrPath)			
 			os.chdir(totDirName)
 			resDirPath = os.path.abspath(os.path.join("./", "res"))
 			print " |- Results Folder: ", resDirPath
 			if os.path.isdir(resDirPath):
 				os.chdir(resDirPath)
-				
 				# Find the number of generations
 				numberOfGen = len(glob.glob(os.path.join(resDirPath,'times_*')))
 								
@@ -78,7 +76,8 @@ if __name__ == '__main__':
 				  
 					  strZeros = zeroBeforeStrNum(ngen, numberOfGen)
 					  
-					  strSpecies = 'timeSpeciesAmount_' + strZeros + str(ngen) + '*'  
+					  strSpecies = 'timeSpeciesAmount_' + strZeros + str(ngen) + '*'
+					  #strSpecies = 'timeSpeciesAmount_00' + strZeros + str(ngen) + '*'  
 					  
 					   # Searching for files
 					  speciesFiles = sorted(glob.glob(os.path.join(resDirPath,strSpecies)))
@@ -89,9 +88,13 @@ if __name__ == '__main__':
 					  	data = np.loadtxt(open(sngSpeciesFile,"rb"),delimiter="\t")
 					  	print data[-1,1]
 					  	dupTime.append(data[-1,1])
+					  	
 			  	
 			  	
 			  	print dupTime
+			  	
+				# Creare file where store data
+				
 			  	np.savetxt(fid_deltat, dupTime, fmt='%.4f', delimiter='\t')
 
 				
