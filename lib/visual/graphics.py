@@ -5,9 +5,11 @@
 	This libraries contained the graphical functions useful for the CRN analysis
 '''
 import sys, os # Standard library
+import numpy as np
 from matplotlib import rc
 from matplotlib import use
 use('Agg')
+import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
 from pylab import *
 # PLOT DEAFAULT VALUES
@@ -77,5 +79,25 @@ def PlotMatrix(tmpFilename, tmpX, tmpY, tmpXlabel, tmpYlabel, tmpLegend):
 		plt.legend(tmpLegend, loc = 'best')
 		
 	plt.savefig(tmpFilename, format='eps', dpi=300)
+	plt.close()
+	#os.rename(tmpFilename, os.path.join('__10_stastisticFiles',tmpFilename))
+	
+def PlotHist(tmpFilename, tmpX, tmpXlabel, tmpYlabel,tmpimgformat='png',tmpdpi=150,num_bins=10):
+	''' PlotMatrix is a function for plotting one or more lines.
+		- tmpFilename is the path + file name of the file to save
+		- tmpX can be a matrix column or a vector
+	'''	
+	# the histogram of the data
+	n, bins, patches = plt.hist(tmpX, num_bins, normed=1, facecolor='green', alpha=0.5)
+	# add a 'best fit' line
+	# add a 'best fit' line
+	y = mlab.normpdf(bins, np.mean(tmpX), np.std(tmpX))
+	plt.plot(bins, y, 'r--')
+	plt.xlabel(tmpXlabel)
+	plt.ylabel(tmpYlabel)
+	
+	# Tweak spacing to prevent clipping of ylabel
+	#plt.subplots_adjust(left=0.15)
+	plt.savefig(tmpFilename, format=tmpimgformat, dpi=tmpdpi)
 	plt.close()
 	#os.rename(tmpFilename, os.path.join('__10_stastisticFiles',tmpFilename))

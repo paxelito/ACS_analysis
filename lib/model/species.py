@@ -28,6 +28,7 @@ def createFileSpecies(tmpFolder, args, pars, tmpScale=1, specieslist = None, tmp
 	fid_initSpecies = open(fname_initSpecies, 'w')
 	# for each species
 	tempFood = []
+	tmpAlpha = '\t0\n'
 	for id, singleSpecies in enumerate(tempSpeciesList):
 		lastc = "0"
 		initConc = args.initAmount / (_AVOGADRO_ * pars[15])
@@ -39,7 +40,8 @@ def createFileSpecies(tmpFolder, args, pars, tmpScale=1, specieslist = None, tmp
 			tempFood.append(id)
 			initConc = args.initBufferAmount / (_AVOGADRO_ * pars[15])
 		if (len(singleSpecies) > args.lastFood) & (len(singleSpecies) <= args.initSet): 
-			scalingFactor = int(args.initAmount/(10**tmpScale))
+			#scalingFactor = int(args.initAmount/(10**tmpScale))
+			scalingFactor = int(args.initAmount)
 			if scalingFactor < 1: scalingFactor = 1
 			if args.fixedConcentration == 0: initConc = np.random.poisson(scalingFactor) / (_AVOGADRO_ * pars[15])
 		if len(singleSpecies) > args.initSet: initConc = 0

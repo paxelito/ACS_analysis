@@ -2,6 +2,7 @@
 # -*- coding: latin-1 -*-
 
 '''Function to analyse the different attractors emerging from different simulations in time. 
+python ~/Dropbox/python/GIT/ACS_analysis/initializator.py -t2 -k3 -K-1 -f2 -s6 -m6 -p5 -I ./acsm2s.conf -H1 -v3 -c0.5 -F PROTO_ac3_f2_s6_m6_p5_RAF -N5 -x0 -i 100
 '''
 
 import sys, os # Standard library
@@ -10,6 +11,7 @@ import linecache as lc
 import glob
 import numpy as np # Scientific library
 from numpy import * 
+from argparse import ArgumentParser
 
 try:
     from pylab import *
@@ -72,6 +74,7 @@ if __name__ == '__main__':
 					# Find the number of generations
 					numberOfGen = len(glob.glob(os.path.join(resDirPath,'times_*')))
 					
+					# For each generation
 					for ngen in range(1,numberOfGen+1):
 					  
 					  strZeros = zeroBeforeStrNum(ngen, numberOfGen)

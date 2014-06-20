@@ -1,6 +1,7 @@
 	#!/usr/bin/env python
 # -*- coding: latin-1 -*-
-'''Script to order the analysis of the divergences in time. 
+'''Script to initialize random catalytic nets 
+python ~/Dropbox/python/GIT/ACS_analysis/initializator.py -t2 -k3 -K-1 -f2 -s6 -m6 -p5 -I ./acsm2s.conf -H1 -v3 -c0.5 -F PROTO_ac3_f2_s6_m6_p5_RAF -N5 -x0 -i 100
 '''
 import sys, os # Standard librar
 import glob
@@ -50,7 +51,7 @@ if __name__ == '__main__':
 	parser.add_argument('-i', '--iteration', help='Number of initial conditions (Default: 1)', default='1', type=int)
  	parser.add_argument('-v', '--avgCon', help='Catalysis level (deafult: 1), i.e. average reactions catalyzed per species', type=float, default='1')
 	parser.add_argument('-c', '--rctRatio', help='Ratio between cleavages and condensations (default: 0.5)', default='0.5', type=float)
-	parser.add_argument('-A', '--alpha', help='Kinetic rate of membrane growth by means of the catalytic activity of the catalytic molecoles ', default='50', type=float)
+	parser.add_argument('-A', '--alpha', help='Kinetic rate of membrane growth by means of the catalytic activity of the catalytic molecoles ', default='100', type=float)
 	parser.add_argument('-C', '--core', help='Number of core on which simulations are distributed', default='2', type=int)	
 	parser.add_argument('-F', '--folderName', help='Simulation Folder Name (Deafault: SIMS)', default='SIMS')
 	parser.add_argument('-R', '--revRcts', help='Reverse reactions are allowed to be created for chance(1: Yes, 0: No, Deafult: No)', default='0', type=int)	
@@ -199,11 +200,9 @@ if __name__ == '__main__':
 		
 		# CREATE DISTINCT INITIAL CONDITIONS	
 		# If volume growth define species contributing to the volume growth
+		selcats = None
 		if parameters[16] > 0: 
-			if len(rafset[3]) > 0:
-				selcats = [ran.choice(rafset[3]) for i in range(0,4)]	
-		else:
-			selcats = None
+			if len(rafset[3]) > 0: selcats = [ran.choice(rafset[3]) for i in range(0,6)]	
 				
 		for singleCond in range(args.iteration):
 			print " :- Iteration ", singleCond+1, " Creation..."
