@@ -51,7 +51,7 @@ if __name__ == '__main__':
 	parser.add_argument('-i', '--iteration', help='Number of initial conditions (Default: 1)', default='1', type=int)
  	parser.add_argument('-v', '--avgCon', help='Catalysis level (deafult: 1), i.e. average reactions catalyzed per species', type=float, default='1')
 	parser.add_argument('-c', '--rctRatio', help='Ratio between cleavages and condensations (default: 0.5)', default='0.5', type=float)
-	parser.add_argument('-A', '--alpha', help='Kinetic rate of membrane growth by means of the catalytic activity of the catalytic molecoles ', default='100', type=float)
+	parser.add_argument('-A', '--alpha', help='Kinetic rate of membrane growth by means of the catalytic activity of the catalytic molecoles (def:50)', default='100', type=float)
 	parser.add_argument('-C', '--core', help='Number of core on which simulations are distributed', default='2', type=int)	
 	parser.add_argument('-F', '--folderName', help='Simulation Folder Name (Deafault: SIMS)', default='SIMS')
 	parser.add_argument('-R', '--revRcts', help='Reverse reactions are allowed to be created for chance(1: Yes, 0: No, Deafult: No)', default='0', type=int)	
