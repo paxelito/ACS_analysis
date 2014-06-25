@@ -34,6 +34,9 @@ if __name__ == '__main__':
 				catalyst substrate product or nothing. Moreover the script recognize all those molecules functioning as hub'
 				, epilog='''File with angle trajectories are created. ''') 
 	parser.add_argument('-p', '--StrPath', help='Path where files are stored', default='./')
+	parser.add_argument('-l', '--lastFlux', help='Last flux ID species', default='5', type=int)
+	parser.add_argument('-m', '--species', help='Number of species', default='126', type=int)
+	parser.add_argument('-d', '--divisions', help='Number of divisions', default='100', type=int)
 	args = parser.parse_args()
 	
 	print "Simulation Results Path: ", args.StrPath
@@ -61,8 +64,7 @@ if __name__ == '__main__':
 		if os.path.isdir(totDirName):
 			# Move to the directory 
 			os.chdir(newdirAllResults)
-			f_name = "deltat_" + tmpDir +".csv"
-			fid_deltat = open(f_name, 'w')
+			#fid_deltat = open(f_name, 'w')
 		  	os.chdir(StrPath)			
 			os.chdir(totDirName)
 			resDirPath = os.path.abspath(os.path.join("./", "res"))
@@ -71,31 +73,41 @@ if __name__ == '__main__':
 				os.chdir(resDirPath)
 				# Find the number of generations
 				numberOfGen = len(glob.glob(os.path.join(resDirPath,'times_*')))
+				dupTime = np.zeros((numberOfGen,2))
+				dupTimeSingleX = np.zeros((numberOfGen,args.species))
 								
-				for ngen in range(1,numberOfGen+1):
-				  
-					  strZeros = zeroBeforeStrNum(ngen, numberOfGen)
-					  
-					  strSpecies = 'timeSpeciesAmount_' + strZeros + str(ngen) + '*'
-					  #strSpecies = 'timeSpeciesAmount_00' + strZeros + str(ngen) + '*'  
-					  
-					   # Searching for files
-					  speciesFiles = sorted(glob.glob(os.path.join(resDirPath,strSpecies)))
-					  
-					  for idS, sngSpeciesFile in enumerate(speciesFiles):
-					  	
-					  	#print '  |- Species File: ', sngSpeciesFile	
-					  	data = np.loadtxt(open(sngSpeciesFile,"rb"),delimiter="\t")
-					  	print data[-1,1]
-					  	dupTime.append(data[-1,1])
-					  	
-			  	
-			  	
-			  	print dupTime
-			  	
-				# Creare file where store data
+				for idgen, ngen in enumerate(range(1,numberOfGen+1)):
+					
+					print "|- Generation ", idgen+1
 				
-			  	np.savetxt(fid_deltat, dupTime, fmt='%.4f', delimiter='\t')
+					strZeros = zeroBeforeStrNum(ngen, args.divisions)
+					
+					strSpecies = 'timeSpeciesAmount_' + strZeros + str(ngen) + '*'
+					#strSpecies = 'timeSpeciesAmount_00' + strZeros + str(ngen) + '*'  
+					
+					# Searching for files
+					speciesFiles = sorted(glob.glob(os.path.join(resDirPath,strSpecies)))
+					
+					for idS, sngSpeciesFile in enumerate(speciesFiles):
+					
+					#print '  |- Species File: ', sngSpeciesFile	
+						data = np.loadtxt(open(sngSpeciesFile,"rb"),delimiter="\t")
+						totX = 0
+						for i in range(data.shape[1]):
+							if i > args.lastFlux+3:
+								totX += data[-1,i]
+								
+							if (i > 2) & (i < args.species+3):
+								dupTimeSingleX[idgen,i-3]=data[-1,i]
+							
+						dupTime[idgen,0] = data[-1,1]
+						dupTime[idgen,1] = totX
+					  				  	
+				# Creare file where store data
+				f_name = os.path.join(newdirAllResults,"deltat_" + tmpDir +".csv")
+			  	np.savetxt(f_name, dupTime, fmt='%.4f', delimiter='\t')
+			  	f_name = os.path.join(newdirAllResults,"deltat_ALL_" + tmpDir +".csv")
+			  	np.savetxt(f_name, dupTimeSingleX, fmt='%.4f', delimiter='\t')
 
 				
 						

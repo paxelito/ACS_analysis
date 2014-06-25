@@ -74,6 +74,9 @@ def read_sims_conf_file(paramFile='acsm2s.conf'):
 		fid = open(paramFile, 'r')
 	except:
 		print 'impossible to load ', paramFile; sys.exit(1)
+	
+	# Initializa theta for old versions of carness
+	theta = 0
 					
 	# Read reaction probability from configuration file
 	for line in fid:
@@ -223,7 +226,7 @@ def readBufferedID(tmpPath):
 		
 	tempBufIDs = []
 	for sp in fid:
-		tmpID, tmpSeq, tmpConc, tmpDiff, tmpSol, tmpCpxDiss, tmpCpxCut, tmpEval, tmpAge, tmpReb, tmpCatID, tmpSubID, tmpKpho, tmpLoadConc, tmpConcLock = sp.split()
+		tmpID, tmpSeq, tmpConc, tmpDiff, tmpSol, tmpCpxDiss, tmpCpxCut, tmpEval, tmpAge, tmpReb, tmpCatID, tmpSubID, tmpKpho, tmpLoadConc, tmpConcLock, tmpAlpha = sp.split()
 		if int(tmpConcLock) == 1:
 			tempBufIDs.append(int(tmpID))
 			
