@@ -19,7 +19,7 @@ font = {'family' : 'serif',
         }
 plt.rc('font', **font)
 #plt.rc('text', usetex = True)
-colr = ['k','r','b','g','c','m','y']
+colr = ['k','r','b','g','c','m','y','burlywood']
 
 #plt.rc('lines', linewidth=2)
 #plt.rc("figure.subplot", left=(52/72.27)/width)
@@ -53,7 +53,7 @@ def plot_np_txt_selcols_and_rows_allvarinrows(tmpfn,tmpdata,cols,vars,varcond,tm
 	plt.close()
 	os.chdir(actfolder)
 
-def PlotMatrix(tmpFilename, tmpX, tmpY, tmpXlabel, tmpYlabel, tmpLegend):
+def PlotMatrix(tmpFilename, tmpX, tmpY, tmpXlabel, tmpYlabel, tmpLegend, tmpimgformat='png',tmpdpi=150):
 	''' PlotMatrix is a function for plotting one or more lines.
 		- tmpFilename is the path + file name of the file to save
 		- tmpX can be a matrix column or a vector
@@ -61,9 +61,10 @@ def PlotMatrix(tmpFilename, tmpX, tmpY, tmpXlabel, tmpYlabel, tmpLegend):
 		- tmpTitle, tmpXlabel and tmpYlabel are a strings
 		- tmpLegend can be a set of strings or can be set to None value if you dont't need legend 
 	'''
-	plt.plot(tmpX, tmpY, 'k')
+	for i in range(tmpY.shape[1]):
+		plt.plot(tmpX, tmpY[:,i], 'k',color=colr[i])
 	plt.xlim(0,max(tmpX))
-	plt.ylim(0,max(tmpY))
+	plt.ylim(0,tmpY.max())
 #  	ax = plt.gca()
 #  	for tick in ax.xaxis.get_major_ticks():
 #  		tick.label1.set_fontsize(actfontsize)
@@ -77,8 +78,8 @@ def PlotMatrix(tmpFilename, tmpX, tmpY, tmpXlabel, tmpYlabel, tmpLegend):
 	plt.grid()
 	if tmpLegend != None:
 		plt.legend(tmpLegend, loc = 'best')
-		
-	plt.savefig(tmpFilename, format='eps', dpi=300)
+	filename = tmpFilename + '.' + tmpimgformat
+	plt.savefig(filename, format=tmpimgformat, dpi=tmpdpi)
 	plt.close()
 	#os.rename(tmpFilename, os.path.join('__10_stastisticFiles',tmpFilename))
 	

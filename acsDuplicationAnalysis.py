@@ -10,6 +10,7 @@ import glob
 from argparse import ArgumentParser
 import numpy as np # Scientific library
 from numpy import * 
+from lib.visual import graphics as gr
 
 try:
     from pylab import *
@@ -33,10 +34,12 @@ if __name__ == '__main__':
 				description='Function to evaluate the activity of each species during the simulation, \
 				catalyst substrate product or nothing. Moreover the script recognize all those molecules functioning as hub'
 				, epilog='''File with angle trajectories are created. ''') 
-	parser.add_argument('-p', '--StrPath', help='Path where files are stored', default='./')
-	parser.add_argument('-l', '--lastFlux', help='Last flux ID species', default='5', type=int)
-	parser.add_argument('-m', '--species', help='Number of species', default='126', type=int)
-	parser.add_argument('-d', '--divisions', help='Number of divisions', default='100', type=int)
+	parser.add_argument('-p', '--StrPath', help='Path where files are stored (def: ./)', default='./')
+	parser.add_argument('-l', '--lastFlux', help='Last flux ID species (def: 5)', default='5', type=int)
+	parser.add_argument('-m', '--species', help='Number of species (def: 126)', default='126', type=int)
+	parser.add_argument('-d', '--divisions', help='Number of divisions (def: 100)', default='100', type=int)
+	parser.add_argument('-g', '--graphs', help='Draw graphs (def: 0)', default='0', type=int)
+	parser.add_argument('-c', '--cols2plot', help='cols to plot', nargs='*', default=[], type=int)
 	args = parser.parse_args()
 	
 	print "Simulation Results Path: ", args.StrPath
@@ -108,6 +111,11 @@ if __name__ == '__main__':
 			  	np.savetxt(f_name, dupTime, fmt='%.4f', delimiter='\t')
 			  	f_name = os.path.join(newdirAllResults,"deltat_ALL_" + tmpDir +".csv")
 			  	np.savetxt(f_name, dupTimeSingleX, fmt='%.4f', delimiter='\t')
+			  	if args.graphs == 1:
+			  		# Create reduce data frame
+			  		reducedData = dupTimeSingleX[:,args.cols2plot]
+			  		fn = os.path.join(newdirAllResults,"divplot_" + tmpDir)
+			  		gr.PlotMatrix(fn,range(1,reducedData.shape[0]+1), reducedData, 'Divisions', 'Amount', args.cols2plot)
 
 				
 						

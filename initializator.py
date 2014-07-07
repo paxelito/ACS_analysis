@@ -46,6 +46,7 @@ if __name__ == '__main__':
 	parser.add_argument('-N', '--initAmount', help='Default Initial Amount (def:600)', default='600', type=int)
 	parser.add_argument('-B', '--initBufferAmount', help='Default Initial Buffer Amount (def:600)', default='600', type=int)
 	parser.add_argument('-x', '--fixedConcentration', help='--initAmount is the average amount (0) or the real amount (1)  (def:0)', default='0', type=int)
+	parser.add_argument('-O', '--holesperc', help='Percentage of holes in initial concentrations', default='0', type=float)
 	parser.add_argument('-I', '--conf', help='Configuration File (Default: ./acsm2s.conf)', default='./acsm2s.conf')
 	parser.add_argument('-H', '--chemistries', help='Number of distinct chemistries to create (Def: 4)', type=int, default='4')
 	parser.add_argument('-i', '--iteration', help='Number of initial conditions (Default: 1)', default='1', type=int)
@@ -138,8 +139,8 @@ if __name__ == '__main__':
 					rafset_no_rev = raf.rafsearch(rcts_no_rev, cats_no_rev, food) # RAF search
 					
 				# IF the RAF has been found the chemistry is valid, is creationMethod == 4 no RAF at all must be present in the chemistry without reverse reactions
-				if (len(rafset[2]) == args.rafPresence) & (len(set([6,8,13,16])&set(rafset[3]))==0):
-				#if (len(rafset[2]) == args.rafPresence):
+				#if (len(rafset[2]) == args.rafPresence) & (len(set([6,8,13,16])&set(rafset[3]))==0):
+				if (len(rafset[2]) >= args.rafPresence):
 					if args.creationMethod == 4:
 						if len(rafset_no_rev[2]) == 0:
 							chemFound = True
@@ -173,7 +174,8 @@ if __name__ == '__main__':
 									else:  
 										scc_in_raf = [0,0]
 							else:
-								scc_in_raf = [0,0]
+								scc_in_raf = scc.checkMinimalSCCdimension(catprodgraph, args.sccinraf)
+								#scc_in_raf = [0,0]
 						else:
 							scc_in_raf = [0,0]
 						

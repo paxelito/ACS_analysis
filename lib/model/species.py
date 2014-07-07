@@ -33,24 +33,35 @@ def createFileSpecies(tmpFolder, args, pars, tmpScale=1, specieslist = None, tmp
 		lastc = "0"
 		initConc = args.initAmount / (_AVOGADRO_ * pars[15])
 		
-		if (tmpCatInRAF) and (len(tmpCatInRAF)) > 0: 
-			if id in tmpCatInRAF: tmpAlpha = '\t' + str(args.alpha) + '\n'
-			else: tmpAlpha = '\t0\n'
-			
+		# FOOD SPECIES
 		if len(singleSpecies) <= args.lastFood: 
-			lastc = "1"
+			if args.sysType == 2: lastc = "1"
 			tempFood.append(id)
 			initConc = args.initBufferAmount / (_AVOGADRO_ * pars[15])
-			
+		
+		# Species of initial set	
 		if (len(singleSpecies) > args.lastFood) & (len(singleSpecies) <= args.initSet): 
 			#scalingFactor = int(args.initAmount/(10**tmpScale))
 			scalingFactor = int(args.initAmount)
 			if scalingFactor < 1: scalingFactor = 1
 			if args.fixedConcentration == 0: initConc = np.random.poisson(scalingFactor) / (_AVOGADRO_ * pars[15])
 			
+		# Species with reduced concentrations	
 		if len(singleSpecies) >= args.redConc: initConc = initConc / _REDUCEDCONCENTRATION_;		
 	
+		# Species longer than the initial set	
 		if len(singleSpecies) > args.initSet: initConc = 0
+		
+		# Holes in initial concentrations
+		if (ran.random() < args.holesperc) & (len(singleSpecies) > args.lastFood): initConc = 0
+		
+		# Contribute to container growth
+		if (tmpCatInRAF) and (len(tmpCatInRAF)) > 0: 
+			if ran.random() < 0.5:
+				if id in tmpCatInRAF: tmpAlpha = '\t' + str(args.alpha) + '\n'
+				else: tmpAlpha = '\t0\n'
+			else:
+				tmpAlpha = '\t0\n'
 		
 		
  		str2w = str(id) + "\t" + singleSpecies + "\t"  + str(initConc) + "\t1\t1\t0\t0\t1\t0\t0\t0\t0\t0\t0\t" + lastc + tmpAlpha
