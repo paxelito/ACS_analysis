@@ -19,7 +19,7 @@ font = {'family' : 'serif',
         }
 plt.rc('font', **font)
 #plt.rc('text', usetex = True)
-colr = ['k','r','b','g','c','m','y','burlywood']
+colr = ['k','r','b','g','c','m','y','burlywood','brown']
 
 #plt.rc('lines', linewidth=2)
 #plt.rc("figure.subplot", left=(52/72.27)/width)
