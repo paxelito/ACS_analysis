@@ -46,7 +46,7 @@ if __name__ == '__main__':
 	parser.add_argument('-N', '--initAmount', help='Default Initial Amount (def:600)', default='600', type=int)
 	parser.add_argument('-B', '--initBufferAmount', help='Default Initial Buffer Amount (def:600)', default='600', type=int)
 	parser.add_argument('-x', '--fixedConcentration', help='--initAmount is the average amount (0) or the real amount (1)  (def:0)', default='0', type=int)
-	parser.add_argument('-O', '--holesperc', help='Percentage of holes in initial concentrations', default='0', type=float)
+	parser.add_argument('-O', '--holesperc', help='Percentage of holes in initial concentrations (def:0)', default='0', type=float)
 	parser.add_argument('-I', '--conf', help='Configuration File (Default: ./acsm2s.conf)', default='./acsm2s.conf')
 	parser.add_argument('-H', '--chemistries', help='Number of distinct chemistries to create (Def: 4)', type=int, default='4')
 	parser.add_argument('-i', '--iteration', help='Number of initial conditions (Default: 1)', default='1', type=int)
