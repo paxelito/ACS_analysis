@@ -79,7 +79,6 @@ if __name__ == '__main__':
 				dupTime = np.zeros((numberOfGen,2))
 				dupTimeSingleX = np.zeros((numberOfGen,args.species))
 								
-				# For each generation
 				for idgen, ngen in enumerate(range(1,numberOfGen+1)):
 					
 					print "|- Generation ", idgen+1
@@ -106,26 +105,21 @@ if __name__ == '__main__':
 							
 						dupTime[idgen,0] = data[-1,1]
 						dupTime[idgen,1] = totX
-						
-						# Creating supermatrix with all the dynamical evolution 
-						if idgen == 0:
-							dataALL = data[:,0:args.species+3]
-						else:
-							dataALL = np.vstack((dataALL, data[:,0:args.species+3]))	
-						
-											  				  	
+					  				  	
 				# Creare file where store data
 				f_name = os.path.join(newdirAllResults,"deltat_" + tmpDir +".csv")
 			  	np.savetxt(f_name, dupTime, fmt='%.4f', delimiter='\t')
 			  	f_name = os.path.join(newdirAllResults,"deltat_ALL_" + tmpDir +".csv")
 			  	np.savetxt(f_name, dupTimeSingleX, fmt='%.4f', delimiter='\t')
-			  	f_name = os.path.join(newdirAllResults,"continous_ALL_" + tmpDir +".csv")
-			  	np.savetxt(f_name, dataALL, fmt='%.4f', delimiter='\t')
 			  	if args.graphs == 1:
+			  		if len(args.cols2plot) == 0: 
+			  			cols2plot = range(args.lastFlux+1,args.species)
+			  		else:
+			  			cols2plot = args.cols2plot[:]
 			  		# Create reduce data frame
-			  		reducedData = dupTimeSingleX[:,args.cols2plot]
+			  		reducedData = dupTimeSingleX[:,cols2plot]
 			  		fn = os.path.join(newdirAllResults,"divplot_" + tmpDir)
-			  		gr.PlotMatrix(fn,range(1,reducedData.shape[0]+1), reducedData, 'Divisions', 'Amount', args.cols2plot)
+			  		gr.PlotMatrix(fn,range(1,reducedData.shape[0]+1), reducedData, 'Divisions', 'Amount', cols2plot)
 
 				
 						

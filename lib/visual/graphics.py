@@ -6,6 +6,7 @@
 '''
 import sys, os # Standard library
 import numpy as np
+import random as ran
 from matplotlib import rc
 from matplotlib import use
 use('Agg')
@@ -62,7 +63,7 @@ def PlotMatrix(tmpFilename, tmpX, tmpY, tmpXlabel, tmpYlabel, tmpLegend, tmpimgf
 		- tmpLegend can be a set of strings or can be set to None value if you dont't need legend 
 	'''
 	for i in range(tmpY.shape[1]):
-		plt.plot(tmpX, tmpY[:,i], 'k',color=colr[i])
+		plt.plot(tmpX, tmpY[:,i], 'k',color=[ran.random(),ran.random(),ran.random()])
 	plt.xlim(0,max(tmpX))
 	plt.ylim(0,tmpY.max())
 #  	ax = plt.gca()
