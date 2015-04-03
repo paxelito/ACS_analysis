@@ -32,9 +32,9 @@ if __name__ == '__main__':
 	parser = ArgumentParser(
 				description='This script perform a topological analysis of random catalytic reaction networks.'
 				, epilog='''Random Catalytic Reaction Networks Topological Assessment ''') 
-	parser.add_argument('-k', '--creationMethod', help='Network creation method (1: Filisetti, 2: Wim, 3: WimNoRevs, 4: Filisetti with revs, DEF: 1)', default='1', type=int)
+	parser.add_argument('-k', '--creationMethod', help='Network creation method (1: Filisetti, 2: Wim, 3: WimNoRevs, 4: Filisetti with revs, DEF: 3)', default='3', type=int)
 	parser.add_argument('-R', '--revRcts', help='Reverse reactions are allowed to be created for chance(1: Yes, 0: No, Deafult: No)', default='0', type=int)		
-	parser.add_argument('-a', '--prefAttach', help='Type of catalyst choice (1: Preferential Attachment, 0: Random attachment, DEF: 0', default='0', type=int)
+	parser.add_argument('-a', '--prefAttach', help='Type of catalyst choice (1: Preferential Attachment, 0: Random attachment, DEF: 0)', default='0', type=int)
 	parser.add_argument('-v', '--minavgcon', help='Initial Average Connectivity, level of catalysis, DEF: 0.1', default='0.1', type=float)
 	parser.add_argument('-V', '--maxavgcon', help='Final Average Connectivity, level of Catalysis, DEF: 4.0', default='4.0', type=float)
 	parser.add_argument('-f', '--lastFood', type=int, help='Food max length (default: 2)', default='2')
@@ -45,6 +45,7 @@ if __name__ == '__main__':
 	parser.add_argument('-n', '--noCat', help='Non catalytic max length (default: 2)', default='2', type=int)
 	parser.add_argument('-c', '--rctRatio', help='Ratio between cleavages and total number of reactions (default: 1, it means that the actual ratio is used)', default='1', type=float)	
 	parser.add_argument('-r', '--randomSeed', help='random seed objects path', default=None)
+	parser.add_argument('-s', '--autocat', help='Allow autocatalysis in principle (def:True)', action="store_false", default=True)
 	#parser.add_argument('-d', '--directRctDirection', help='Direction of the forward reaction where necessary (1: cleavage, 0: condensation, 2: random with probability 0.5,Default: 2)', default='2', type=int)
 
 	args = parser.parse_args()
@@ -157,7 +158,7 @@ if __name__ == '__main__':
 				
 				# ARTIFICIAL CHEMISTRY CREATION ----------
 				timeNetCreation = time()
-				rcts, cats, speciesList, rcts_no_rev, cats_no_rev = network.create_chemistry(args, originalSpeciesList, pars, rctToCat, totCleavage, totCond, averageConn)
+				rcts, cats, speciesList, rcts_no_rev, cats_no_rev = network.create_chemistry(args, originalSpeciesList, pars, rctToCat, totCleavage, totCond, averageConn, args.autocat)
 				timeCreatinVector.append(time()-timeNetCreation)
 				#print timeCreatinVector
 				

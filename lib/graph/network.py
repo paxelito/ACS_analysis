@@ -94,7 +94,7 @@ def return_scc_in_raf(tmpRAF, tmpClosure, tmpCats):
 	sccsets = scc.diGraph_netX_stats(stdgraph)
 	return sccsets 
 
-def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavage, totCond, tmpac):
+def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavage, totCond, tmpac, autocat=True):
 	#print '\t|- Create chemistry'
 	speciesList = deepcopy(originalSpeciesList)
 	initSpeciesListLength = len(speciesList) # Initial cardinality of the species list (to avoid recursive multiple species evaluation)
@@ -255,7 +255,15 @@ def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavag
 				if (len(originalSpeciesList[catalyst]) > args.noCat):
 					if rctnew == False:
 						if sum((cats[:,1]==catalyst) & (cats[:,2]==rct2cat))==0:
-							catFound = True
+							if not autocat:
+								if int(rctType) == 1:
+									if (catalyst == int(rcts[rct2cat,3])) or (catalyst == int(rcts[rct2cat,4])): catFound = False
+									else: catFound = True
+								else:
+									if (catalyst == int(rcts[rct2cat,2])): catFound = False
+									else: catFound = True								
+							else:
+								catFound = True
 					else:
 						catFound = True	
 			
