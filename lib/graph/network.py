@@ -231,6 +231,20 @@ def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavag
 		#if round(tmpac,1) == 1.1: print rcts
 				
 		while not noSameRct:
+			
+			# Define reaction ID
+			if rctnew: 
+				if (args.creationMethod == 2) | (args.creationMethod == 4):
+					rctsToCat = reactionID - 2
+				else:
+					rctsToCat = reactionID - 1
+				
+				noSameRct = True # correct catalysis, since the reaction is new, it is impossible that it has been already catalysed
+				
+			else: 
+				rctsToCat = rct2cat
+				
+			# Search for the catalyst 
 			while not catFound:
 				if (args.prefAttach == 0) | (i == 0): 
 					catalyst = originalSpeciesList.index(ran.choice(originalSpeciesList[len(parameters[14]):initSpeciesListLength-1]))
@@ -257,29 +271,35 @@ def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavag
 						if sum((cats[:,1]==catalyst) & (cats[:,2]==rct2cat))==0:
 							if not autocat:
 								if int(rctType) == 1:
-									if (catalyst == int(rcts[rct2cat,3])) or (catalyst == int(rcts[rct2cat,4])): catFound = False
+									if (catalyst == int(rcts[rctsToCat,3])) or (catalyst == int(rcts[rctsToCat,4])): catFound = False
 									else: catFound = True
 								else:
-									if (catalyst == int(rcts[rct2cat,2])): catFound = False
+									if (catalyst == int(rcts[rctsToCat,2])): catFound = False
 									else: catFound = True								
 							else:
 								catFound = True
 					else:
-						catFound = True	
-			
-			#print catalyst	
-			# Forward reaction to catalyze
-			if rctnew: 
-				if (args.creationMethod == 2) | (args.creationMethod == 4):
-					rctsToCat = reactionID - 2
+						if not autocat:
+							if int(rctType) == 1:
+								if (catalyst == int(rcts[rctsToCat,3])) or (catalyst == int(rcts[rctsToCat,4])): catFound = False
+								else: catFound = True
+							else:
+								if (catalyst == int(rcts[rctsToCat,2])): catFound = False
+								else: catFound = True								
+						else:
+							catFound = True
+						
+			if not autocat:
+				if int(rctType) == 1:
+					if (catalyst == int(rcts[rctsToCat,3])) or (catalyst == int(rcts[rctsToCat,4])): 
+						print catalyst, " || ", int(rcts[rctsToCat,2]), " -> ", int(rcts[rctsToCat,3]), " + ", int(rcts[rctsToCat,4])
+						raw_input("W")
 				else:
-					rctsToCat = reactionID - 1
-				
-				noSameRct = True # correct catalysis, since the reaction is new, it is impossible that it has been already catalysed
-				
-			else: 
-				rctsToCat = rct2cat
+					if (catalyst == int(rcts[rctsToCat,2])): 
+						print catalyst, " || ", int(rcts[rctsToCat,2]), " <- ", int(rcts[rctsToCat,3]), " + ", int(rcts[rctsToCat,4])
+						raw_input("W")
 			
+			# Store catalysis
 			if catalysisID == 0: # if this is the first catalysis
 				
 				cats = np.array([[int(catalysisID), int(catalyst), int(rctsToCat), int(0), parameters[27], parameters[28], parameters[29], int(1)]])
