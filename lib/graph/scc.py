@@ -79,6 +79,8 @@ def checkMinimalSCCdimension(tmpDig,tmpMinDim):
 	findflag = False
 	sccSize = []
 	scc = nx.strongly_connected_components(tmpDig)
+	#print scc
+	#raw_input("cioa")
 	#sccL = nx.strongly_connected_components_recursive(tmpDig)
 	#print scc
 	#print sccL

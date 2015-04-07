@@ -271,32 +271,32 @@ def create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavag
 						if sum((cats[:,1]==catalyst) & (cats[:,2]==rct2cat))==0:
 							if not autocat:
 								if int(rctType) == 1:
-									if (catalyst == int(rcts[rctsToCat,3])) or (catalyst == int(rcts[rctsToCat,4])): catFound = False
+									if (catalyst == int(rcts[int(rctsToCat),3])) or (catalyst == int(rcts[int(rctsToCat),4])): catFound = False
 									else: catFound = True
 								else:
-									if (catalyst == int(rcts[rctsToCat,2])): catFound = False
+									if (catalyst == int(rcts[int(rctsToCat),2])): catFound = False
 									else: catFound = True								
 							else:
 								catFound = True
 					else:
 						if not autocat:
 							if int(rctType) == 1:
-								if (catalyst == int(rcts[rctsToCat,3])) or (catalyst == int(rcts[rctsToCat,4])): catFound = False
+								if (catalyst == int(rcts[int(rctsToCat),3])) or (catalyst == int(rcts[int(rctsToCat),4])): catFound = False
 								else: catFound = True
 							else:
-								if (catalyst == int(rcts[rctsToCat,2])): catFound = False
+								if (catalyst == int(rcts[int(rctsToCat),2])): catFound = False
 								else: catFound = True								
 						else:
 							catFound = True
 						
 			if not autocat:
 				if int(rctType) == 1:
-					if (catalyst == int(rcts[rctsToCat,3])) or (catalyst == int(rcts[rctsToCat,4])): 
-						print catalyst, " || ", int(rcts[rctsToCat,2]), " -> ", int(rcts[rctsToCat,3]), " + ", int(rcts[rctsToCat,4])
+					if (catalyst == int(rcts[int(rctsToCat),3])) or (catalyst == int(rcts[int(rctsToCat),4])): 
+						print catalyst, " || ", int(rcts[int(rctsToCat),2]), " -> ", int(rcts[int(rctsToCat),3]), " + ", int(rcts[int(rctsToCat),4])
 						raw_input("W")
 				else:
-					if (catalyst == int(rcts[rctsToCat,2])): 
-						print catalyst, " || ", int(rcts[rctsToCat,2]), " <- ", int(rcts[rctsToCat,3]), " + ", int(rcts[rctsToCat,4])
+					if (catalyst == int(rcts[int(rctsToCat),2])): 
+						print catalyst, " || ", int(rcts[int(rctsToCat),2]), " <- ", int(rcts[int(rctsToCat),3]), " + ", int(rcts[int(rctsToCat),4])
 						raw_input("W")
 			
 			# Store catalysis

@@ -1,7 +1,7 @@
 	#!/usr/bin/env python
 # -*- coding: latin-1 -*-
 '''Script to initialize random catalytic nets 
-python ~/Dropbox/python/GIT/ACS_analysis/initializator.py -t2 -k3 -K-1 -f2 -s6 -m6 -p5 -I ./acsm2s.conf -H1 -v3 -c0.5 -F PROTO_ac3_f2_s6_m6_p5_RAF -N5 -x0 -i 100
+python <path>/GIT/ACS_analysis/initializator.py -t2 -a0 -o ~/Documents/lavoro/protocell/init/ -k3 -d2 -K10 -f2 -n2 -s6 -m6 -p7 -I ~/Documents/lavoro/protocell/init/acsm2s.conf -N600 -B600 -x1 -O0 -H10 -v2.5 -c0.5 -F TEST -i 1 -S2 -u -P2 -S2
 '''
 import sys, os # Standard librar
 import glob
@@ -157,21 +157,24 @@ if __name__ == '__main__':
 								#print scc_in_raf
 								if scc_in_raf[0] == True:
 									if args.sccinraf > 0:
-										if args.sccinraf in scc_in_raf[1]:
+										if args.sccinraf <= int(scc_in_raf[1][0]):
 											scc.printSCConFile(scc_in_raf[2], folderName, idchem+1)
 										else:
 											chemFound = False 
 											scc_in_raf = [0,0]
+											raw_input("165")
 									else:
 										if sum(scc_in_raf[1]) == 0:
 											scc.printSCConFile(scc_in_raf[2], folderName, idchem+1)
 										else:
 											chemFound = False 
 											scc_in_raf = [0,0]
+											raw_input("172")
 								else:
 									if args.sccinraf > 0:
 										scc_in_raf = [0,0]
 										chemFound = False
+										raw_input("177")
 									else:  
 										scc_in_raf = [0,0]
 							else:
@@ -188,7 +191,7 @@ if __name__ == '__main__':
 				rcts, cats, speciesList, rcts_norev, cats_norev = network.create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavage, totCond, rctToCat, args.autocat)
 				food = deepcopy(foodList)
 				rafset = raf.rafsearch(rcts, cats, food) # RAF search
-				if len(rafset[2]) > 0: 
+				if len(rafset[2]) > 0: # If the RAF contains at least one species
 					rctsRAF = rcts[np.any(rcts[:, 0] == np.expand_dims(rafset[2],1), 0), :]
 					catprodgraph = scc.createNetXGraphForRAF(rctsRAF, rafset[0], cats)
 					if args.sccinraf >= 0:
