@@ -42,6 +42,7 @@ if __name__ == '__main__':
 	parser.add_argument('-d', '--directRctDirection', help='Direction of the forward reaction where necessary (1: cleavage, 0: condensation, 2: random with probability 0.5,Default: 2)', default='2', type=int)
 	parser.add_argument('-H', '--chemistries', help='Number of distinct chemistries to create (Def: 4)', type=int, default='4')	
 	parser.add_argument('-K', '--chemistriesWithRAF', help='Number of Chemistries with RAF to create (def:0), -1 does not care about RAFs', default='0', type=int)
+	parser.add_argument('-u', '--autocat', help='Allow autocatalysis in principle (def:True)', action="store_false", default=True)
 	parser.add_argument('-f', '--lastFood', type=int, help='max food species length (deafult: 2)', default='2')
 	parser.add_argument('-s', '--initSet', type=int, help='Max Dimension of the initial set (Default: 4)', default='4')
 	parser.add_argument('-m', '--maxDim', help='Max Dimension of the systems (Default: 6)', default='6', type=int)
@@ -131,7 +132,7 @@ if __name__ == '__main__':
 			while chemFound == False:
 				# CHEMISTRY CREATION
 				if scanned % 100 == 0: print "\t\t tried chemistries to find RAFs -> ", scanned
-				rcts, cats, speciesList, rcts_no_rev, cats_no_rev = network.create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavage, totCond, rctToCat)
+				rcts, cats, speciesList, rcts_no_rev, cats_no_rev = network.create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavage, totCond, rctToCat, args.autocat)
 				food = deepcopy(foodList)
 				rafset = raf.rafsearch(rcts, cats, food) # RAF search
 				if args.creationMethod == 4: 
@@ -184,7 +185,7 @@ if __name__ == '__main__':
 			scanned = 0
 			while chemFound == False:
 				if scanned % 100 == 0: print "\t\t tried chemistries -> ", scanned
-				rcts, cats, speciesList, rcts_norev, cats_norev = network.create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavage, totCond, rctToCat)
+				rcts, cats, speciesList, rcts_norev, cats_norev = network.create_chemistry(args, originalSpeciesList, parameters, rctToCat, totCleavage, totCond, rctToCat, args.autocat)
 				food = deepcopy(foodList)
 				rafset = raf.rafsearch(rcts, cats, food) # RAF search
 				if len(rafset[2]) > 0: 
