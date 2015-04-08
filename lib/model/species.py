@@ -19,7 +19,7 @@ def getTotNumberOfSpeciesFromCompletePop(M):
 	N = 2 ** (M + 1) - 2
 	return N
 
-def createFileSpecies(tmpFolder, args, pars, tmpScale=1, specieslist = None, tmpCatInRAF=None):
+def createFileSpecies(tmpFolder, args, pars, tmpScale=1, specieslist = None, tmpCatInRAF=None, tmpRafCatContribute2C=1):
 	# Create species file 
 	if specieslist and len(specieslist) > 1: tempSpeciesList = specieslist
 	else: tempSpeciesList = createCompleteSpeciesPopulation(args.maxDim, pars[14])
@@ -29,14 +29,14 @@ def createFileSpecies(tmpFolder, args, pars, tmpScale=1, specieslist = None, tmp
 	# for each species
 	tempFood = []
 	tmpAlpha = '\t0\n'
-	for id, singleSpecies in enumerate(tempSpeciesList):
+	for idspecies, singleSpecies in enumerate(tempSpeciesList):
 		lastc = "0"
 		initConc = args.initAmount / (_AVOGADRO_ * pars[15])
 		
 		# FOOD SPECIES
 		if len(singleSpecies) <= args.lastFood: 
 			if args.sysType == 2: lastc = "1"
-			tempFood.append(id)
+			tempFood.append(idspecies)
 			initConc = args.initBufferAmount / (_AVOGADRO_ * pars[15])
 		
 		# Species of initial set	
@@ -57,21 +57,22 @@ def createFileSpecies(tmpFolder, args, pars, tmpScale=1, specieslist = None, tmp
 		
 		# Contribute to container growth
 		if (tmpCatInRAF) and (len(tmpCatInRAF)) > 0: 
-			if ran.random() < 0.5:
-				if id in tmpCatInRAF: tmpAlpha = '\t' + str(args.alpha) + '\n'
-				else: tmpAlpha = '\t0\n'
+			if ran.random() <= tmpRafCatContribute2C:
+				if idspecies in tmpCatInRAF: 
+					tmpAlpha = '\t' + str(args.alpha) + '\n'
+				else: 
+					tmpAlpha = '\t0\n'
 			else:
-				tmpAlpha = '\t0\n'
+				tmpAlpha = '\t0\n'		
 		
-		
- 		str2w = str(id) + "\t" + singleSpecies + "\t"  + str(initConc) + "\t1\t1\t0\t0\t1\t0\t0\t0\t0\t0\t0\t" + lastc + tmpAlpha
+		str2w = str(idspecies) + "\t" + singleSpecies + "\t"  + str(initConc) + "\t1\t1\t0\t0\t1\t0\t0\t0\t0\t0\t0\t" + lastc + tmpAlpha
 		fid_initSpecies.write(str2w)   
 	fid_initSpecies.close()
 	return tempSpeciesList, tempFood
 
 def weightedChoice(weights, objects):
-    """Return a random item from objects, with the weighting defined by weights 
+	"""Return a random item from objects, with the weighting defined by weights 
     (which must sum to 1)."""
-    cs = cumsum(weights) #An array of the weights, cumulatively summed.
-    idx = sum(cs < ran.random()) #Find the index of the first weight over a random value.
-    return objects[idx]
+	cs = cumsum(weights) #An array of the weights, cumulatively summed.
+	idx = sum(cs < ran.random()) #Find the index of the first weight over a random value.
+	return objects[idx]
