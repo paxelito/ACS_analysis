@@ -28,12 +28,12 @@ if __name__ == '__main__':
 	parser = ArgumentParser(
 				description='Main script of ACS analysis.'
 				, epilog='''ACS ANALYSIS Main File. ''') 
-	parser.add_argument('-i', '--initanal', type=int, help='Analysis of the initial structures (def: 0)', choices=[0,1], default=0)
-	parser.add_argument('-e', '--exhaustive', type=int, help='Analysis of the dynamic structures (def: 1)', choices=[0,1], default=1)
+	parser.add_argument('-p', '--strPath', help='Path where files are stored (def: ./)', default='./')
+	parser.add_argument('-i', '--initanal', help='Analysis of the initial structures', action='store_true', default=False)
+	parser.add_argument('-e', '--exhaustive', help='Analysis of the dynamic structures', action='store_true', default=False)
 	parser.add_argument('-d', '--decay', type=float, help='Decay time (def: 0)', default=0)
 	parser.add_argument('-t', '--timeWindow', type=float, help='Dynamical time window (def: 10 seconds)', default=10)
 	parser.add_argument('-m', '--maxDim', help='Max Dimension of the system (def: 4)', default='4', type=int)
-	parser.add_argument('-p', '--strPath', help='Path where files are stored (def: ./)', default='./')
 	parser.add_argument('-r', '--resFolder', help='Name of the result folder (def: res)', default='res')
 	parser.add_argument('-b', '--debug', type=int, help='Debug Mode (Def: 0)', default=0)
 	
@@ -58,7 +58,7 @@ if __name__ == '__main__':
 	_PROTO_ = 1
 	_CSTR_ = 2
 	
-	if args.initanal == 1:
+	if args.initanal:
 		fname_initRafRes = os.path.join(newdirAllResults, '0_initRafAnalysis.csv')
 		fname_initRafResLIST = os.path.join(newdirAllResults, '0_initRafAnalysisLIST.csv')
 		fname_initRafResALL = os.path.join(newdirAllResults, '0_initRafAnalysisALL.csv')
@@ -104,7 +104,7 @@ if __name__ == '__main__':
 				os.chdir(resDirPath)
 				
 				# Analysis of the dynamics
-				if (args.exhaustive == 1) | (args.decay > 0):
+				if args.exhaustive | (args.decay > 0):
 					print "\t|- Analysis of the dynamics..."
 					for ngen in range(1,numberOfGen+1):
 						print "\t|-Generation ", ngen
