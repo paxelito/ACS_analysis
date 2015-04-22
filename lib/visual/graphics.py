@@ -159,8 +159,8 @@ def plotBipartiteGraph(rcts, cats, tmpFolder, tmpFilename, imgname='_bipartite.p
 		plt.savefig(os.path.join(tmpFolder, imgname))
 		#plt.show()
 
-	nx.write_graphml(BIG, os.path.join(tmpFolder, tmpFilename))
-
+	#nx.write_graphml(BIG, os.path.join(tmpFolder, tmpFilename))
+	nx.write_pajek(BIG, os.path.join(tmpFolder, tmpFilename))
 	plt.close()
 
 def plotGraph(BIG, tmpFolder, tmpFilename, imgname='_bipartite.pdf', savegraphimage=False):

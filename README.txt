@@ -13,3 +13,6 @@ FILES:
 - acsDynStatInTime -> Trajectory in concentrations of each species are detected
 - init.py system initializator
 - prepareNewSim.py -> prepare the initial conditions of a new simulation starting from the final conditions of an other sim. 
+
+
+controllare creazione di reazioni spontanee, 

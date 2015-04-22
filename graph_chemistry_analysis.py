@@ -94,7 +94,7 @@ if __name__ == '__main__':
 				# Filter graf network
 				rafcats = cats[np.in1d(cats[:,1], raf[3])]
 				rafrcts = rcts[np.in1d(rcts[:,0], raf[2])]
-				grf.plotBipartiteGraph(rafrcts, rafcats, newdirAllResults, "0_graph_RAF_bipartite.graphml", "bipartiteRAFgraph.png", True)
+				grf.plotBipartiteGraph(rafrcts, rafcats, newdirAllResults, "0_graph_RAF_bipartite.net", "bipartiteRAFgraph.png", True)
 				grf.plotGraph(sccg, newdirAllResults, "0_graph_catalyst_product.graphml", "chemistrygraph.png", True)
 
 
