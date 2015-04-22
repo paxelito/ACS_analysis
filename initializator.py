@@ -64,7 +64,7 @@ if __name__ == '__main__':
 	parser.add_argument('-c', '--rctRatio', help='Cleavage probability (default: 0.5)', default='0.5', type=float)
 	parser.add_argument('-A', '--alpha', help='Kinetic rate of membrane growth by means of the catalytic activity of the catalytic molecoles (def:1)', default='1', type=float)
 	parser.add_argument('-P', '--rafPresence', help='Force the presence of RAF of 1 dimension, i.e. self-catalysis (1), or bigger (2...N) or no RAF at all (0), Default: 0', default='0', type=int)
-	parser.add_argument('-S', '--sccinraf', help='minimal dimension of the SCC within a RAF (def: 0). If < 0 dont care about SCC, type=int, default=0)
+	parser.add_argument('-S', '--sccinraf', help='minimal dimension of the SCC within a RAF (def: 0). If < 0 dont care about SCC', type=int, default=0)
 	parser.add_argument('-r', '--randomSeed', help='random seed', type=int, default=None)
 	args = parser.parse_args()
 	
