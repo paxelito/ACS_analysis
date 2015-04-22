@@ -24,8 +24,11 @@ from lib.IO import *
 from lib.graph import raf
 from lib.graph import network
 from lib.dyn import dynamics as dm
+from lib.visual import graphics as grf
 import networkx as nx
 import matplotlib.pyplot as plt
+from networkx.algorithms import bipartite
+from lib.graph import scc
 
 #æInput parameters definition 
 if __name__ == '__main__':
@@ -68,11 +71,12 @@ if __name__ == '__main__':
 	for tmpDir in tmpDirs:
 		
 		totDirName = os.path.join(strPath,tmpDir)
+
 		if os.path.isdir(totDirName):
 			# Move to the directory 
 			os.chdir(totDirName)
 			
-			print " \- Results Folder: ", totDirName				
+			print " \- Results Folder: {0}".format(totDirName)				
 			# Analysis of the initial structures 
 			conf = readfiles.readConfFile(totDirName) #ÊConfiguration file upload
 			foodList = range(0,args.lastFluxID+1)
@@ -82,13 +86,22 @@ if __name__ == '__main__':
 			rcts = readfiles.loadAllData(totDirName,'_acsreactions.csv') # reaction file upload
 			cats = readfiles.loadAllData(totDirName,'_acscatalysis.csv') #Êcatalysis file upload
 			#ÊREAL RAF COMPUTATION (!!!!!! 1 is average connectivity)
-			raf, scc, sccg = network.net_analysis_of_static_graphs(fid_initRafRes, fid_initRafResALL, fid_initRafResLIST, tmpDir, conf[9], 1, rcts, cats, foodList, args.maxDim)
-			for i in raf: print i
-			for i in scc: print i
-			for line in nx.generate_adjlist(sccg):
-				print(line)
-			nx.write_graphml(sccg, os.path.join(newdirAllResults, 'graph.graphml'))
-			plt.show()
+			raf, _, sccg = network.net_analysis_of_static_graphs(fid_initRafRes, fid_initRafResALL, fid_initRafResLIST, tmpDir, conf[9], 1, rcts, cats, foodList, args.maxDim)
+
+			grf.plotBipartiteGraph(rcts, cats, newdirAllResults, "0_graph_bipartite.graphml", "completebipartitegraph.png")
+
+			if len(raf[2]) > 0:
+				# Filter graf network
+				rafcats = cats[np.in1d(cats[:,1], raf[3])]
+				rafrcts = rcts[np.in1d(rcts[:,0], raf[2])]
+				grf.plotBipartiteGraph(rafrcts, rafcats, newdirAllResults, "0_graph_RAF_bipartite.graphml", "bipartiteRAFgraph.png", True)
+				grf.plotGraph(sccg, newdirAllResults, "0_graph_catalyst_product.graphml", "chemistrygraph.png", True)
+
+
+
+
+			# print catalyst -> product graph 			
+			#plt.show()
 		
 		
 					

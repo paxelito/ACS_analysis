@@ -37,7 +37,7 @@ from lib.IO import *
 if __name__ == '__main__':
 	parser = ArgumentParser(
 				description='This script initialize new simulation structures.'
-				, epilog='''File with angle trajectories are created. ''') 
+				, epilog='''CARNESS INITIALIZATION PROCEDURE. ''') 
 	parser.add_argument('-F', '--folderName', help='Simulation Folder Name (Deafault: SIMS)', default='SIMS')
 	parser.add_argument('-C', '--core', help='Number of core on which simulations are distributed (def:2)', default='2', type=int)
 	parser.add_argument('-t', '--sysType', help='System Architecture [1:CLOSE, 2:PROTO, 3:CSTR], deafult: 1', default='2')
@@ -61,10 +61,10 @@ if __name__ == '__main__':
 	parser.add_argument('-I', '--conf', help='Configuration File (Default: ./acsm2s.conf)', default='./acsm2s.conf')
 	parser.add_argument('-i', '--iteration', help='Number of initial conditions (Default: 1)', default='1', type=int)
 	parser.add_argument('-v', '--avgCon', help='Catalysis level (deafult: 1), i.e. average reactions catalyzed per species', type=float, default='1')
-	parser.add_argument('-c', '--rctRatio', help='Ratio between cleavages and condensations (default: 0.5)', default='0.5', type=float)
+	parser.add_argument('-c', '--rctRatio', help='Cleavage probability (default: 0.5)', default='0.5', type=float)
 	parser.add_argument('-A', '--alpha', help='Kinetic rate of membrane growth by means of the catalytic activity of the catalytic molecoles (def:1)', default='1', type=float)
 	parser.add_argument('-P', '--rafPresence', help='Force the presence of RAF of 1 dimension, i.e. self-catalysis (1), or bigger (2...N) or no RAF at all (0), Default: 0', default='0', type=int)
-	parser.add_argument('-S', '--sccinraf', help='minimal dimension of the SCC within a RAF (def: 0)', type=int, default=0)
+	parser.add_argument('-S', '--sccinraf', help='minimal dimension of the SCC within a RAF (def: 0). If < 0 don\'t care about SCC, type=int, default=0)
 	parser.add_argument('-r', '--randomSeed', help='random seed', type=int, default=None)
 	args = parser.parse_args()
 	

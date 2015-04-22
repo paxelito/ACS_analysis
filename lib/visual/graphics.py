@@ -13,6 +13,9 @@ use('Agg')
 import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
 from pylab import *
+import networkx as nx
+from networkx.algorithms import bipartite
+
 # PLOT DEAFAULT VALUES
 font = {'family' : 'serif',
         'weight' : 'normal',
@@ -103,3 +106,76 @@ def PlotHist(tmpFilename, tmpX, tmpXlabel, tmpYlabel,tmpimgformat='png',tmpdpi=1
 	plt.savefig(tmpFilename, format=tmpimgformat, dpi=tmpdpi)
 	plt.close()
 	#os.rename(tmpFilename, os.path.join('__10_stastisticFiles',tmpFilename))
+
+def plotBipartiteGraph(rcts, cats, tmpFolder, tmpFilename, imgname='_bipartite.pdf', savegraphimage=False):
+	''' Function to create bipartite graphs starting from ctrs and cats structures
+
+		:param rcts: reactions structures
+		:param catalysis: catalysis structures
+		:param tmpFolder: Save Folder	
+	'''
+	# Create Bipartite Complete Graph
+	# Add catalyst -> reaction edges
+	BIG = nx.DiGraph()
+	# Add species from catalysis to graph
+	BIG.add_nodes_from(cats[:,1], bipartite=0)
+	# Add reactions to graph
+	strrcts = [str(int(i)) for i in cats[:,2]]
+	BIG.add_nodes_from(strrcts, bipartite=1) 
+	# Add catalyst->reaction edges
+	loe = [(x,strrcts[i]) for i,x in enumerate(cats[:,1])]
+	BIG.add_edges_from(loe, weight=0.5)
+	# Add reaction -> product nodes and edges
+	# Add species from reactions to graph
+	BIG.add_nodes_from(rcts[:,2], bipartite=0)
+	BIG.add_nodes_from(rcts[:,3], bipartite=0)
+	BIG.add_nodes_from(rcts[:,4], bipartite=0)
+	# Create substrate reactions edges and reactions products edges
+	newedges = []
+	for r in rcts:
+		if r[1]==0:
+			newedges.append((str(int(r[0])),r[2]))
+			newedges.append((r[3],str(int(r[0]))))
+			newedges.append((r[4],str(int(r[0]))))
+		else:
+			newedges.append((str(int(r[0])),r[3]))
+			newedges.append((str(int(r[0])),r[4]))
+			newedges.append((r[2],str(int(r[0]))))
+	
+	BIG.add_edges_from(newedges, weight=1.0)
+	
+	pos=nx.spring_layout(BIG)
+	species_nodes, reactions_nodes = bipartite.sets(BIG)
+	
+	if savegraphimage:
+		nx.draw_networkx_nodes(BIG,pos,nodelist=list(species_nodes),node_shape='o')
+		nx.draw_networkx_nodes(BIG,pos,nodelist=list(reactions_nodes),node_shape='s',node_color="green")
+		catalysis=[(u,v) for (u,v,d) in BIG.edges(data=True) if d['weight'] == 0.5]
+		reactions=[(u,v) for (u,v,d) in BIG.edges(data=True) if d['weight'] == 1.0]
+		nx.draw_networkx_edges(BIG,pos,edgelist=reactions, width=0.5)
+		nx.draw_networkx_edges(BIG,pos,edgelist=catalysis, width=0.5,alpha=0.5,edge_color='b',style='dashed')
+		nx.draw_networkx_labels(BIG,pos)
+		plt.axis('off')
+		plt.savefig(os.path.join(tmpFolder, imgname))
+		#plt.show()
+
+	nx.write_graphml(BIG, os.path.join(tmpFolder, tmpFilename))
+
+	plt.close()
+
+def plotGraph(BIG, tmpFolder, tmpFilename, imgname='_bipartite.pdf', savegraphimage=False):
+	'''
+		Plot normal graphs
+	'''
+
+	if savegraphimage:
+		pos=nx.random_layout(BIG)
+		nx.draw_networkx_nodes(BIG,pos,node_shape='o')
+		nx.draw_networkx_edges(BIG,pos, width=0.5)
+		nx.draw_networkx_labels(BIG,pos)
+		plt.axis('off')	
+		#plt.show()
+		plt.savefig(os.path.join(tmpFolder, imgname))
+
+	nx.write_graphml(BIG, os.path.join(tmpFolder, tmpFilename))
+
