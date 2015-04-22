@@ -132,17 +132,26 @@ def plotBipartiteGraph(rcts, cats, tmpFolder, tmpFilename, imgname='_bipartite.p
 	BIG.add_nodes_from(rcts[:,4], bipartite=0)
 	# Create substrate reactions edges and reactions products edges
 	newedges = []
+	warningedges = []
 	for r in rcts:
 		if r[1]==0:
+			 
 			newedges.append((str(int(r[0])),r[2]))
-			newedges.append((r[3],str(int(r[0]))))
-			newedges.append((r[4],str(int(r[0]))))
+
+			if nx.has_path(BIG,r[3],str(int(r[0]))): warningedges.append((r[3],str(int(r[0]))))
+			else: newedges.append((r[3],str(int(r[0]))))
+			
+			if nx.has_path(BIG,r[4],str(int(r[0]))): warningedges.append((r[4],str(int(r[0]))))
+			else: newedges.append((r[4],str(int(r[0]))))
 		else:
 			newedges.append((str(int(r[0])),r[3]))
 			newedges.append((str(int(r[0])),r[4]))
-			newedges.append((r[2],str(int(r[0]))))
+
+			if nx.has_path(BIG,r[2],str(int(r[0]))): warningedges.append((r[2],str(int(r[0]))))
+			else: newedges.append((r[2],str(int(r[0]))))
 	
 	BIG.add_edges_from(newedges, weight=1.0)
+	BIG.add_edges_from(warningedges, weight=1.5)
 	
 	pos=nx.spring_layout(BIG)
 	species_nodes, reactions_nodes = bipartite.sets(BIG)
@@ -152,8 +161,10 @@ def plotBipartiteGraph(rcts, cats, tmpFolder, tmpFilename, imgname='_bipartite.p
 		nx.draw_networkx_nodes(BIG,pos,nodelist=list(reactions_nodes),node_shape='s',node_color="green")
 		catalysis=[(u,v) for (u,v,d) in BIG.edges(data=True) if d['weight'] == 0.5]
 		reactions=[(u,v) for (u,v,d) in BIG.edges(data=True) if d['weight'] == 1.0]
+		warnings=[(u,v) for (u,v,d) in BIG.edges(data=True) if d['weight'] == 1.5]
 		nx.draw_networkx_edges(BIG,pos,edgelist=reactions, width=0.5)
 		nx.draw_networkx_edges(BIG,pos,edgelist=catalysis, width=0.5,alpha=0.5,edge_color='b',style='dashed')
+		nx.draw_networkx_edges(BIG,pos,edgelist=warnings, width=1.0,alpha=0.5,edge_color='r',style='dashed')
 		nx.draw_networkx_labels(BIG,pos)
 		plt.axis('off')
 		plt.savefig(os.path.join(tmpFolder, imgname))
