@@ -7,9 +7,9 @@
 import sys, os # Standard library
 import numpy as np
 import random as ran
+matplotlib.use('Agg')
 from matplotlib import rc
-from matplotlib import use
-use('Agg')
+#from matplotlib import use
 import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
 from pylab import *
