@@ -53,6 +53,10 @@
 '''
 
 import sys, os # Standard library
+
+import matplotlib
+matplotlib.use('Agg')
+
 import datetime as dt
 import linecache as lc
 from copy import deepcopy
@@ -72,7 +76,6 @@ from lib.graph import network
 from lib.dyn import dynamics as dm
 from lib.visual import graphics as grf
 import networkx as nx
-import matplotlib.pyplot as plt
 from networkx.algorithms import bipartite
 from lib.graph import scc
 
