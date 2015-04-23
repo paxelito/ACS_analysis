@@ -51,10 +51,31 @@
 <span class="c">#!/usr/bin/env python</span>
 <span class="c"># -*- coding: latin-1 -*-</span>
 <span class="sd">&#39;&#39;&#39; </span>
-<span class="sd">	This python tool evaluates a particular chemistry findind RAF, SCC and </span>
-<span class="sd">	saving the multigraph bipartite network and the catalyst-product network</span>
-<span class="sd">	</span>
-<span class="sd">	NETWORKX formats :: http://networkx.lanl.gov/reference/readwrite.html</span>
+<span class="sd">	This python tool evaluates a particular chemistry finding RAF, SCC and </span>
+<span class="sd">	saving the multigraph bipartite network and the catalyst-product network. </span>
+
+<span class="sd">	RAF BIPARTITE NET</span>
+<span class="sd">	-----------------</span>
+
+<span class="sd">	Bipartite MultiGraph legend:</span>
+
+<span class="sd">	* Nodes</span>
+<span class="sd">		* Red Circle: Molecular species</span>
+<span class="sd">		* Blue Circle: Molecular species belonging to the SCCs (only in ALL reactions representations)</span>
+<span class="sd">		* Green Square: reactions</span>
+<span class="sd">	* Edges</span>
+<span class="sd">		* Grey: Substrate or product, according to the direction of the arrow, partipation </span>
+<span class="sd">		* Blue: Catalyis</span>
+<span class="sd">		* Red: WARNING arrow. It means that a species is both a catalyst and a substrate of the reaction. </span>
+
+<span class="sd">	OUTPUT files</span>
+<span class="sd">	------------</span>
+
+<span class="sd">	* completebipartitegraph.png.[png/net] :: Bipartite Multigraph of all the chemistry</span>
+<span class="sd">	* bipartiteRAFgraph.png.[png/net] :: Bipartite Multigraph of the reactions involved in the RAF only </span>
+<span class="sd">	* chemistry_cat_prod_graph.[png/net] :: Catalyst -&gt; Product representation of the chemistry</span>
+
+<span class="sd">	Currently graphs are exported in PAJEK (http://mrvar.fdv.uni-lj.si/pajek/) format, other formats are available at http://networkx.lanl.gov/reference/readwrite.html</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
 <span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span> <span class="c"># Standard library</span>
@@ -133,16 +154,15 @@
 			<span class="n">rcts</span> <span class="o">=</span> <span class="n">readfiles</span><span class="o">.</span><span class="n">loadAllData</span><span class="p">(</span><span class="n">totDirName</span><span class="p">,</span><span class="s">&#39;_acsreactions.csv&#39;</span><span class="p">)</span> <span class="c"># reaction file upload</span>
 			<span class="n">cats</span> <span class="o">=</span> <span class="n">readfiles</span><span class="o">.</span><span class="n">loadAllData</span><span class="p">(</span><span class="n">totDirName</span><span class="p">,</span><span class="s">&#39;_acscatalysis.csv&#39;</span><span class="p">)</span> <span class="c">#Êcatalysis file upload</span>
 
-			<span class="n">raf</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">sccg</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">net_analysis_of_static_graphs</span><span class="p">(</span><span class="n">fid_initRafRes</span><span class="p">,</span> <span class="n">fid_initRafResALL</span><span class="p">,</span> <span class="n">fid_initRafResLIST</span><span class="p">,</span> <span class="n">tmpDir</span><span class="p">,</span> <span class="n">conf</span><span class="p">[</span><span class="mi">9</span><span class="p">],</span> <span class="mi">1</span><span class="p">,</span> <span class="n">rcts</span><span class="p">,</span> <span class="n">cats</span><span class="p">,</span> <span class="n">foodList</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">maxDim</span><span class="p">)</span>
-
-			<span class="n">grf</span><span class="o">.</span><span class="n">plotBipartiteGraph</span><span class="p">(</span><span class="n">rcts</span><span class="p">,</span> <span class="n">cats</span><span class="p">,</span> <span class="n">newdirAllResults</span><span class="p">,</span> <span class="s">&quot;0_graph_bipartite.graphml&quot;</span><span class="p">,</span> <span class="s">&quot;completebipartitegraph.png&quot;</span><span class="p">)</span>
+			<span class="n">raf</span><span class="p">,</span> <span class="n">sccstat</span><span class="p">,</span> <span class="n">sccg</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">net_analysis_of_static_graphs</span><span class="p">(</span><span class="n">fid_initRafRes</span><span class="p">,</span> <span class="n">fid_initRafResALL</span><span class="p">,</span> <span class="n">fid_initRafResLIST</span><span class="p">,</span> <span class="n">tmpDir</span><span class="p">,</span> <span class="n">conf</span><span class="p">[</span><span class="mi">9</span><span class="p">],</span> <span class="mi">1</span><span class="p">,</span> <span class="n">rcts</span><span class="p">,</span> <span class="n">cats</span><span class="p">,</span> <span class="n">foodList</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">maxDim</span><span class="p">)</span>
+			<span class="n">grf</span><span class="o">.</span><span class="n">plotBipartiteGraph</span><span class="p">(</span><span class="n">rcts</span><span class="p">,</span> <span class="n">cats</span><span class="p">,</span> <span class="n">sccstat</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">newdirAllResults</span><span class="p">,</span> <span class="s">&quot;completebipartitegraph.net&quot;</span><span class="p">,</span> <span class="s">&quot;completebipartitegraph.png&quot;</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
 
 			<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">raf</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
 				<span class="c"># Filter graf network</span>
 				<span class="n">rafcats</span> <span class="o">=</span> <span class="n">cats</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">in1d</span><span class="p">(</span><span class="n">cats</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">raf</span><span class="p">[</span><span class="mi">3</span><span class="p">])]</span>
 				<span class="n">rafrcts</span> <span class="o">=</span> <span class="n">rcts</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">in1d</span><span class="p">(</span><span class="n">rcts</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">raf</span><span class="p">[</span><span class="mi">2</span><span class="p">])]</span>
-				<span class="n">grf</span><span class="o">.</span><span class="n">plotBipartiteGraph</span><span class="p">(</span><span class="n">rafrcts</span><span class="p">,</span> <span class="n">rafcats</span><span class="p">,</span> <span class="n">newdirAllResults</span><span class="p">,</span> <span class="s">&quot;0_graph_RAF_bipartite.net&quot;</span><span class="p">,</span> <span class="s">&quot;bipartiteRAFgraph.png&quot;</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
-				<span class="n">grf</span><span class="o">.</span><span class="n">plotGraph</span><span class="p">(</span><span class="n">sccg</span><span class="p">,</span> <span class="n">newdirAllResults</span><span class="p">,</span> <span class="s">&quot;0_graph_catalyst_product.net&quot;</span><span class="p">,</span> <span class="s">&quot;chemistrygraph.png&quot;</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+				<span class="n">grf</span><span class="o">.</span><span class="n">plotBipartiteGraph</span><span class="p">(</span><span class="n">rafrcts</span><span class="p">,</span> <span class="n">rafcats</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">newdirAllResults</span><span class="p">,</span> <span class="s">&quot;bipartiteRAFgraph.net&quot;</span><span class="p">,</span> <span class="s">&quot;bipartiteRAFgraph.png&quot;</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="n">par_font_size</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+				<span class="n">grf</span><span class="o">.</span><span class="n">plotGraph</span><span class="p">(</span><span class="n">sccg</span><span class="p">,</span> <span class="n">sccstat</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">newdirAllResults</span><span class="p">,</span> <span class="s">&quot;chemistry_cat_prod_graph.net&quot;</span><span class="p">,</span> <span class="s">&quot;chemistry_cat_prod_graph.png&quot;</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
 
 					
 	<span class="n">fid_initRafRes</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>

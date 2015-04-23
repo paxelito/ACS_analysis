@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2014.11.28)  23 APR 2015 13:10
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2014.11.28)  23 APR 2015 16:35
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -876,7 +876,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 120--120
 
  []
 
-<logo.png, id=77, 112.92188pt x 107.65219pt>
+<logo.png, id=85, 112.92188pt x 107.65219pt>
 File: logo.png Graphic file (type png)
  <use logo.png>
 Package pdftex.def Info: logo.png used on input line 120.
@@ -929,438 +929,386 @@ LaTeX Font Info:    Font shape `T1/ptm/bx/n' in size <14.4> not available
 (Font)              Font shape `T1/ptm/b/n' tried instead on input line 127.
 LaTeX Font Info:    Font shape `T1/ptm/bx/n' in size <24.88> not available
 (Font)              Font shape `T1/ptm/b/n' tried instead on input line 127.
-LaTeX Font Info:    Try loading font information for T1+pcr on input line 136.
+LaTeX Font Info:    Try loading font information for TS1+ptm on input line 152.
+
+(/usr/share/texlive/texmf-dist/tex/latex/psnfss/ts1ptm.fd
+File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
+) [3] [4]
+Chapter 2.
+LaTeX Font Info:    Try loading font information for T1+pcr on input line 225.
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/t1pcr.fd
 File: t1pcr.fd 2001/06/04 font definitions for T1/pcr.
 )
 LaTeX Font Info:    Font shape `T1/pcr/bx/n' in size <10> not available
-(Font)              Font shape `T1/pcr/b/n' tried instead on input line 136.
- [3]
+(Font)              Font shape `T1/pcr/b/n' tried instead on input line 225.
+ [5
+
+]
 LaTeX Font Info:    Font shape `T1/pcr/bx/n' in size <9> not available
-(Font)              Font shape `T1/pcr/b/n' tried instead on input line 224.
+(Font)              Font shape `T1/pcr/b/n' tried instead on input line 313.
 LaTeX Font Info:    Font shape `T1/pcr/m/it' in size <9> not available
-(Font)              Font shape `T1/pcr/m/sl' tried instead on input line 224.
+(Font)              Font shape `T1/pcr/m/sl' tried instead on input line 313.
 <<ot1tt.cmap>>
-[4] [5] [6] [7] [8] [9] [10] [11] [12] [13]
-LaTeX Font Info:    Try loading font information for TS1+ptm on input line 1164
-.
-
-(/usr/share/texlive/texmf-dist/tex/latex/psnfss/ts1ptm.fd
-File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
-) [14] [15]
-Underfull \hbox (badness 6493) in paragraph at lines 1374--1376
+[6] [7] [8] [9] [10] [11] [12] [13] [14] [15] [16] [17]
+Underfull \hbox (badness 6493) in paragraph at lines 1463--1465
 []\T1/ptm/m/n/10 Weisstein, Eric W. ``Non-cen-tral F-Distribution.'' From MathW
 orld--A Wol-fram Web Re-source.
  []
 
-[16] [17] [18] [19] [20] [21] [22] [23] [24] [25] [26] [27] [28] [29] [30]
-[31] [32]
-Chapter 2.
-[33
-
-] [34] [35] [36] [37] [38] [39] [40] [41] [42] [43] [44] [45]
-Underfull \hbox (badness 6493) in paragraph at lines 4216--4218
-[]\T1/ptm/m/n/10 Weisstein, Eric W. ``Non-cen-tral F-Distribution.'' From MathW
-orld--A Wol-fram Web Re-source.
- []
-
-[46] [47] [48] [49] [50] [51] [52] [53] [54] [55] [56] [57] [58] [59] [60]
-[61] [62]
+[18] [19] [20] [21] [22] [23] [24] [25] [26] [27] [28] [29] [30] [31] [32]
+[33] [34]
 Chapter 3.
-[63
+[35
 
-] [64] [65] [66] [67] [68] [69] [70] [71] [72] [73] [74] [75]
-Underfull \hbox (badness 6493) in paragraph at lines 7066--7068
+] [36] [37] [38] [39] [40] [41] [42] [43] [44] [45] [46] [47]
+Underfull \hbox (badness 6493) in paragraph at lines 4313--4315
 []\T1/ptm/m/n/10 Weisstein, Eric W. ``Non-cen-tral F-Distribution.'' From MathW
 orld--A Wol-fram Web Re-source.
  []
 
-[76] [77] [78] [79] [80] [81] [82] [83] [84] [85] [86] [87] [88] [89] [90]
-[91] [92]
+[48] [49] [50] [51] [52] [53] [54] [55] [56] [57] [58] [59] [60] [61] [62]
+[63] [64]
 Chapter 4.
-[93
+[65
 
-] [94
+] [66
 
 ]
 Chapter 5.
-[95] [96] [97] [98] [99] [100] [101] [102] [103] [104] [105] [106] [107]
-Underfull \hbox (badness 6493) in paragraph at lines 9920--9922
+[67] [68] [69] [70] [71] [72] [73] [74] [75] [76] [77] [78] [79]
+Underfull \hbox (badness 6493) in paragraph at lines 7167--7169
 []\T1/ptm/m/n/10 Weisstein, Eric W. ``Non-cen-tral F-Distribution.'' From MathW
 orld--A Wol-fram Web Re-source.
  []
 
-[108] [109] [110] [111] [112] [113] [114] [115] [116] [117] [118] [119]
-[120] [121] [122] [123] [124]
+[80] [81] [82] [83] [84] [85] [86] [87] [88] [89] [90] [91] [92] [93] [94]
+[95] [96]
 Chapter 6.
-[125
+[97
 
-] [126] [127] [128] [129] [130] [131] [132] [133] [134] [135] [136]
-[137]
-Underfull \hbox (badness 6493) in paragraph at lines 12756--12758
+] [98] [99] [100] [101] [102] [103] [104] [105] [106] [107] [108] [109]
+Underfull \hbox (badness 6493) in paragraph at lines 10003--10005
 []\T1/ptm/m/n/10 Weisstein, Eric W. ``Non-cen-tral F-Distribution.'' From MathW
 orld--A Wol-fram Web Re-source.
  []
 
-[138] [139] [140] [141] [142] [143] [144] [145] [146] [147] [148] [149]
-[150] [151] [152] [153] [154]
+[110] [111] [112] [113] [114] [115] [116] [117] [118] [119] [120] [121]
+[122] [123] [124] [125] [126]
 Chapter 7.
-[155
+[127
 
-] [156] [157] [158] [159] [160] [161] [162] [163] [164] [165] [166]
-[167]
-Underfull \hbox (badness 6493) in paragraph at lines 15610--15612
+] [128] [129] [130] [131] [132] [133] [134] [135] [136] [137] [138]
+[139]
+Underfull \hbox (badness 6493) in paragraph at lines 12857--12859
 []\T1/ptm/m/n/10 Weisstein, Eric W. ``Non-cen-tral F-Distribution.'' From MathW
 orld--A Wol-fram Web Re-source.
  []
 
-[168] [169] [170] [171] [172] [173] [174] [175] [176] [177] [178] [179]
-[180] [181] [182] [183] [184]
+[140] [141] [142] [143] [144] [145] [146] [147] [148] [149] [150] [151]
+[152] [153] [154] [155] [156]
 Chapter 8.
-[185
+[157
 
-] [186] [187] [188] [189] [190] [191] [192] [193] [194] [195] [196]
-[197]
-Underfull \hbox (badness 6493) in paragraph at lines 18477--18479
+] [158] [159] [160] [161] [162] [163] [164] [165] [166] [167] [168]
+[169]
+Underfull \hbox (badness 6493) in paragraph at lines 15724--15726
 []\T1/ptm/m/n/10 Weisstein, Eric W. ``Non-cen-tral F-Distribution.'' From MathW
 orld--A Wol-fram Web Re-source.
  []
 
-[198] [199] [200] [201] [202] [203] [204] [205] [206] [207] [208] [209]
-[210] [211] [212] [213] [214]
+[170] [171] [172] [173] [174] [175] [176] [177] [178] [179] [180] [181]
+[182] [183] [184] [185] [186]
 Chapter 9.
-[215
+[187
 
-] [216] [217] [218] [219] [220] [221] [222] [223] [224] [225] [226]
-[227]
-Underfull \hbox (badness 6493) in paragraph at lines 21331--21333
+] [188] [189] [190] [191] [192] [193] [194] [195] [196] [197] [198]
+[199]
+Underfull \hbox (badness 6493) in paragraph at lines 18578--18580
 []\T1/ptm/m/n/10 Weisstein, Eric W. ``Non-cen-tral F-Distribution.'' From MathW
 orld--A Wol-fram Web Re-source.
  []
 
-[228] [229] [230] [231] [232] [233] [234] [235] [236] [237] [238] [239]
-[240] [241] [242] [243] [244]
+[200] [201] [202] [203] [204] [205] [206] [207] [208] [209] [210] [211]
+[212] [213] [214] [215] [216]
 Chapter 10.
-[245
+[217
 
-] [246
+] [218
 
 ]
 Chapter 11.
 LaTeX Font Info:    Font shape `T1/phv/bx/n' in size <12> not available
-(Font)              Font shape `T1/phv/b/n' tried instead on input line 22963.
-[247] [248] [249] [250] [251] [252] [253] [254] [255] [256] [257] [258]
-[259]
-Underfull \hbox (badness 6493) in paragraph at lines 24225--24227
+(Font)              Font shape `T1/phv/b/n' tried instead on input line 20210.
+[219] [220] [221] [222] [223] [224] [225] [226] [227] [228] [229] [230]
+[231]
+Underfull \hbox (badness 6493) in paragraph at lines 21472--21474
 []\T1/ptm/m/n/10 Weisstein, Eric W. ``Non-cen-tral F-Distribution.'' From MathW
 orld--A Wol-fram Web Re-source.
  []
 
-[260] [261] [262] [263] [264] [265] [266] [267] [268] [269] [270] [271]
-[272] [273] [274] [275] [276] [277] [278] [279] [280] [281] [282] [283]
-[284] [285] [286] [287] [288]
-Underfull \hbox (badness 6493) in paragraph at lines 27101--27103
+[232] [233] [234] [235] [236] [237] [238] [239] [240] [241] [242] [243]
+[244] [245] [246] [247] [248] [249] [250] [251] [252] [253] [254] [255]
+[256] [257] [258] [259] [260]
+Underfull \hbox (badness 6493) in paragraph at lines 24348--24350
 []\T1/ptm/m/n/10 Weisstein, Eric W. ``Non-cen-tral F-Distribution.'' From MathW
 orld--A Wol-fram Web Re-source.
  []
 
-[289] [290] [291] [292] [293] [294] [295] [296] [297] [298] [299] [300]
-[301] [302] [303] [304]
-Underfull \hbox (badness 10000) in paragraph at lines 28630--28630
+[261] [262] [263] [264] [265] [266] [267] [268] [269] [270] [271] [272]
+[273] [274] [275] [276]
+Underfull \hbox (badness 10000) in paragraph at lines 25877--25877
 \T1/ptm/m/it/10 food\T1/ptm/m/n/10 , \T1/ptm/m/it/10 spon-tRa-tio=None\T1/ptm/m
 /n/10 , \T1/ptm/m/it/10 kspon-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 28630--28630
+Underfull \hbox (badness 10000) in paragraph at lines 25877--25877
 \T1/ptm/m/it/10 tass=None\T1/ptm/m/n/10 , \T1/ptm/m/it/10 kspont-diss=None\T1/p
 tm/m/n/10 ,
  []
 
 
-Underfull \hbox (badness 6380) in paragraph at lines 28642--28642
+Underfull \hbox (badness 6380) in paragraph at lines 25889--25889
 []\T1/ptm/m/it/10 path_file\T1/ptm/m/n/10 , \T1/ptm/m/it/10 rct-Str\T1/ptm/m/n/
 10 , \T1/ptm/m/it/10 spon-tRa-tio=None\T1/ptm/m/n/10 , \T1/ptm/m/it/10 kspon-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 28648--28648
+Underfull \hbox (badness 10000) in paragraph at lines 25895--25895
 []\T1/ptm/m/it/10 path_file\T1/ptm/m/n/10 , \T1/ptm/m/it/10 nGen=10\T1/ptm/m/n/
 10 , \T1/ptm/m/it/10 nSim=1\T1/ptm/m/n/10 , \T1/ptm/m/it/10 nSec=1000\T1/ptm/m/
 n/10 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 28648--28648
+Underfull \hbox (badness 10000) in paragraph at lines 25895--25895
 \T1/ptm/m/it/10 v=1e-18\T1/ptm/m/n/10 , \T1/ptm/m/it/10 vg=0\T1/ptm/m/n/10 , \T
 1/ptm/m/it/10 sd=0\T1/ptm/m/n/10 , \T1/ptm/m/it/10 nrg=0\T1/ptm/m/n/10 , \T1/pt
 m/m/it/10 rse=0\T1/ptm/m/n/10 , \T1/ptm/m/it/10 ncml=2\T1/ptm/m/n/10 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 28648--28648
+Underfull \hbox (badness 10000) in paragraph at lines 25895--25895
 \T1/ptm/m/it/10 K_ass=50\T1/ptm/m/n/10 , \T1/ptm/m/it/10 K_diss=25\T1/ptm/m/n/1
 0 , \T1/ptm/m/it/10 K_cpx=50\T1/ptm/m/n/10 , \T1/ptm/m/it/10 K_cpxDiss=1\T1/ptm
 /m/n/10 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 28648--28648
+Underfull \hbox (badness 10000) in paragraph at lines 25895--25895
 \T1/ptm/m/it/10 K_nrg=0\T1/ptm/m/n/10 , \T1/ptm/m/it/10 K_nrg_decay=0\T1/ptm/m/
 n/10 , \T1/ptm/m/it/10 K_spont_ass=0\T1/ptm/m/n/10 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 28648--28648
+Underfull \hbox (badness 10000) in paragraph at lines 25895--25895
 \T1/ptm/m/it/10 dif-fu-sion_contribute=0\T1/ptm/m/n/10 , \T1/ptm/m/it/10 sol-u-
 bil-ity_threshold=0\T1/ptm/m/n/10 , \T1/ptm/m/it/10 in-
  []
 
 
-Underfull \hbox (badness 7064) in paragraph at lines 28648--28648
+Underfull \hbox (badness 7064) in paragraph at lines 25895--25895
 \T1/ptm/m/it/10 flux_rate=0\T1/ptm/m/n/10 , \T1/ptm/m/it/10 maxLOut=3\T1/ptm/m/
 n/10 , \T1/ptm/m/it/10 fileAmountSaveIn-ter-val=10\T1/ptm/m/n/10 ,
  []
 
-[305] [306] [307] [308] [309] [310] [311] [312] [313] [314] [315] [316]
-[317] [318] [319]
-Underfull \hbox (badness 6493) in paragraph at lines 30006--30008
+[277] [278] [279] [280] [281] [282] [283] [284] [285] [286] [287] [288]
+[289] [290] [291]
+Underfull \hbox (badness 6493) in paragraph at lines 27253--27255
 []\T1/ptm/m/n/10 Weisstein, Eric W. ``Non-cen-tral F-Distribution.'' From MathW
 orld--A Wol-fram Web Re-source.
  []
 
-[320] [321] [322] [323] [324] [325] [326] [327] [328] [329] [330] [331]
-[332] [333] [334] [335] [336] [337] [338] [339] [340] [341] [342] [343]
-[344] [345] [346] [347]
-Underfull \hbox (badness 10000) in paragraph at lines 32761--32761
+[292] [293] [294] [295] [296] [297] [298] [299] [300] [301] [302] [303]
+[304] [305] [306] [307] [308] [309] [310] [311] [312] [313] [314] [315]
+[316] [317] [318] [319]
+Underfull \hbox (badness 10000) in paragraph at lines 30008--30008
 []\T1/ptm/m/it/10 fid_dynRafRes\T1/ptm/m/n/10 , \T1/ptm/m/it/10 tmp-Time\T1/ptm
 /m/n/10 , \T1/ptm/m/it/10 rcts\T1/ptm/m/n/10 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 32761--32761
+Underfull \hbox (badness 10000) in paragraph at lines 30008--30008
 \T1/ptm/m/it/10 cats\T1/ptm/m/n/10 , \T1/ptm/m/it/10 foodList\T1/ptm/m/n/10 , \
 T1/ptm/m/it/10 growth=False\T1/ptm/m/n/10 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 32761--32761
+Underfull \hbox (badness 10000) in paragraph at lines 30008--30008
 \T1/ptm/m/it/10 rct-sALL=None\T1/ptm/m/n/10 , \T1/ptm/m/it/10 cat-sALL=None\T1/
 ptm/m/n/10 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 32767--32767
+Underfull \hbox (badness 10000) in paragraph at lines 30014--30014
 []\T1/ptm/m/it/10 fid_initRafRes\T1/ptm/m/n/10 , \T1/ptm/m/it/10 fid_initRafRes
 ALL\T1/ptm/m/n/10 ,
  []
 
-[348] [349]
-Underfull \hbox (badness 6493) in paragraph at lines 32873--32875
+[320] [321]
+Underfull \hbox (badness 6493) in paragraph at lines 30120--30122
 []\T1/ptm/m/n/10 Weisstein, Eric W. ``Non-cen-tral F-Distribution.'' From MathW
 orld--A Wol-fram Web Re-source.
  []
 
-[350] [351] [352] [353] [354] [355] [356] [357] [358] [359] [360] [361]
-[362] [363] [364] [365] [366] [367] [368] [369] [370] [371] [372] [373]
-[374] [375] [376] [377] [378]
-Underfull \hbox (badness 6493) in paragraph at lines 35749--35751
+[322] [323] [324] [325] [326] [327] [328] [329] [330] [331] [332] [333]
+[334] [335] [336] [337] [338] [339] [340] [341] [342] [343] [344] [345]
+[346] [347] [348] [349] [350]
+Underfull \hbox (badness 6493) in paragraph at lines 32996--32998
 []\T1/ptm/m/n/10 Weisstein, Eric W. ``Non-cen-tral F-Distribution.'' From MathW
 orld--A Wol-fram Web Re-source.
  []
 
-[379] [380] [381] [382]
-Underfull \hbox (badness 10000) in paragraph at lines 36121--36121
+[351] [352] [353] [354]
+Underfull \hbox (badness 10000) in paragraph at lines 33368--33368
 []\T1/ptm/m/it/10 fid_dynRafRes\T1/ptm/m/n/10 , \T1/ptm/m/it/10 tmp-Time\T1/ptm
 /m/n/10 , \T1/ptm/m/it/10 rcts\T1/ptm/m/n/10 , \T1/ptm/m/it/10 cats\T1/ptm/m/n/
 10 , \T1/ptm/m/it/10 foodList\T1/ptm/m/n/10 ,
  []
 
-[383] [384] [385] [386] [387] [388] [389] [390] [391] [392] [393] [394]
-[395] [396] [397] [398] [399] [400] [401] [402] [403] [404] [405] [406]
-[407] [408]
-Underfull \hbox (badness 6493) in paragraph at lines 38637--38639
+[355] [356] [357] [358] [359] [360] [361] [362] [363] [364] [365] [366]
+[367] [368] [369] [370] [371] [372] [373] [374] [375] [376] [377] [378]
+[379] [380]
+Underfull \hbox (badness 6493) in paragraph at lines 35884--35886
 []\T1/ptm/m/n/10 Weisstein, Eric W. ``Non-cen-tral F-Distribution.'' From MathW
 orld--A Wol-fram Web Re-source.
  []
 
-[409] [410] [411] [412] [413] [414] [415] [416] [417] [418] [419] [420]
-[421] [422] [423] [424] [425]
-Underfull \hbox (badness 10000) in paragraph at lines 40248--40248
+[381] [382] [383] [384] [385] [386] [387] [388] [389] [390] [391] [392]
+[393] [394] [395] [396] [397]
+Underfull \hbox (badness 10000) in paragraph at lines 37495--37495
 []\T1/ptm/m/it/10 tmpSpecies\T1/ptm/m/n/10 , \T1/ptm/m/it/10 al-
  []
 
-[426]
+[398]
 Chapter 12.
-[427
+[399
 
-] [428] [429] [430] [431] [432] [433] [434] [435] [436] [437] [438]
-[439]
-Underfull \hbox (badness 6493) in paragraph at lines 41546--41548
+] [400] [401] [402] [403] [404] [405] [406] [407] [408] [409] [410]
+[411]
+Underfull \hbox (badness 6493) in paragraph at lines 38793--38795
 []\T1/ptm/m/n/10 Weisstein, Eric W. ``Non-cen-tral F-Distribution.'' From MathW
 orld--A Wol-fram Web Re-source.
  []
 
-[440] [441] [442] [443] [444] [445] [446] [447] [448] [449] [450] [451]
-[452] [453] [454] [455] [456]
+[412] [413] [414] [415] [416] [417] [418] [419] [420] [421] [422] [423]
+[424] [425] [426] [427] [428]
 Chapter 13.
-[457
+[429
 
-] [458
+] [430
 
 ]
 Chapter 14.
-[459] [460] [461] [462] [463] [464] [465] [466] [467] [468] [469] [470]
-[471]
-Underfull \hbox (badness 6493) in paragraph at lines 44386--44388
+[431] [432] [433] [434] [435] [436] [437] [438] [439] [440] [441] [442]
+[443]
+Underfull \hbox (badness 6493) in paragraph at lines 41633--41635
 []\T1/ptm/m/n/10 Weisstein, Eric W. ``Non-cen-tral F-Distribution.'' From MathW
 orld--A Wol-fram Web Re-source.
  []
 
-[472] [473] [474] [475] [476] [477] [478] [479] [480] [481] [482] [483]
-[484] [485] [486] [487] [488]
+[444] [445] [446] [447] [448] [449] [450] [451] [452] [453] [454] [455]
+[456] [457] [458] [459] [460]
 Chapter 15.
-[489
+[461
 
-] [490
+] [462
 
-] [491
+] [463
 
 
-] (./CARNESSanalysis.ind [492
+] (./CARNESSanalysis.ind [464
 
 
 ]
-Underfull \hbox (badness 10000) in paragraph at lines 69--70
+Underfull \hbox (badness 10000) in paragraph at lines 66--67
 []\T1/ptm/m/n/10 createCompleteSpeciesPopulation() (in mod-ule
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 73--74
+Underfull \hbox (badness 10000) in paragraph at lines 70--71
 []\T1/ptm/m/n/10 createRandomCleavage() (in mod-ule
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 74--76
+Underfull \hbox (badness 10000) in paragraph at lines 71--73
 []\T1/ptm/m/n/10 createRandomCleavageForCompleteFiringDisk() (in
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 76--77
+Underfull \hbox (badness 10000) in paragraph at lines 73--74
 []\T1/ptm/m/n/10 createRandomCondensation() (in mod-ule
  []
 
-[493
+[465
 
 ]
-Underfull \hbox (badness 10000) in paragraph at lines 124--125
+Underfull \hbox (badness 10000) in paragraph at lines 119--120
 []\T1/ptm/m/n/10 fixCondensationReaction() (in mod-ule
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 180--181
+Underfull \hbox (badness 10000) in paragraph at lines 172--173
 []\T1/ptm/m/n/10 getNumOfCondensations() (in mod-ule
  []
 
-[494] [495]
-Underfull \hbox (badness 10000) in paragraph at lines 326--327
+[466] [467]
+Underfull \hbox (badness 10000) in paragraph at lines 311--312
 []\T1/ptm/m/n/10 multivariate_normal() (in mod-ule acs-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 330--331
-[]\T1/ptm/m/n/10 multivariate_normal() (in mod-ule
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 349--350
-[]\T1/ptm/m/n/10 negative_binomial() (in mod-ule
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 358--359
+Underfull \hbox (badness 10000) in paragraph at lines 341--342
 []\T1/ptm/m/n/10 net_analysis_of_dynamic_graphs() (in mod-ule
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 359--360
+Underfull \hbox (badness 10000) in paragraph at lines 342--343
 []\T1/ptm/m/n/10 net_analysis_of_static_graphs() (in mod-ule
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 363--364
+Underfull \hbox (badness 10000) in paragraph at lines 346--347
 []\T1/ptm/m/n/10 noncentral_chisquare() (in mod-ule acs-
  []
 
-
-Underfull \hbox (badness 10000) in paragraph at lines 367--368
-[]\T1/ptm/m/n/10 noncentral_chisquare() (in mod-ule
- []
-
-[496] [497]
-Underfull \hbox (badness 10000) in paragraph at lines 554--555
-[]\T1/ptm/m/n/10 random_integers() (in mod-ule
- []
-
-[498]
-Underfull \hbox (badness 10000) in paragraph at lines 700--701
-[]\T1/ptm/m/n/10 standard_cauchy() (in mod-ule
- []
-
-[499]
-Underfull \hbox (badness 10000) in paragraph at lines 712--713
+[468] [469] [470]
+Underfull \hbox (badness 10000) in paragraph at lines 675--676
 []\T1/ptm/m/n/10 standard_exponential() (in mod-ule acs-
  []
 
-
-Underfull \hbox (badness 10000) in paragraph at lines 716--717
-[]\T1/ptm/m/n/10 standard_exponential() (in mod-ule
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 732--733
-[]\T1/ptm/m/n/10 standard_gamma() (in mod-ule
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 748--749
-[]\T1/ptm/m/n/10 standard_normal() (in mod-ule
- []
-
-[500]
-Underfull \hbox (badness 10000) in paragraph at lines 870--871
+[471] [472]
+Underfull \hbox (badness 10000) in paragraph at lines 824--825
 []\T1/ptm/m/n/10 write_and_create_std_nrgFile() (in mod-ule
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 871--872
+Underfull \hbox (badness 10000) in paragraph at lines 825--826
 []\T1/ptm/m/n/10 write_and_createInfluxFile() (in mod-ule
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 874--875
+Underfull \hbox (badness 10000) in paragraph at lines 828--829
 []\T1/ptm/m/n/10 writeAllFilesAndCreateResFolder() (in mod-ule
  []
 
-[501] [502
-
-])
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 46031.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 46031.
+[473])
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 43278.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 43278.
  (./CARNESSanalysis.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 46031.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 43278.
 
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 46031
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 43278
 .
 Package rerunfilecheck Info: File `CARNESSanalysis.out' has not changed.
-(rerunfilecheck)             Checksum: 17199D6CDE1B5193D154D3630BBFAFD3;1034.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 46031.
+(rerunfilecheck)             Checksum: 59412BF3C7E26976AAF8E62812442711;1167.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 43278.
  ) 
 Here is how much of TeX's memory you used:
- 11506 strings out of 493304
- 179664 string characters out of 6139870
- 274392 words of memory out of 5000000
- 13181 multiletter control sequences out of 15000+600000
+ 11380 strings out of 493304
+ 176072 string characters out of 6139870
+ 272041 words of memory out of 5000000
+ 13139 multiletter control sequences out of 15000+600000
  66451 words of font info for 76 fonts, out of 8000000 for 9000
  958 hyphenation exceptions out of 8191
  36i,25n,45p,1035b,534s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -1383,10 +1331,10 @@ fb></usr/share/texlive/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb></usr/sha
 re/texlive/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/share/texlive/texm
 f-dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texlive/texmf-dist/fonts/ty
 pe1/urw/times/utmri8a.pfb>
-Output written on CARNESSanalysis.pdf (506 pages, 1780724 bytes).
+Output written on CARNESSanalysis.pdf (477 pages, 1689565 bytes).
 PDF statistics:
- 4582 PDF objects out of 5155 (max. 8388607)
- 4005 compressed objects within 41 object streams
- 1518 named destinations out of 1728 (max. 500000)
- 174 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 4342 PDF objects out of 5155 (max. 8388607)
+ 3797 compressed objects within 38 object streams
+ 1434 named destinations out of 1440 (max. 500000)
+ 190 words of extra memory for PDF output out of 10000 (max. 10000000)
 
