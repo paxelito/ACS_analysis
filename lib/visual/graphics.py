@@ -9,7 +9,7 @@ import numpy as np
 import random as ran
 from matplotlib import rc
 from matplotlib import use
-use('Agg')
+#use('Agg')
 import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
 from pylab import *
