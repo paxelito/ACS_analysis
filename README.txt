@@ -1,10 +1,16 @@
-The repository contains analysis scripts devoted to the study and the characterization of the simulations carried out by means of the CARNESS simulator. 
-Python Libraries:
-- Numpy
-- Scipy
-- networkX
+CARNESS APP :: Analysis Python Package
+======================================
 
-FILES: 
+CARNESS APP is a python scripts package containing useful scripts to study and analyse the simulations carried out by means of the CARNESS simulator. 
+
+System requirements
+-------------------
+
+Python Libraries: Numpy, Scipy, networkX, matplotlib 
+
+Scripts
+-------
+
 - acsAttractorAnalysis.py -> Comparison between final states 
 - acsAttractorAnalysisInTime.py -> Comparison between distinct states in time
 - acsSCCanalysis.py -> Strongly connected components analysis
