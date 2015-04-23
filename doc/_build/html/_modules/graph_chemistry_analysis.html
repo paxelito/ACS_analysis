@@ -1,0 +1,198 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>graph_chemistry_analysis &mdash; CARNESS analysis package 20150424.001 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '20150424.001',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="CARNESS analysis package 20150424.001 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">CARNESS analysis package 20150424.001 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for graph_chemistry_analysis</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python</span>
+<span class="c"># -*- coding: latin-1 -*-</span>
+<span class="sd">&#39;&#39;&#39; </span>
+<span class="sd">	This python tool evaluates a particular chemistry findind RAF, SCC and </span>
+<span class="sd">	saving the multigraph bipartite network and the catalyst-product network</span>
+<span class="sd">	</span>
+<span class="sd">	NETWORKX formats :: http://networkx.lanl.gov/reference/readwrite.html</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span> <span class="c"># Standard library</span>
+<span class="kn">import</span> <span class="nn">datetime</span> <span class="kn">as</span> <span class="nn">dt</span>
+<span class="kn">import</span> <span class="nn">linecache</span> <span class="kn">as</span> <span class="nn">lc</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">from</span> <span class="nn">argparse</span> <span class="kn">import</span> <span class="n">ArgumentParser</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span> <span class="c"># Scientific library</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="o">*</span> 
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">pylab</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="k">pass</span>
+   
+<span class="kn">from</span> <span class="nn">lib.IO</span> <span class="kn">import</span> <span class="o">*</span> 
+<span class="kn">from</span> <span class="nn">lib.graph</span> <span class="kn">import</span> <span class="n">raf</span>
+<span class="kn">from</span> <span class="nn">lib.graph</span> <span class="kn">import</span> <span class="n">network</span>
+<span class="kn">from</span> <span class="nn">lib.dyn</span> <span class="kn">import</span> <span class="n">dynamics</span> <span class="k">as</span> <span class="n">dm</span>
+<span class="kn">from</span> <span class="nn">lib.visual</span> <span class="kn">import</span> <span class="n">graphics</span> <span class="k">as</span> <span class="n">grf</span>
+<span class="kn">import</span> <span class="nn">networkx</span> <span class="kn">as</span> <span class="nn">nx</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">networkx.algorithms</span> <span class="kn">import</span> <span class="n">bipartite</span>
+<span class="kn">from</span> <span class="nn">lib.graph</span> <span class="kn">import</span> <span class="n">scc</span>
+
+<span class="c">#æInput parameters definition </span>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+	<span class="n">parser</span> <span class="o">=</span> <span class="n">ArgumentParser</span><span class="p">(</span>
+				<span class="n">description</span><span class="o">=</span><span class="s">&#39;Graph analysis of the chemistry&#39;</span>
+				<span class="p">,</span> <span class="n">epilog</span><span class="o">=</span><span class="s">&#39;&#39;&#39;Graph CHEMISTRY analysis. &#39;&#39;&#39;</span><span class="p">)</span> 
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-p&#39;</span><span class="p">,</span> <span class="s">&#39;--strPath&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Path where files are stored (def: ./)&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;./&#39;</span><span class="p">)</span>	
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-f&#39;</span><span class="p">,</span> <span class="s">&#39;--lastFluxID&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Last ID of the flux species (def: 5)&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;5&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-m&#39;</span><span class="p">,</span> <span class="s">&#39;--maxDim&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Max Dimension of the system (def: 6)&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;6&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+	<span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+	
+	<span class="c"># Create absolute paths</span>
+	<span class="n">strPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">strPath</span><span class="p">)</span>
+	<span class="n">tmpDirs</span> <span class="o">=</span> <span class="n">sort</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">strPath</span><span class="p">))</span>
+	
+	<span class="c"># Goes into the simulation folder</span>
+	<span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">strPath</span><span class="p">)</span>
+	
+	<span class="c"># Create stas folders</span>
+	<span class="n">ndn</span> <span class="o">=</span> <span class="s">&#39;_0_new_allStatResults&#39;</span>
+	<span class="n">newdirAllResults</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">strPath</span><span class="p">,</span> <span class="n">ndn</span><span class="p">)</span>
+	<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">newdirAllResults</span><span class="p">):</span>
+		<span class="k">try</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">newdirAllResults</span><span class="p">)</span>
+		<span class="k">except</span><span class="p">:</span> <span class="k">print</span> <span class="s">&quot;Impossible to create statistic directory&quot;</span><span class="p">,</span> <span class="n">newdirAllResults</span><span class="p">;</span> <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+	<span class="k">print</span> <span class="s">&quot;</span><span class="se">\n\n</span><span class="s">********************</span><span class="se">\n\n</span><span class="s">|- Simulation Folder: &quot;</span><span class="p">,</span> <span class="n">strPath</span>
+	
+	<span class="n">fname_initRafRes</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">newdirAllResults</span><span class="p">,</span> <span class="s">&#39;0_initRafAnalysis.csv&#39;</span><span class="p">)</span>
+	<span class="n">fname_initRafResLIST</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">newdirAllResults</span><span class="p">,</span> <span class="s">&#39;0_initRafAnalysisLIST.csv&#39;</span><span class="p">)</span>
+	<span class="n">fname_initRafResALL</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">newdirAllResults</span><span class="p">,</span> <span class="s">&#39;0_initRafAnalysisALL.csv&#39;</span><span class="p">)</span>
+	<span class="n">fid_initRafRes</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname_initRafRes</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+	<span class="n">fid_initRafResLIST</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname_initRafResLIST</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+	<span class="n">fid_initRafResALL</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname_initRafResALL</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+	<span class="n">strToWrite</span> <span class="o">=</span> <span class="s">&quot;Folder</span><span class="se">\t</span><span class="s">P</span><span class="se">\t</span><span class="s">AC</span><span class="se">\t</span><span class="s">M</span><span class="se">\t</span><span class="s">RAFsize</span><span class="se">\t</span><span class="s">ClosureSize</span><span class="se">\t</span><span class="s">CatsSize</span><span class="se">\t</span><span class="s">uRAF</span><span class="se">\t</span><span class="s">SCC</span><span class="se">\t</span><span class="s">AutoCat</span><span class="se">\n</span><span class="s">&quot;</span>
+	<span class="n">fid_initRafRes</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">strToWrite</span><span class="p">)</span>
+	
+	<span class="k">for</span> <span class="n">tmpDir</span> <span class="ow">in</span> <span class="n">tmpDirs</span><span class="p">:</span>
+		
+		<span class="n">totDirName</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">strPath</span><span class="p">,</span><span class="n">tmpDir</span><span class="p">)</span>
+
+		<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">totDirName</span><span class="p">):</span>
+			<span class="c"># Move to the directory </span>
+			<span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">totDirName</span><span class="p">)</span>
+			
+			<span class="k">print</span> <span class="s">&quot; \- Results Folder: {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">totDirName</span><span class="p">)</span>				
+			<span class="c"># Analysis of the initial structures </span>
+			<span class="n">conf</span> <span class="o">=</span> <span class="n">readfiles</span><span class="o">.</span><span class="n">readConfFile</span><span class="p">(</span><span class="n">totDirName</span><span class="p">)</span> <span class="c">#ÊConfiguration file upload</span>
+			<span class="n">foodList</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">args</span><span class="o">.</span><span class="n">lastFluxID</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+							
+			<span class="c"># Initial Analysis are turned ON (RAF ANALYSIS)</span>
+			<span class="k">print</span> <span class="s">&quot;   |- LOADING init structures...&quot;</span>
+			<span class="n">rcts</span> <span class="o">=</span> <span class="n">readfiles</span><span class="o">.</span><span class="n">loadAllData</span><span class="p">(</span><span class="n">totDirName</span><span class="p">,</span><span class="s">&#39;_acsreactions.csv&#39;</span><span class="p">)</span> <span class="c"># reaction file upload</span>
+			<span class="n">cats</span> <span class="o">=</span> <span class="n">readfiles</span><span class="o">.</span><span class="n">loadAllData</span><span class="p">(</span><span class="n">totDirName</span><span class="p">,</span><span class="s">&#39;_acscatalysis.csv&#39;</span><span class="p">)</span> <span class="c">#Êcatalysis file upload</span>
+
+			<span class="n">raf</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">sccg</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">net_analysis_of_static_graphs</span><span class="p">(</span><span class="n">fid_initRafRes</span><span class="p">,</span> <span class="n">fid_initRafResALL</span><span class="p">,</span> <span class="n">fid_initRafResLIST</span><span class="p">,</span> <span class="n">tmpDir</span><span class="p">,</span> <span class="n">conf</span><span class="p">[</span><span class="mi">9</span><span class="p">],</span> <span class="mi">1</span><span class="p">,</span> <span class="n">rcts</span><span class="p">,</span> <span class="n">cats</span><span class="p">,</span> <span class="n">foodList</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">maxDim</span><span class="p">)</span>
+
+			<span class="n">grf</span><span class="o">.</span><span class="n">plotBipartiteGraph</span><span class="p">(</span><span class="n">rcts</span><span class="p">,</span> <span class="n">cats</span><span class="p">,</span> <span class="n">newdirAllResults</span><span class="p">,</span> <span class="s">&quot;0_graph_bipartite.graphml&quot;</span><span class="p">,</span> <span class="s">&quot;completebipartitegraph.png&quot;</span><span class="p">)</span>
+
+			<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">raf</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+				<span class="c"># Filter graf network</span>
+				<span class="n">rafcats</span> <span class="o">=</span> <span class="n">cats</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">in1d</span><span class="p">(</span><span class="n">cats</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">raf</span><span class="p">[</span><span class="mi">3</span><span class="p">])]</span>
+				<span class="n">rafrcts</span> <span class="o">=</span> <span class="n">rcts</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">in1d</span><span class="p">(</span><span class="n">rcts</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">raf</span><span class="p">[</span><span class="mi">2</span><span class="p">])]</span>
+				<span class="n">grf</span><span class="o">.</span><span class="n">plotBipartiteGraph</span><span class="p">(</span><span class="n">rafrcts</span><span class="p">,</span> <span class="n">rafcats</span><span class="p">,</span> <span class="n">newdirAllResults</span><span class="p">,</span> <span class="s">&quot;0_graph_RAF_bipartite.net&quot;</span><span class="p">,</span> <span class="s">&quot;bipartiteRAFgraph.png&quot;</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+				<span class="n">grf</span><span class="o">.</span><span class="n">plotGraph</span><span class="p">(</span><span class="n">sccg</span><span class="p">,</span> <span class="n">newdirAllResults</span><span class="p">,</span> <span class="s">&quot;0_graph_catalyst_product.net&quot;</span><span class="p">,</span> <span class="s">&quot;chemistrygraph.png&quot;</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+
+					
+	<span class="n">fid_initRafRes</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	<span class="n">fid_initRafResLIST</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	<span class="n">fid_initRafResALL</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	
+	
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/logo.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">CARNESS analysis package 20150424.001 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Alessandro Filisetti.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>
