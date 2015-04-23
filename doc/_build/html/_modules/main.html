@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -8,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>main &mdash; ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation</title>
+    <title>main &mdash; CARNESS analysis package 20150424.001 documentation</title>
     
     <link rel="stylesheet" href="../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -16,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '20140204.004',
+        VERSION:     '20150424.001',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +23,8 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation" href="../index.html" />
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="CARNESS analysis package 20150424.001 documentation" href="../index.html" />
     <link rel="up" title="Module code" href="index.html" /> 
   </head>
   <body>
@@ -38,7 +37,7 @@
         <li class="right" >
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../index.html">ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation</a> &raquo;</li>
+        <li><a href="../index.html">CARNESS analysis package 20150424.001 documentation</a> &raquo;</li>
           <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
@@ -52,6 +51,7 @@
 <span class="c">#!/usr/bin/env python</span>
 <span class="c"># -*- coding: latin-1 -*-</span>
 <span class="sd">&#39;&#39;&#39; MAIN analysis script package for CaRNeSS simulations</span>
+<span class="sd">	Main file analysis</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
 <span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span> <span class="c"># Standard library</span>
@@ -78,12 +78,12 @@
 	<span class="n">parser</span> <span class="o">=</span> <span class="n">ArgumentParser</span><span class="p">(</span>
 				<span class="n">description</span><span class="o">=</span><span class="s">&#39;Main script of ACS analysis.&#39;</span>
 				<span class="p">,</span> <span class="n">epilog</span><span class="o">=</span><span class="s">&#39;&#39;&#39;ACS ANALYSIS Main File. &#39;&#39;&#39;</span><span class="p">)</span> 
-	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-i&#39;</span><span class="p">,</span> <span class="s">&#39;--initanal&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Analysis of the initial structures (def: 0)&#39;</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-e&#39;</span><span class="p">,</span> <span class="s">&#39;--exhaustive&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Analysis of the dynamic structures (def: 1)&#39;</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-p&#39;</span><span class="p">,</span> <span class="s">&#39;--strPath&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Path where files are stored (def: ./)&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;./&#39;</span><span class="p">)</span>
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-i&#39;</span><span class="p">,</span> <span class="s">&#39;--initanal&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Analysis of the initial structures&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-e&#39;</span><span class="p">,</span> <span class="s">&#39;--exhaustive&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Analysis of the dynamic structures&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
 	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-d&#39;</span><span class="p">,</span> <span class="s">&#39;--decay&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Decay time (def: 0)&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-t&#39;</span><span class="p">,</span> <span class="s">&#39;--timeWindow&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Dynamical time window (def: 10 seconds)&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-m&#39;</span><span class="p">,</span> <span class="s">&#39;--maxDim&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Max Dimension of the system (def: 4)&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;4&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
-	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-p&#39;</span><span class="p">,</span> <span class="s">&#39;--strPath&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Path where files are stored (def: ./)&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;./&#39;</span><span class="p">)</span>
 	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-r&#39;</span><span class="p">,</span> <span class="s">&#39;--resFolder&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Name of the result folder (def: res)&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;res&#39;</span><span class="p">)</span>
 	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-b&#39;</span><span class="p">,</span> <span class="s">&#39;--debug&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;Debug Mode (Def: 0)&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 	
@@ -108,7 +108,7 @@
 	<span class="n">_PROTO_</span> <span class="o">=</span> <span class="mi">1</span>
 	<span class="n">_CSTR_</span> <span class="o">=</span> <span class="mi">2</span>
 	
-	<span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">initanal</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+	<span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">initanal</span><span class="p">:</span>
 		<span class="n">fname_initRafRes</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">newdirAllResults</span><span class="p">,</span> <span class="s">&#39;0_initRafAnalysis.csv&#39;</span><span class="p">)</span>
 		<span class="n">fname_initRafResLIST</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">newdirAllResults</span><span class="p">,</span> <span class="s">&#39;0_initRafAnalysisLIST.csv&#39;</span><span class="p">)</span>
 		<span class="n">fname_initRafResALL</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">newdirAllResults</span><span class="p">,</span> <span class="s">&#39;0_initRafAnalysisALL.csv&#39;</span><span class="p">)</span>
@@ -154,7 +154,7 @@
 				<span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">resDirPath</span><span class="p">)</span>
 				
 				<span class="c"># Analysis of the dynamics</span>
-				<span class="k">if</span> <span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">exhaustive</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">decay</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+				<span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">exhaustive</span> <span class="o">|</span> <span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">decay</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
 					<span class="k">print</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">|- Analysis of the dynamics...&quot;</span>
 					<span class="k">for</span> <span class="n">ngen</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">numberOfGen</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
 						<span class="k">print</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">|-Generation &quot;</span><span class="p">,</span> <span class="n">ngen</span>
@@ -411,6 +411,9 @@
       </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/logo.png" alt="Logo"/>
+            </a></p>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
@@ -437,13 +440,13 @@
         <li class="right" >
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../index.html">ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation</a> &raquo;</li>
+        <li><a href="../index.html">CARNESS analysis package 20150424.001 documentation</a> &raquo;</li>
           <li><a href="index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
-        &copy; Copyright 2014, Alessandro Filisetti.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+        &copy; Copyright 2015, Alessandro Filisetti.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
   </body>
 </html>

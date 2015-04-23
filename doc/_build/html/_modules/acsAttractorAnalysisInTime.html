@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -8,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>acsAttractorAnalysisInTime &mdash; ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation</title>
+    <title>acsAttractorAnalysisInTime &mdash; CARNESS analysis package 20150424.001 documentation</title>
     
     <link rel="stylesheet" href="../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -16,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '20140204.004',
+        VERSION:     '20150424.001',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +23,8 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation" href="../index.html" />
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="CARNESS analysis package 20150424.001 documentation" href="../index.html" />
     <link rel="up" title="Module code" href="index.html" /> 
   </head>
   <body>
@@ -38,7 +37,7 @@
         <li class="right" >
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../index.html">ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation</a> &raquo;</li>
+        <li><a href="../index.html">CARNESS analysis package 20150424.001 documentation</a> &raquo;</li>
           <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
@@ -53,6 +52,7 @@
 <span class="c"># -*- coding: latin-1 -*-</span>
 
 <span class="sd">&#39;&#39;&#39;Function to analyse the different attractors emerging from different simulations in time. </span>
+<span class="sd">python ~/Dropbox/python/GIT/ACS_analysis/initializator.py -t2 -k3 -K-1 -f2 -s6 -m6 -p5 -I ./acsm2s.conf -H1 -v3 -c0.5 -F PROTO_ac3_f2_s6_m6_p5_RAF -N5 -x0 -i 100</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
 <span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span> <span class="c"># Standard library</span>
@@ -61,6 +61,7 @@
 <span class="kn">import</span> <span class="nn">glob</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span> <span class="c"># Scientific library</span>
 <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="o">*</span> 
+<span class="kn">from</span> <span class="nn">argparse</span> <span class="kn">import</span> <span class="n">ArgumentParser</span>
 
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">pylab</span> <span class="kn">import</span> <span class="o">*</span>
@@ -123,6 +124,7 @@
 					<span class="c"># Find the number of generations</span>
 					<span class="n">numberOfGen</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">resDirPath</span><span class="p">,</span><span class="s">&#39;times_*&#39;</span><span class="p">)))</span>
 					
+					<span class="c"># For each generation</span>
 					<span class="k">for</span> <span class="n">ngen</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">numberOfGen</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
 					  
 					  <span class="n">strZeros</span> <span class="o">=</span> <span class="n">zeroBeforeStrNum</span><span class="p">(</span><span class="n">ngen</span><span class="p">,</span> <span class="n">numberOfGen</span><span class="p">)</span>
@@ -453,6 +455,9 @@
       </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/logo.png" alt="Logo"/>
+            </a></p>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
@@ -479,13 +484,13 @@
         <li class="right" >
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../index.html">ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation</a> &raquo;</li>
+        <li><a href="../index.html">CARNESS analysis package 20150424.001 documentation</a> &raquo;</li>
           <li><a href="index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
-        &copy; Copyright 2014, Alessandro Filisetti.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+        &copy; Copyright 2015, Alessandro Filisetti.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
   </body>
 </html>

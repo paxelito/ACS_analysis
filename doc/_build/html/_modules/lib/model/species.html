@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -8,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>lib.model.species &mdash; ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation</title>
+    <title>lib.model.species &mdash; CARNESS analysis package 20150424.001 documentation</title>
     
     <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -16,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '20140204.004',
+        VERSION:     '20150424.001',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +23,8 @@
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <link rel="top" title="ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation" href="../../../index.html" />
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="CARNESS analysis package 20150424.001 documentation" href="../../../index.html" />
     <link rel="up" title="Module code" href="../../index.html" /> 
   </head>
   <body>
@@ -38,7 +37,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">CARNESS analysis package 20150424.001 documentation</a> &raquo;</li>
           <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
@@ -55,8 +54,11 @@
 <span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span> <span class="c"># Standard library</span>
 <span class="kn">import</span> <span class="nn">itertools</span> <span class="kn">as</span> <span class="nn">it</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span> <span class="c"># Scientific library</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">cumsum</span>
+<span class="kn">import</span> <span class="nn">random</span> <span class="kn">as</span> <span class="nn">ran</span>
 
 <span class="n">_AVOGADRO_</span> <span class="o">=</span> <span class="mf">6.022141e23</span>
+<span class="n">_REDUCEDCONCENTRATION_</span> <span class="o">=</span> <span class="mf">10.0</span>
 
 <div class="viewcode-block" id="createCompleteSpeciesPopulation"><a class="viewcode-back" href="../../../lib.model.html#lib.model.species.createCompleteSpeciesPopulation">[docs]</a><span class="k">def</span> <span class="nf">createCompleteSpeciesPopulation</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">alphabet</span><span class="p">):</span>
 	<span class="n">species</span> <span class="o">=</span> <span class="p">[]</span>
@@ -67,7 +69,7 @@
 	<span class="n">N</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">**</span> <span class="p">(</span><span class="n">M</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span>
 	<span class="k">return</span> <span class="n">N</span>
 </div>
-<div class="viewcode-block" id="createFileSpecies"><a class="viewcode-back" href="../../../lib.model.html#lib.model.species.createFileSpecies">[docs]</a><span class="k">def</span> <span class="nf">createFileSpecies</span><span class="p">(</span><span class="n">tmpFolder</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">pars</span><span class="p">,</span> <span class="n">tmpScale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">specieslist</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="createFileSpecies"><a class="viewcode-back" href="../../../lib.model.html#lib.model.species.createFileSpecies">[docs]</a><span class="k">def</span> <span class="nf">createFileSpecies</span><span class="p">(</span><span class="n">tmpFolder</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">pars</span><span class="p">,</span> <span class="n">tmpScale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">specieslist</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">tmpCatInRAF</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">tmpRafCatContribute2C</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
 	<span class="c"># Create species file </span>
 	<span class="k">if</span> <span class="n">specieslist</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">specieslist</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span> <span class="n">tempSpeciesList</span> <span class="o">=</span> <span class="n">specieslist</span>
 	<span class="k">else</span><span class="p">:</span> <span class="n">tempSpeciesList</span> <span class="o">=</span> <span class="n">createCompleteSpeciesPopulation</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">maxDim</span><span class="p">,</span> <span class="n">pars</span><span class="p">[</span><span class="mi">14</span><span class="p">])</span>
@@ -76,21 +78,54 @@
 	<span class="n">fid_initSpecies</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname_initSpecies</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
 	<span class="c"># for each species</span>
 	<span class="n">tempFood</span> <span class="o">=</span> <span class="p">[]</span>
-	<span class="k">for</span> <span class="nb">id</span><span class="p">,</span> <span class="n">singleSpecies</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tempSpeciesList</span><span class="p">):</span>
+	<span class="n">tmpAlpha</span> <span class="o">=</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">0</span><span class="se">\n</span><span class="s">&#39;</span>
+	<span class="k">for</span> <span class="n">idspecies</span><span class="p">,</span> <span class="n">singleSpecies</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tempSpeciesList</span><span class="p">):</span>
 		<span class="n">lastc</span> <span class="o">=</span> <span class="s">&quot;0&quot;</span>
 		<span class="n">initConc</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">initAmount</span> <span class="o">/</span> <span class="p">(</span><span class="n">_AVOGADRO_</span> <span class="o">*</span> <span class="n">pars</span><span class="p">[</span><span class="mi">15</span><span class="p">])</span>
+		
+		<span class="c"># FOOD SPECIES</span>
 		<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">singleSpecies</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">args</span><span class="o">.</span><span class="n">lastFood</span><span class="p">:</span> 
-			<span class="n">lastc</span> <span class="o">=</span> <span class="s">&quot;1&quot;</span>
-			<span class="n">tempFood</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+			<span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">sysType</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span> <span class="n">lastc</span> <span class="o">=</span> <span class="s">&quot;1&quot;</span>
+			<span class="n">tempFood</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idspecies</span><span class="p">)</span>
+			<span class="n">initConc</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">initBufferAmount</span> <span class="o">/</span> <span class="p">(</span><span class="n">_AVOGADRO_</span> <span class="o">*</span> <span class="n">pars</span><span class="p">[</span><span class="mi">15</span><span class="p">])</span>
+		
+		<span class="c"># Species of initial set	</span>
 		<span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">singleSpecies</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">args</span><span class="o">.</span><span class="n">lastFood</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">singleSpecies</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">args</span><span class="o">.</span><span class="n">initSet</span><span class="p">):</span> 
-			<span class="n">scalingFactor</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">initAmount</span><span class="o">/</span><span class="p">(</span><span class="mi">10</span><span class="o">**</span><span class="n">tmpScale</span><span class="p">))</span>
+			<span class="c">#scalingFactor = int(args.initAmount/(10**tmpScale))</span>
+			<span class="n">scalingFactor</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">initAmount</span><span class="p">)</span>
 			<span class="k">if</span> <span class="n">scalingFactor</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span> <span class="n">scalingFactor</span> <span class="o">=</span> <span class="mi">1</span>
-			<span class="n">initConc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">poisson</span><span class="p">(</span><span class="n">scalingFactor</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">_AVOGADRO_</span> <span class="o">*</span> <span class="n">pars</span><span class="p">[</span><span class="mi">15</span><span class="p">])</span>
+			<span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">fixedConcentration</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="n">initConc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">poisson</span><span class="p">(</span><span class="n">scalingFactor</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">_AVOGADRO_</span> <span class="o">*</span> <span class="n">pars</span><span class="p">[</span><span class="mi">15</span><span class="p">])</span>
+			
+		<span class="c"># Species with reduced concentrations	</span>
+		<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">singleSpecies</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">args</span><span class="o">.</span><span class="n">redConc</span><span class="p">:</span> <span class="n">initConc</span> <span class="o">=</span> <span class="n">initConc</span> <span class="o">/</span> <span class="n">_REDUCEDCONCENTRATION_</span><span class="p">;</span>		
+	
+		<span class="c"># Species longer than the initial set	</span>
 		<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">singleSpecies</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">args</span><span class="o">.</span><span class="n">initSet</span><span class="p">:</span> <span class="n">initConc</span> <span class="o">=</span> <span class="mi">0</span>
-		<span class="n">str2w</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">singleSpecies</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span>  <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">initConc</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">1</span><span class="se">\t</span><span class="s">1</span><span class="se">\t</span><span class="s">0</span><span class="se">\t</span><span class="s">0</span><span class="se">\t</span><span class="s">1</span><span class="se">\t</span><span class="s">0</span><span class="se">\t</span><span class="s">0</span><span class="se">\t</span><span class="s">0</span><span class="se">\t</span><span class="s">0</span><span class="se">\t</span><span class="s">0</span><span class="se">\t</span><span class="s">0</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">lastc</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span>
+		
+		<span class="c"># Holes in initial concentrations</span>
+		<span class="k">if</span> <span class="p">(</span><span class="n">ran</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">args</span><span class="o">.</span><span class="n">holesperc</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">singleSpecies</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">args</span><span class="o">.</span><span class="n">lastFood</span><span class="p">):</span> <span class="n">initConc</span> <span class="o">=</span> <span class="mi">0</span>
+		
+		<span class="c"># Contribute to container growth</span>
+		<span class="k">if</span> <span class="p">(</span><span class="n">tmpCatInRAF</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tmpCatInRAF</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span> 
+			<span class="k">if</span> <span class="n">ran</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="n">tmpRafCatContribute2C</span><span class="p">:</span>
+				<span class="k">if</span> <span class="n">idspecies</span> <span class="ow">in</span> <span class="n">tmpCatInRAF</span><span class="p">:</span> 
+					<span class="n">tmpAlpha</span> <span class="o">=</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">alpha</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span>
+				<span class="k">else</span><span class="p">:</span> 
+					<span class="n">tmpAlpha</span> <span class="o">=</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">0</span><span class="se">\n</span><span class="s">&#39;</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="n">tmpAlpha</span> <span class="o">=</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">0</span><span class="se">\n</span><span class="s">&#39;</span>		
+		
+		<span class="n">str2w</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">idspecies</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">singleSpecies</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span>  <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">initConc</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">1</span><span class="se">\t</span><span class="s">1</span><span class="se">\t</span><span class="s">0</span><span class="se">\t</span><span class="s">0</span><span class="se">\t</span><span class="s">1</span><span class="se">\t</span><span class="s">0</span><span class="se">\t</span><span class="s">0</span><span class="se">\t</span><span class="s">0</span><span class="se">\t</span><span class="s">0</span><span class="se">\t</span><span class="s">0</span><span class="se">\t</span><span class="s">0</span><span class="se">\t</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">lastc</span> <span class="o">+</span> <span class="n">tmpAlpha</span>
 		<span class="n">fid_initSpecies</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">str2w</span><span class="p">)</span>   
 	<span class="n">fid_initSpecies</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-	<span class="k">return</span> <span class="n">tempSpeciesList</span><span class="p">,</span> <span class="n">tempFood</span></div>
+	<span class="k">return</span> <span class="n">tempSpeciesList</span><span class="p">,</span> <span class="n">tempFood</span>
+</div>
+<div class="viewcode-block" id="weightedChoice"><a class="viewcode-back" href="../../../lib.model.html#lib.model.species.weightedChoice">[docs]</a><span class="k">def</span> <span class="nf">weightedChoice</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">objects</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Return a random item from objects, with the weighting defined by weights </span>
+<span class="sd">    (which must sum to 1).&quot;&quot;&quot;</span>
+	<span class="n">cs</span> <span class="o">=</span> <span class="n">cumsum</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span> <span class="c">#An array of the weights, cumulatively summed.</span>
+	<span class="n">idx</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">cs</span> <span class="o">&lt;</span> <span class="n">ran</span><span class="o">.</span><span class="n">random</span><span class="p">())</span> <span class="c">#Find the index of the first weight over a random value.</span>
+	<span class="k">return</span> <span class="n">objects</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span></div>
 </pre></div>
 
           </div>
@@ -98,6 +133,9 @@
       </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/logo.png" alt="Logo"/>
+            </a></p>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../../../search.html" method="get">
@@ -124,13 +162,13 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">CARNESS analysis package 20150424.001 documentation</a> &raquo;</li>
           <li><a href="../../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
-        &copy; Copyright 2014, Alessandro Filisetti.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+        &copy; Copyright 2015, Alessandro Filisetti.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
   </body>
 </html>

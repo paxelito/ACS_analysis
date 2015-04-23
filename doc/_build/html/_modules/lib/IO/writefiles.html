@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -8,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>lib.IO.writefiles &mdash; ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation</title>
+    <title>lib.IO.writefiles &mdash; CARNESS analysis package 20150424.001 documentation</title>
     
     <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -16,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '20140204.004',
+        VERSION:     '20150424.001',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +23,8 @@
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <link rel="top" title="ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation" href="../../../index.html" />
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="CARNESS analysis package 20150424.001 documentation" href="../../../index.html" />
     <link rel="up" title="Module code" href="../../index.html" /> 
   </head>
   <body>
@@ -38,7 +37,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">CARNESS analysis package 20150424.001 documentation</a> &raquo;</li>
           <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
@@ -56,6 +55,7 @@
 <span class="kn">import</span> <span class="nn">glob</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span> <span class="c"># Scientific library</span>
 <span class="kn">import</span> <span class="nn">random</span> <span class="kn">as</span> <span class="nn">ran</span>
+<span class="kn">import</span> <span class="nn">cPickle</span> <span class="kn">as</span> <span class="nn">pickle</span>
 <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="o">*</span> 
 <span class="kn">from</span> <span class="nn">argparse</span> <span class="kn">import</span> <span class="n">ArgumentParser</span>
 <span class="k">try</span><span class="p">:</span>
@@ -63,6 +63,12 @@
 <span class="k">except</span><span class="p">:</span>
     <span class="k">pass</span>
    
+<div class="viewcode-block" id="saveRandomSeed"><a class="viewcode-back" href="../../../lib.IO.html#lib.IO.writefiles.saveRandomSeed">[docs]</a><span class="k">def</span> <span class="nf">saveRandomSeed</span><span class="p">(</span><span class="n">tmpPath</span><span class="p">):</span>
+	<span class="sd">&#39;&#39;&#39;Function to save the random seed&#39;&#39;&#39;</span>
+	
+	<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmpPath</span><span class="p">,</span><span class="s">&quot;rndstate.dat&quot;</span><span class="p">),</span> <span class="s">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+		<span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">ran</span><span class="o">.</span><span class="n">getstate</span><span class="p">(),</span> <span class="n">f</span><span class="p">)</span>
+</div>
 <div class="viewcode-block" id="write_init_raf_list"><a class="viewcode-back" href="../../../lib.IO.html#lib.IO.writefiles.write_init_raf_list">[docs]</a><span class="k">def</span> <span class="nf">write_init_raf_list</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span> <span class="n">rafinfo</span><span class="p">,</span> <span class="n">folder</span><span class="p">):</span>
 	<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">folder</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">CLOSURE -&gt; &quot;</span><span class="p">)</span>
 	<span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">((</span><span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="o">+</span> <span class="s">&#39; &#39;</span><span class="p">)),</span> <span class="n">rafinfo</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
@@ -134,7 +140,8 @@
 	</div>
 <div class="viewcode-block" id="write_acsms_file"><a class="viewcode-back" href="../../../lib.IO.html#lib.IO.writefiles.write_acsms_file">[docs]</a><span class="k">def</span> <span class="nf">write_acsms_file</span><span class="p">(</span><span class="n">path_file</span><span class="p">,</span> <span class="n">nGen</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">nSim</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">nSec</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span><span class="n">nRct</span><span class="o">=</span><span class="mi">200000000</span><span class="p">,</span><span class="n">nH</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">nA</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">rs</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">dl</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">tssi</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span><span class="n">ftsi</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">nspmt</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">lfds</span><span class="o">=</span><span class="mi">13</span><span class="p">,</span><span class="n">oc</span><span class="o">=</span><span class="mf">0.0001</span><span class="p">,</span><span class="n">ecc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">alf</span><span class="o">=</span><span class="s">&quot;AB&quot;</span><span class="p">,</span><span class="n">v</span><span class="o">=</span><span class="mf">1e-18</span><span class="p">,</span>\
 					 <span class="n">vg</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">sd</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">nrg</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">rse</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">ncml</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="n">P</span><span class="o">=</span><span class="mf">0.00103306</span><span class="p">,</span><span class="n">cp</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span><span class="n">mrevrct</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">rr</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">rrr</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">sr</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">K_ass</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span><span class="n">K_diss</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span><span class="n">K_cpx</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span><span class="n">K_cpxDiss</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">K_nrg</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">K_nrg_decay</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">K_spont_ass</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>\
-					 <span class="n">K_spont_diss</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">moleculeDecay_KineticConstant</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span><span class="n">diffusion_contribute</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">solubility_threshold</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">influx_rate</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">maxLOut</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+					 <span class="n">K_spont_diss</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">moleculeDecay_KineticConstant</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span><span class="n">diffusion_contribute</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">solubility_threshold</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">influx_rate</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">maxLOut</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>\
+					 <span class="n">fileAmountSaveInterval</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span><span class="n">saveRtcInfo</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">randInitSpeciesConc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">tmpTheta</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 	<span class="k">print</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">|- save conf file&quot;</span>
 	<span class="n">fname_conf</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path_file</span><span class="p">,</span> <span class="s">&#39;acsm2s.conf&#39;</span><span class="p">)</span>
 	<span class="n">fid_conf</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname_conf</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
@@ -150,6 +157,7 @@
 	<span class="n">str2w</span> <span class="o">=</span> <span class="s">&quot;debugLevel=&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">dl</span><span class="p">)</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span> <span class="n">fid_conf</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">str2w</span><span class="p">);</span>
 	<span class="n">str2w</span> <span class="o">=</span> <span class="s">&quot;timeStructuresSavingInterval=&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">tssi</span><span class="p">)</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span> <span class="n">fid_conf</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">str2w</span><span class="p">);</span>
 	<span class="n">str2w</span> <span class="o">=</span> <span class="s">&quot;fileTimesSaveInterval=&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">ftsi</span><span class="p">)</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span> <span class="n">fid_conf</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">str2w</span><span class="p">);</span>
+	<span class="n">str2w</span> <span class="o">=</span> <span class="s">&quot;fileAmountSaveInterval=&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">fileAmountSaveInterval</span><span class="p">)</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span> <span class="n">fid_conf</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">str2w</span><span class="p">);</span>
 	<span class="n">str2w</span> <span class="o">=</span> <span class="s">&quot;newSpeciesProbMinThreshold=&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">nspmt</span><span class="p">)</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span> <span class="n">fid_conf</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">str2w</span><span class="p">);</span>
 	<span class="n">str2w</span> <span class="o">=</span> <span class="s">&quot;lastFiringDiskSpeciesID=&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">lfds</span><span class="p">)</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span> <span class="n">fid_conf</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">str2w</span><span class="p">);</span>
 	<span class="n">str2w</span> <span class="o">=</span> <span class="s">&quot;overallConcentration=&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">oc</span><span class="p">)</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span> <span class="n">fid_conf</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">str2w</span><span class="p">);</span>
@@ -158,6 +166,7 @@
 	<span class="n">str2w</span> <span class="o">=</span> <span class="s">&quot;volume=&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span> <span class="n">fid_conf</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">str2w</span><span class="p">);</span>
 	<span class="n">str2w</span> <span class="o">=</span> <span class="s">&quot;volumeGrowth=&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">vg</span><span class="p">)</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span> <span class="n">fid_conf</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">str2w</span><span class="p">);</span>
 	<span class="n">str2w</span> <span class="o">=</span> <span class="s">&quot;stochDivision=&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">sd</span><span class="p">)</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span> <span class="n">fid_conf</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">str2w</span><span class="p">);</span>
+	<span class="n">str2w</span> <span class="o">=</span> <span class="s">&quot;theta=&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">tmpTheta</span><span class="p">)</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span> <span class="n">fid_conf</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">str2w</span><span class="p">);</span>
 	<span class="n">str2w</span> <span class="o">=</span> <span class="s">&quot;energy=&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">nrg</span><span class="p">)</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span> <span class="n">fid_conf</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">str2w</span><span class="p">);</span>
 	<span class="n">str2w</span> <span class="o">=</span> <span class="s">&quot;ratioSpeciesEnergizable=&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">rse</span><span class="p">)</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span> <span class="n">fid_conf</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">str2w</span><span class="p">);</span>
 	<span class="n">str2w</span> <span class="o">=</span> <span class="s">&quot;nonCatalyticMaxLength=&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">ncml</span><span class="p">)</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span> <span class="n">fid_conf</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">str2w</span><span class="p">);</span>
@@ -180,6 +189,8 @@
 	<span class="n">str2w</span> <span class="o">=</span> <span class="s">&quot;solubility_threshold=&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">solubility_threshold</span><span class="p">)</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span> <span class="n">fid_conf</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">str2w</span><span class="p">);</span>
 	<span class="n">str2w</span> <span class="o">=</span> <span class="s">&quot;influx_rate=&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">influx_rate</span><span class="p">)</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span> <span class="n">fid_conf</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">str2w</span><span class="p">);</span>
 	<span class="n">str2w</span> <span class="o">=</span> <span class="s">&quot;maxLOut=&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">maxLOut</span><span class="p">)</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span> <span class="n">fid_conf</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">str2w</span><span class="p">);</span>
+	<span class="n">str2w</span> <span class="o">=</span> <span class="s">&quot;saveReactionParameters=&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">saveRtcInfo</span><span class="p">)</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span> <span class="n">fid_conf</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">str2w</span><span class="p">);</span>
+	<span class="n">str2w</span> <span class="o">=</span> <span class="s">&quot;randomInitSpeciesConcentration=&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">randInitSpeciesConc</span><span class="p">)</span><span class="o">+</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span> <span class="n">fid_conf</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">str2w</span><span class="p">);</span>
  
 	<span class="n">fid_conf</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
 </pre></div>
@@ -189,6 +200,9 @@
       </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/logo.png" alt="Logo"/>
+            </a></p>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../../../search.html" method="get">
@@ -215,13 +229,13 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">CARNESS analysis package 20150424.001 documentation</a> &raquo;</li>
           <li><a href="../../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
-        &copy; Copyright 2014, Alessandro Filisetti.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+        &copy; Copyright 2015, Alessandro Filisetti.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
   </body>
 </html>

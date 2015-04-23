@@ -3,14 +3,15 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to ELDA::Emergent Levels Dynamic Assessment's documentation!
-====================================================================
+CARNESS analysis python package documentation
+=============================================
 
 Contents:
 
 .. toctree::
    :maxdepth: 4
 
+   graph_chemistry_analysis
    acsAttractorAnalysis
    acsAttractorAnalysisInTime
    acsBufferedFluxes

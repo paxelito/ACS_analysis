@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -8,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>lib.IO.readfiles &mdash; ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation</title>
+    <title>lib.IO.readfiles &mdash; CARNESS analysis package 20150424.001 documentation</title>
     
     <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -16,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '20140204.004',
+        VERSION:     '20150424.001',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +23,8 @@
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <link rel="top" title="ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation" href="../../../index.html" />
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="CARNESS analysis package 20150424.001 documentation" href="../../../index.html" />
     <link rel="up" title="Module code" href="../../index.html" /> 
   </head>
   <body>
@@ -38,7 +37,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">CARNESS analysis package 20150424.001 documentation</a> &raquo;</li>
           <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
@@ -55,6 +54,8 @@
 <span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span> <span class="c"># Standard librar</span>
 <span class="kn">import</span> <span class="nn">glob</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span> <span class="c"># Scientific library</span>
+<span class="kn">import</span> <span class="nn">random</span> <span class="kn">as</span> <span class="nn">ran</span>
+<span class="kn">import</span> <span class="nn">cPickle</span> <span class="kn">as</span> <span class="nn">pickle</span>
 <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="o">*</span> 
 <span class="kn">from</span> <span class="nn">argparse</span> <span class="kn">import</span> <span class="n">ArgumentParser</span>
 <span class="k">try</span><span class="p">:</span>
@@ -62,6 +63,23 @@
 <span class="k">except</span><span class="p">:</span>
     <span class="k">pass</span>
    
+
+<div class="viewcode-block" id="loadRandomSeed"><a class="viewcode-back" href="../../../lib.IO.html#lib.IO.readfiles.loadRandomSeed">[docs]</a><span class="k">def</span> <span class="nf">loadRandomSeed</span><span class="p">(</span><span class="n">tmpRndPath</span><span class="p">):</span>
+	<span class="sd">&#39;&#39;&#39;Function to load a previously saved random seed&#39;&#39;&#39;</span>
+	
+	<span class="n">seedFile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmpRndPath</span><span class="p">,</span><span class="s">&quot;rndstate.dat&quot;</span><span class="p">)</span>
+	
+	<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">seedFile</span><span class="p">):</span>
+		<span class="c"># Restore the previously saved sate</span>
+		<span class="k">print</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">|- Found rndstate.dat, initializing random module...</span><span class="se">\n</span><span class="s">&#39;</span>
+		<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">seedFile</span><span class="p">,</span> <span class="s">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+			<span class="n">state</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+		<span class="n">ran</span><span class="o">.</span><span class="n">setstate</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="c"># Use a well-known start state</span>
+		<span class="k">print</span> <span class="s">&#39;No rndstate.dat, seeding a random state&#39;</span>
+		<span class="n">ran</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+</div>
 <div class="viewcode-block" id="readConfFile"><a class="viewcode-back" href="../../../lib.IO.html#lib.IO.readfiles.readConfFile">[docs]</a><span class="k">def</span> <span class="nf">readConfFile</span><span class="p">(</span><span class="n">tmpPath</span><span class="p">):</span>
 	<span class="c">#Open Parameter File</span>
 	<span class="n">paramFile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmpPath</span><span class="p">,</span><span class="s">&quot;acsm2s.conf&quot;</span><span class="p">)</span>
@@ -106,6 +124,9 @@
 		<span class="n">fid</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">paramFile</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
 	<span class="k">except</span><span class="p">:</span>
 		<span class="k">print</span> <span class="s">&#39;impossible to load &#39;</span><span class="p">,</span> <span class="n">paramFile</span><span class="p">;</span> <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+	
+	<span class="c"># Initializa theta for old versions of carness</span>
+	<span class="n">theta</span> <span class="o">=</span> <span class="mi">0</span>
 					
 	<span class="c"># Read reaction probability from configuration file</span>
 	<span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">fid</span><span class="p">:</span>
@@ -136,6 +157,8 @@
 			<span class="n">lastFiringDiskSpeciesID</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">strLine</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>	
 		<span class="k">if</span> <span class="n">strLine</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;overallConcentration&quot;</span><span class="p">:</span>
 			<span class="n">overallConcentration</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">strLine</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">overallConcentration</span> <span class="o">=</span> <span class="mi">0</span>
 		<span class="k">if</span> <span class="n">strLine</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;ECConcentration&quot;</span><span class="p">:</span>
 			<span class="n">ECConcentration</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">strLine</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 		<span class="k">if</span> <span class="n">strLine</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;alphabet&quot;</span><span class="p">:</span>
@@ -146,6 +169,8 @@
 			<span class="n">volumeGrowth</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">strLine</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 		<span class="k">if</span> <span class="n">strLine</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;stochDivision&quot;</span><span class="p">:</span>
 			<span class="n">stochDivision</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">strLine</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+		<span class="k">if</span> <span class="n">strLine</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;theta&quot;</span><span class="p">:</span>
+			<span class="n">theta</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">strLine</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 		<span class="k">if</span> <span class="n">strLine</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;energy&quot;</span><span class="p">:</span>
 			<span class="n">energy</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">strLine</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 		<span class="k">if</span> <span class="n">strLine</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;ratioSpeciesEnergizable&quot;</span><span class="p">:</span>
@@ -158,6 +183,8 @@
 			<span class="n">cleavageProbability</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">strLine</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 		<span class="k">if</span> <span class="n">strLine</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;main_rev_rct_allowed&quot;</span><span class="p">:</span>
 			<span class="n">main_rev_rct_allowed</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">strLine</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">main_rev_rct_allowed</span> <span class="o">=</span> <span class="mi">0</span>
 		<span class="k">if</span> <span class="n">strLine</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;reverseReactions&quot;</span><span class="p">:</span>
 			<span class="n">reverseReactions</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">strLine</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>	
 		<span class="k">if</span> <span class="n">strLine</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;revRctRatio&quot;</span><span class="p">:</span>
@@ -189,14 +216,21 @@
 		<span class="k">if</span> <span class="n">strLine</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;influx_rate&quot;</span><span class="p">:</span>
 			<span class="n">influx_rate</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">strLine</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 		<span class="k">if</span> <span class="n">strLine</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;maxLOut&quot;</span><span class="p">:</span>
-			<span class="n">maxLOut</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">strLine</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>				
+			<span class="n">maxLOut</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">strLine</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+	 	<span class="k">if</span> <span class="n">strLine</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;fileAmountSaveInterval&quot;</span><span class="p">:</span>
+			<span class="n">fileAmountSaveInterval</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">strLine</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+		<span class="k">if</span> <span class="n">strLine</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;saveReactionParameters&quot;</span><span class="p">:</span>
+			<span class="n">saveReactionParameters</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">strLine</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>	
+		<span class="k">if</span> <span class="n">strLine</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;randomInitSpeciesConcentration&quot;</span><span class="p">:</span>
+			<span class="n">randomInitSpeciesConcentration</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">strLine</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+								
 			
-	<span class="c">#r1 = 0 : 9 || 10 : 17 || 11 : 24 || 25 : 36 || 37 : 39</span>
+	<span class="c">#r1 = 0 : 9 || 10 : 17 || 18 : 24 || 25 : 35 || 36 : 43</span>
 	<span class="k">return</span> <span class="p">(</span><span class="n">nGEN</span><span class="p">,</span><span class="n">nSIM</span><span class="p">,</span><span class="n">nSeconds</span><span class="p">,</span><span class="n">nReactions</span><span class="p">,</span><span class="n">nHours</span><span class="p">,</span><span class="n">nAttempts</span><span class="p">,</span><span class="n">randomSeed</span><span class="p">,</span><span class="n">debugLevel</span><span class="p">,</span><span class="n">timeStructuresSavingInterval</span><span class="p">,</span><span class="n">fileTimesSaveInterval</span><span class="p">,</span>\
 		    <span class="n">newSpeciesProbMinThreshold</span><span class="p">,</span><span class="n">lastFiringDiskSpeciesID</span><span class="p">,</span><span class="n">overallConcentration</span><span class="p">,</span><span class="n">ECConcentration</span><span class="p">,</span><span class="n">alphabet</span><span class="p">,</span><span class="n">volume</span><span class="p">,</span><span class="n">volumeGrowth</span><span class="p">,</span><span class="n">stochDivision</span><span class="p">,</span>\
 		    <span class="n">energy</span><span class="p">,</span><span class="n">ratioSpeciesEnergizable</span><span class="p">,</span><span class="n">nonCatalyticMaxLength</span><span class="p">,</span><span class="n">reactionProbability</span><span class="p">,</span><span class="n">cleavageProbability</span><span class="p">,</span><span class="n">main_rev_rct_allowed</span><span class="p">,</span><span class="n">reverseReactions</span><span class="p">,</span>\
 		    <span class="n">revRctRatio</span><span class="p">,</span><span class="n">spontRct</span><span class="p">,</span><span class="n">K_ass</span><span class="p">,</span><span class="n">K_diss</span><span class="p">,</span><span class="n">K_cpx</span><span class="p">,</span><span class="n">K_cpxDiss</span><span class="p">,</span><span class="n">K_nrg</span><span class="p">,</span><span class="n">K_nrg_decay</span><span class="p">,</span><span class="n">K_spont_ass</span><span class="p">,</span><span class="n">K_spont_diss</span><span class="p">,</span><span class="n">moleculeDecay_KineticConstant</span><span class="p">,</span>\
-		    <span class="n">diffusion_contribute</span><span class="p">,</span><span class="n">solubility_threshold</span><span class="p">,</span><span class="n">influx_rate</span><span class="p">,</span><span class="n">maxLOut</span><span class="p">)</span>
+		    <span class="n">diffusion_contribute</span><span class="p">,</span><span class="n">solubility_threshold</span><span class="p">,</span><span class="n">influx_rate</span><span class="p">,</span><span class="n">maxLOut</span><span class="p">,</span><span class="n">fileAmountSaveInterval</span><span class="p">,</span><span class="n">saveReactionParameters</span><span class="p">,</span><span class="n">randomInitSpeciesConcentration</span><span class="p">,</span><span class="n">theta</span><span class="p">)</span>
 </div>
 <div class="viewcode-block" id="readInitConfFile"><a class="viewcode-back" href="../../../lib.IO.html#lib.IO.readfiles.readInitConfFile">[docs]</a><span class="k">def</span> <span class="nf">readInitConfFile</span><span class="p">(</span><span class="n">tmpPath</span><span class="p">):</span>
 	<span class="c">#Open Parameter File</span>
@@ -242,7 +276,7 @@
 		
 	<span class="n">tempBufIDs</span> <span class="o">=</span> <span class="p">[]</span>
 	<span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="n">fid</span><span class="p">:</span>
-		<span class="n">tmpID</span><span class="p">,</span> <span class="n">tmpSeq</span><span class="p">,</span> <span class="n">tmpConc</span><span class="p">,</span> <span class="n">tmpDiff</span><span class="p">,</span> <span class="n">tmpSol</span><span class="p">,</span> <span class="n">tmpCpxDiss</span><span class="p">,</span> <span class="n">tmpCpxCut</span><span class="p">,</span> <span class="n">tmpEval</span><span class="p">,</span> <span class="n">tmpAge</span><span class="p">,</span> <span class="n">tmpReb</span><span class="p">,</span> <span class="n">tmpCatID</span><span class="p">,</span> <span class="n">tmpSubID</span><span class="p">,</span> <span class="n">tmpKpho</span><span class="p">,</span> <span class="n">tmpLoadConc</span><span class="p">,</span> <span class="n">tmpConcLock</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+		<span class="n">tmpID</span><span class="p">,</span> <span class="n">tmpSeq</span><span class="p">,</span> <span class="n">tmpConc</span><span class="p">,</span> <span class="n">tmpDiff</span><span class="p">,</span> <span class="n">tmpSol</span><span class="p">,</span> <span class="n">tmpCpxDiss</span><span class="p">,</span> <span class="n">tmpCpxCut</span><span class="p">,</span> <span class="n">tmpEval</span><span class="p">,</span> <span class="n">tmpAge</span><span class="p">,</span> <span class="n">tmpReb</span><span class="p">,</span> <span class="n">tmpCatID</span><span class="p">,</span> <span class="n">tmpSubID</span><span class="p">,</span> <span class="n">tmpKpho</span><span class="p">,</span> <span class="n">tmpLoadConc</span><span class="p">,</span> <span class="n">tmpConcLock</span><span class="p">,</span> <span class="n">tmpAlpha</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
 		<span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">tmpConcLock</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
 			<span class="n">tempBufIDs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">tmpID</span><span class="p">))</span>
 			
@@ -301,6 +335,9 @@
       </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/logo.png" alt="Logo"/>
+            </a></p>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../../../search.html" method="get">
@@ -327,13 +364,13 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../index.html">ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">CARNESS analysis package 20150424.001 documentation</a> &raquo;</li>
           <li><a href="../../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
-        &copy; Copyright 2014, Alessandro Filisetti.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+        &copy; Copyright 2015, Alessandro Filisetti.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
   </body>
 </html>

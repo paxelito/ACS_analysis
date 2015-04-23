@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -8,15 +6,15 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>acsDynStatInTime Module &mdash; ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation</title>
+    <title>acsDynStatInTime Module &mdash; CARNESS analysis package 20150424.001 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '',
-        VERSION:     '20140204.004',
+        URL_ROOT:    './',
+        VERSION:     '20150424.001',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +23,8 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation" href="index.html" />
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="CARNESS analysis package 20150424.001 documentation" href="index.html" />
     <link rel="next" title="acsFromWim2Carness Module" href="acsFromWim2Carness.html" />
     <link rel="prev" title="acsBufferedFluxes Module" href="acsBufferedFluxes.html" /> 
   </head>
@@ -45,7 +44,7 @@
         <li class="right" >
           <a href="acsBufferedFluxes.html" title="acsBufferedFluxes Module"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation</a> &raquo;</li> 
+        <li><a href="index.html">CARNESS analysis package 20150424.001 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -65,18 +64,12 @@
 and is related to the Gamma distribution.  It has the probability
 distribution function</p>
 <div class="math">
-\begin{equation*}
-f(x; a,b) = \frac{1}{B(\alpha, \beta)} x^{\alpha - 1}
-(1 - x)^{\beta - 1},
-\end{equation*}
-</div>
+\[f(x; a,b) = \frac{1}{B(\alpha, \beta)} x^{\alpha - 1}
+(1 - x)^{\beta - 1},\]</div>
 <p>where the normalisation, B, is the beta function,</p>
 <div class="math">
-\begin{equation*}
-B(\alpha, \beta) = \int_0^1 t^{\alpha - 1}
-(1 - t)^{\beta - 1} dt.
-\end{equation*}
-</div>
+\[B(\alpha, \beta) = \int_0^1 t^{\alpha - 1}
+(1 - t)^{\beta - 1} dt.\]</div>
 <p>It is often seen in Bayesian inference and order statistics.</p>
 <dl class="docutils">
 <dt>a <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
@@ -84,7 +77,7 @@ B(\alpha, \beta) = \int_0^1 t^{\alpha - 1}
 <dt>b <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
 <dd>Beta, non-negative.</dd>
 <dt>size <span class="classifier-delimiter">:</span> <span class="classifier">tuple of ints, optional</span></dt>
-<dd>The number of samples to draw.  The ouput is packed according to
+<dd>The number of samples to draw.  The output is packed according to
 the size given.</dd>
 </dl>
 <dl class="docutils">
@@ -100,11 +93,11 @@ Beta distribution.</dd>
 <dd><p>Draw samples from a binomial distribution.</p>
 <p>Samples are drawn from a Binomial distribution with specified
 parameters, n trials and p probability of success where
-n an integer &gt; 0 and p is in the interval [0,1]. (n may be
+n an integer &gt;= 0 and p is in the interval [0,1]. (n may be
 input as a float, but it is truncated to an integer in use)</p>
 <dl class="docutils">
 <dt>n <span class="classifier-delimiter">:</span> <span class="classifier">float (but truncated to an integer)</span></dt>
-<dd>parameter, &gt; 0.</dd>
+<dd>parameter, &gt;= 0.</dd>
 <dt>p <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
 <dd>parameter, &gt;= 0 and &lt;=1.</dd>
 <dt>size <span class="classifier-delimiter">:</span> <span class="classifier">{tuple, int}</span></dt>
@@ -121,18 +114,9 @@ input as a float, but it is truncated to an integer in use)</p>
 </dl>
 <p>The probability density for the Binomial distribution is</p>
 <div class="math">
-\begin{equation*}
-P(N) = \binom{n}{N}p^N(1-p)^{n-N},
-\end{equation*}
-</div>
-<p>where <span class="math">
-\(n\)</span>
- is the number of trials, <span class="math">
-\(p\)</span>
- is the probability
-of success, and <span class="math">
-\(N\)</span>
- is the number of successes.</p>
+\[P(N) = \binom{n}{N}p^N(1-p)^{n-N},\]</div>
+<p>where <span class="math">\(n\)</span> is the number of trials, <span class="math">\(p\)</span> is the probability
+of success, and <span class="math">\(N\)</span> is the number of successes.</p>
 <p>When estimating the standard error of a proportion in a population by
 using a random sample, the normal distribution works well unless the
 product p*n &lt;=5, where p = population proportion estimate, and n =
@@ -221,31 +205,17 @@ is given.</dd>
 <p>The variable obtained by summing the squares of <cite>df</cite> independent,
 standard normally distributed random variables:</p>
 <div class="math">
-\begin{equation*}
-Q = \sum_{i=0}^{\mathtt{df}} X^2_i
-\end{equation*}
-</div>
+\[Q = \sum_{i=0}^{\mathtt{df}} X^2_i\]</div>
 <p>is chi-square distributed, denoted</p>
 <div class="math">
-\begin{equation*}
-Q \sim \chi^2_k.
-\end{equation*}
-</div>
+\[Q \sim \chi^2_k.\]</div>
 <p>The probability density function of the chi-squared distribution is</p>
 <div class="math">
-\begin{equation*}
-p(x) = \frac{(1/2)^{k/2}}{\Gamma(k/2)}
-x^{k/2 - 1} e^{-x/2},
-\end{equation*}
-</div>
-<p>where <span class="math">
-\(\Gamma\)</span>
- is the gamma function,</p>
+\[p(x) = \frac{(1/2)^{k/2}}{\Gamma(k/2)}
+x^{k/2 - 1} e^{-x/2},\]</div>
+<p>where <span class="math">\(\Gamma\)</span> is the gamma function,</p>
 <div class="math">
-\begin{equation*}
-\Gamma(x) = \int_0^{-\infty} t^{x - 1} e^{-t} dt.
-\end{equation*}
-</div>
+\[\Gamma(x) = \int_0^{-\infty} t^{x - 1} e^{-t} dt.\]</div>
 <p><a class="reference external" href="http://www.itl.nist.gov/div898/handbook/eda/section3/eda3666.htm">NIST/SEMATECH e-Handbook of Statistical Methods</a></p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">chisquare</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span>
 <span class="go">array([ 1.89920014,  9.00867716,  3.13710533,  5.62318272])</span>
@@ -259,27 +229,18 @@ x^{k/2 - 1} e^{-x/2},
 <dd><p>Exponential distribution.</p>
 <p>Its probability density function is</p>
 <div class="math">
-\begin{equation*}
-f(x; \frac{1}{\beta}) = \frac{1}{\beta} \exp(-\frac{x}{\beta}),
-\end{equation*}
-</div>
-<p>for <tt class="docutils literal"><span class="pre">x</span> <span class="pre">&gt;</span> <span class="pre">0</span></tt> and 0 elsewhere. <span class="math">
-\(\beta\)</span>
- is the scale parameter,
-which is the inverse of the rate parameter <span class="math">
-\(\lambda = 1/\beta\)</span>
-.
+\[f(x; \frac{1}{\beta}) = \frac{1}{\beta} \exp(-\frac{x}{\beta}),\]</div>
+<p>for <tt class="docutils literal"><span class="pre">x</span> <span class="pre">&gt;</span> <span class="pre">0</span></tt> and 0 elsewhere. <span class="math">\(\beta\)</span> is the scale parameter,
+which is the inverse of the rate parameter <span class="math">\(\lambda = 1/\beta\)</span>.
 The rate parameter is an alternative, widely used parameterization
-of the exponential distribution <a href="#id60"><span class="problematic" id="id61"><span id="id6"></span>[3]_</span></a>.</p>
+of the exponential distribution <a href="#id66"><span class="problematic" id="id67"><span id="id6"></span>[3]_</span></a>.</p>
 <p>The exponential distribution is a continuous analogue of the
 geometric distribution.  It describes many common situations, such as
-the size of raindrops measured over many rainstorms <a href="#id62"><span class="problematic" id="id63"><span id="id7"></span>[1]_</span></a>, or the time
-between page requests to Wikipedia <a href="#id64"><span class="problematic" id="id65"><span id="id8"></span>[2]_</span></a>.</p>
+the size of raindrops measured over many rainstorms <a href="#id68"><span class="problematic" id="id69"><span id="id7"></span>[1]_</span></a>, or the time
+between page requests to Wikipedia <a href="#id70"><span class="problematic" id="id71"><span id="id8"></span>[2]_</span></a>.</p>
 <dl class="docutils">
 <dt>scale <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd>The scale parameter, <span class="math">
-\(\beta = 1/\lambda\)</span>
-.</dd>
+<dd>The scale parameter, <span class="math">\(\beta = 1/\lambda\)</span>.</dd>
 <dt>size <span class="classifier-delimiter">:</span> <span class="classifier">tuple of ints</span></dt>
 <dd>Number of samples to draw.  The output is shaped
 according to <cite>size</cite>.</dd>
@@ -407,18 +368,9 @@ level.</p>
 </dl>
 <p>The probability density for the Gamma distribution is</p>
 <div class="math">
-\begin{equation*}
-p(x) = x^{k-1}\frac{e^{-x/\theta}}{\theta^k\Gamma(k)},
-\end{equation*}
-</div>
-<p>where <span class="math">
-\(k\)</span>
- is the shape and <span class="math">
-\(\theta\)</span>
- the scale,
-and <span class="math">
-\(\Gamma\)</span>
- is the Gamma function.</p>
+\[p(x) = x^{k-1}\frac{e^{-x/\theta}}{\theta^k\Gamma(k)},\]</div>
+<p>where <span class="math">\(k\)</span> is the shape and <span class="math">\(\theta\)</span> the scale,
+and <span class="math">\(\Gamma\)</span> is the Gamma function.</p>
 <p>The Gamma distribution is often used to model the times to failure of
 electronic components, and arises naturally in processes for which the
 waiting times between Poisson distributed events are relevant.</p>
@@ -466,10 +418,7 @@ that must be run in order to achieve success.  It is therefore
 supported on the positive integers, <tt class="docutils literal"><span class="pre">k</span> <span class="pre">=</span> <span class="pre">1,</span> <span class="pre">2,</span> <span class="pre">...</span></tt>.</p>
 <p>The probability mass function of the geometric distribution is</p>
 <div class="math">
-\begin{equation*}
-f(k) = (1 - p)^{k - 1} p
-\end{equation*}
-</div>
+\[f(k) = (1 - p)^{k - 1} p\]</div>
 <p>where <cite>p</cite> is the probability of success of an individual trial.</p>
 <dl class="docutils">
 <dt>p <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
@@ -552,16 +501,9 @@ special case of the Extreme Value Type I distribution for maximums from
 distributions with &#8220;exponential-like&#8221; tails.</p>
 <p>The probability density for the Gumbel distribution is</p>
 <div class="math">
-\begin{equation*}
-p(x) = \frac{e^{-(x - \mu)/ \beta}}{\beta} e^{ -e^{-(x - \mu)/
-\beta}},
-\end{equation*}
-</div>
-<p>where <span class="math">
-\(\mu\)</span>
- is the mode, a location parameter, and <span class="math">
-\(\beta\)</span>
- is
+\[p(x) = \frac{e^{-(x - \mu)/ \beta}}{\beta} e^{ -e^{-(x - \mu)/
+\beta}},\]</div>
+<p>where <span class="math">\(\mu\)</span> is the mode, a location parameter, and <span class="math">\(\beta\)</span> is
 the scale parameter.</p>
 <p>The Gumbel (named for German mathematician Emil Julius Gumbel) was used
 very early in the hydrology literature, for modeling the occurrence of
@@ -574,12 +516,8 @@ of extreme events.</p>
 <p>It is one of a class of extreme value distributions, the Generalized
 Extreme Value (GEV) distributions, which also includes the Weibull and
 Frechet.</p>
-<p>The function has a mean of <span class="math">
-\(\mu + 0.57721\beta\)</span>
- and a variance of
-<span class="math">
-\(\frac{\pi^2}{6}\beta^2\)</span>
-.</p>
+<p>The function has a mean of <span class="math">\(\mu + 0.57721\beta\)</span> and a variance of
+<span class="math">\(\frac{\pi^2}{6}\beta^2\)</span>.</p>
 <p>Gumbel, E. J., <em>Statistics of Extremes</em>, New York: Columbia University
 Press, 1958.</p>
 <p>Reiss, R.-D. and Thomas, M., <em>Statistical Analysis of Extreme Values from
@@ -631,19 +569,20 @@ parameters, ngood (ways to make a good selection), nbad (ways to make
 a bad selection), and nsample = number of items sampled, which is less
 than or equal to the sum ngood + nbad.</p>
 <dl class="docutils">
-<dt>ngood <span class="classifier-delimiter">:</span> <span class="classifier">float (but truncated to an integer)</span></dt>
-<dd>parameter, &gt; 0.</dd>
-<dt>nbad <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd>parameter, &gt;= 0.</dd>
-<dt>nsample <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd>parameter, &gt; 0 and &lt;= ngood+nbad</dd>
-<dt>size <span class="classifier-delimiter">:</span> <span class="classifier">{tuple, int}</span></dt>
+<dt>ngood <span class="classifier-delimiter">:</span> <span class="classifier">int or array_like</span></dt>
+<dd>Number of ways to make a good selection.  Must be nonnegative.</dd>
+<dt>nbad <span class="classifier-delimiter">:</span> <span class="classifier">int or array_like</span></dt>
+<dd>Number of ways to make a bad selection.  Must be nonnegative.</dd>
+<dt>nsample <span class="classifier-delimiter">:</span> <span class="classifier">int or array_like</span></dt>
+<dd>Number of items sampled.  Must be at least 1 and at most
+<tt class="docutils literal"><span class="pre">ngood</span> <span class="pre">+</span> <span class="pre">nbad</span></tt>.</dd>
+<dt>size <span class="classifier-delimiter">:</span> <span class="classifier">int or tuple of int</span></dt>
 <dd>Output shape.  If the given shape is, e.g., <tt class="docutils literal"><span class="pre">(m,</span> <span class="pre">n,</span> <span class="pre">k)</span></tt>, then
 <tt class="docutils literal"><span class="pre">m</span> <span class="pre">*</span> <span class="pre">n</span> <span class="pre">*</span> <span class="pre">k</span></tt> samples are drawn.</dd>
 </dl>
 <dl class="docutils">
-<dt>samples <span class="classifier-delimiter">:</span> <span class="classifier">{ndarray, scalar}</span></dt>
-<dd>where the values are all integers in  [0, n].</dd>
+<dt>samples <span class="classifier-delimiter">:</span> <span class="classifier">ndarray or scalar</span></dt>
+<dd>The values are all integers in  [0, n].</dd>
 </dl>
 <dl class="docutils">
 <dt>scipy.stats.distributions.hypergeom <span class="classifier-delimiter">:</span> <span class="classifier">probability density function,</span></dt>
@@ -651,15 +590,8 @@ than or equal to the sum ngood + nbad.</p>
 </dl>
 <p>The probability density for the Hypergeometric distribution is</p>
 <div class="math">
-\begin{equation*}
-P(x) = \frac{\binom{m}{n}\binom{N-m}{n-x}}{\binom{N}{n}},
-\end{equation*}
-</div>
-<p>where <span class="math">
-\(0 \le x \le m\)</span>
- and <span class="math">
-\(n+m-N \le x \le n\)</span>
-</p>
+\[P(x) = \frac{\binom{m}{n}\binom{N-m}{n-x}}{\binom{N}{n}},\]</div>
+<p>where <span class="math">\(0 \le x \le m\)</span> and <span class="math">\(n+m-N \le x \le n\)</span></p>
 <p>for P(x) the probability of x successes, n = ngood, m = nbad, and
 N = number of samples.</p>
 <p>Consider an urn with black and white marbles in it, ngood of them
@@ -722,21 +654,14 @@ difference between two independent, identically distributed exponential
 random variables.</p>
 <dl class="docutils">
 <dt>loc <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd>The position, <span class="math">
-\(\mu\)</span>
-, of the distribution peak.</dd>
+<dd>The position, <span class="math">\(\mu\)</span>, of the distribution peak.</dd>
 <dt>scale <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd><span class="math">
-\(\lambda\)</span>
-, the exponential decay.</dd>
+<dd><span class="math">\(\lambda\)</span>, the exponential decay.</dd>
 </dl>
 <p>It has the probability density function</p>
 <div class="math">
-\begin{equation*}
-f(x; \mu, \lambda) = \frac{1}{2\lambda}
-\exp\left(-\frac{|x - \mu|}{\lambda}\right).
-\end{equation*}
-</div>
+\[f(x; \mu, \lambda) = \frac{1}{2\lambda}
+\exp\left(-\frac{|x - \mu|}{\lambda}\right).\]</div>
 <p>The first law of Laplace, from 1774, states that the frequency of an error
 can be expressed as an exponential function of the absolute magnitude of
 the error, which leads to the Laplace distribution. For many problems in
@@ -818,15 +743,8 @@ parameters, loc (location or mean, also median), and scale (&gt;0).</p>
 </dl>
 <p>The probability density for the Logistic distribution is</p>
 <div class="math">
-\begin{equation*}
-P(x) = P(x) = \frac{e^{-(x-\mu)/s}}{s(1+e^{-(x-\mu)/s})^2},
-\end{equation*}
-</div>
-<p>where <span class="math">
-\(\mu\)</span>
- = location and <span class="math">
-\(s\)</span>
- = scale.</p>
+\[P(x) = P(x) = \frac{e^{-(x-\mu)/s}}{s(1+e^{-(x-\mu)/s})^2},\]</div>
+<p>where <span class="math">\(\mu\)</span> = location and <span class="math">\(s\)</span> = scale.</p>
 <p>The Logistic distribution is used in Extreme Value problems where it
 can act as a mixture of Gumbel distributions, in Epidemiology, and by
 the World Chess Federation (FIDE) where it is used in the Elo ranking
@@ -875,73 +793,46 @@ MathWorld&#8211;A Wolfram Web Resource.
 <dt id="acsDynStatInTime.lognormal">
 <tt class="descclassname">acsDynStatInTime.</tt><tt class="descname">lognormal</tt><big>(</big><em>mean=0.0</em>, <em>sigma=1.0</em>, <em>size=None</em><big>)</big><a class="headerlink" href="#acsDynStatInTime.lognormal" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return samples drawn from a log-normal distribution.</p>
-<p>Draw samples from a log-normal distribution with specified mean, standard
-deviation, and shape. Note that the mean and standard deviation are not the
-values for the distribution itself, but of the underlying normal
-distribution it is derived from.</p>
+<p>Draw samples from a log-normal distribution with specified mean,
+standard deviation, and array shape.  Note that the mean and standard
+deviation are not the values for the distribution itself, but of the
+underlying normal distribution it is derived from.</p>
 <dl class="docutils">
 <dt>mean <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
 <dd>Mean value of the underlying normal distribution</dd>
-<dt>sigma <span class="classifier-delimiter">:</span> <span class="classifier">float, &gt;0.</span></dt>
+<dt>sigma <span class="classifier-delimiter">:</span> <span class="classifier">float, &gt; 0.</span></dt>
 <dd>Standard deviation of the underlying normal distribution</dd>
 <dt>size <span class="classifier-delimiter">:</span> <span class="classifier">tuple of ints</span></dt>
 <dd>Output shape.  If the given shape is, e.g., <tt class="docutils literal"><span class="pre">(m,</span> <span class="pre">n,</span> <span class="pre">k)</span></tt>, then
 <tt class="docutils literal"><span class="pre">m</span> <span class="pre">*</span> <span class="pre">n</span> <span class="pre">*</span> <span class="pre">k</span></tt> samples are drawn.</dd>
 </dl>
 <dl class="docutils">
+<dt>samples <span class="classifier-delimiter">:</span> <span class="classifier">ndarray or float</span></dt>
+<dd>The desired samples. An array of the same shape as <cite>size</cite> if given,
+if <cite>size</cite> is None a float is returned.</dd>
+</dl>
+<dl class="docutils">
 <dt>scipy.stats.lognorm <span class="classifier-delimiter">:</span> <span class="classifier">probability density function, distribution,</span></dt>
 <dd>cumulative density function, etc.</dd>
 </dl>
 <p>A variable <cite>x</cite> has a log-normal distribution if <cite>log(x)</cite> is normally
-distributed.</p>
-<p>The probability density function for the log-normal distribution is</p>
+distributed.  The probability density function for the log-normal
+distribution is:</p>
 <div class="math">
-\begin{equation*}
-p(x) = \frac{1}{\sigma x \sqrt{2\pi}}
-e^{(-\frac{(ln(x)-\mu)^2}{2\sigma^2})}
-\end{equation*}
-</div>
-<p>where <span class="math">
-\(\mu\)</span>
- is the mean and <span class="math">
-\(\sigma\)</span>
- is the standard deviation
-of the normally distributed logarithm of the variable.</p>
-<p>A log-normal distribution results if a random variable is the <em>product</em> of
-a large number of independent, identically-distributed variables in the
-same way that a normal distribution results if the variable is the <em>sum</em>
-of a large number of independent, identically-distributed variables
-(see the last example). It is one of the so-called &#8220;fat-tailed&#8221;
-distributions.</p>
-<p>The log-normal distribution is commonly used to model the lifespan of units
-with fatigue-stress failure modes. Since this includes
-most mechanical systems, the log-normal distribution has widespread
-application.</p>
-<p>It is also commonly used to model oil field sizes, species abundance, and
-latent periods of infectious diseases.</p>
-<table class="docutils footnote" frame="void" id="id26" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label">[1]</td><td>Eckhard Limpert, Werner A. Stahel, and Markus Abbt, &#8220;Log-normal
-Distributions across the Sciences: Keys and Clues&#8221;, May 2001
-Vol. 51 No. 5 BioScience
-<a class="reference external" href="http://stat.ethz.ch/~stahel/lognormal/bioscience.pdf">http://stat.ethz.ch/~stahel/lognormal/bioscience.pdf</a></td></tr>
-</tbody>
-</table>
-<table class="docutils footnote" frame="void" id="id27" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label">[2]</td><td>Reiss, R.D., Thomas, M.(2001), Statistical Analysis of Extreme
-Values, Birkhauser Verlag, Basel, pp 31-32.</td></tr>
-</tbody>
-</table>
-<table class="docutils footnote" frame="void" id="id28" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label">[3]</td><td>Wikipedia, &#8220;Lognormal distribution&#8221;,
-<a class="reference external" href="http://en.wikipedia.org/wiki/Lognormal_distribution">http://en.wikipedia.org/wiki/Lognormal_distribution</a></td></tr>
-</tbody>
-</table>
+\[p(x) = \frac{1}{\sigma x \sqrt{2\pi}}
+e^{(-\frac{(ln(x)-\mu)^2}{2\sigma^2})}\]</div>
+<p>where <span class="math">\(\mu\)</span> is the mean and <span class="math">\(\sigma\)</span> is the standard
+deviation of the normally distributed logarithm of the variable.
+A log-normal distribution results if a random variable is the <em>product</em>
+of a large number of independent, identically-distributed variables in
+the same way that a normal distribution results if the variable is the
+<em>sum</em> of a large number of independent, identically-distributed
+variables.</p>
+<p>Limpert, E., Stahel, W. A., and Abbt, M., &#8220;Log-normal Distributions
+across the Sciences: Keys and Clues,&#8221; <em>BioScience</em>, Vol. 51, No. 5,
+May, 2001.  <a class="reference external" href="http://stat.ethz.ch/~stahel/lognormal/bioscience.pdf">http://stat.ethz.ch/~stahel/lognormal/bioscience.pdf</a></p>
+<p>Reiss, R.D. and Thomas, M., <em>Statistical Analysis of Extreme Values</em>,
+Basel: Birkhauser Verlag, 2001, pp. 31-32.</p>
 <p>Draw samples from the distribution:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span> <span class="o">=</span> <span class="mf">3.</span><span class="p">,</span> <span class="mf">1.</span> <span class="c"># mean and standard deviation</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">lognormal</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
@@ -974,12 +865,8 @@ distribution can be fit well by a log-normal probability density function.</p>
 </pre></div>
 </div>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="c"># scale values to be positive</span>
-</pre></div>
-</div>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">count</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">ignored</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="n">normed</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="s">&#39;center&#39;</span><span class="p">)</span>
-</pre></div>
-</div>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">b</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">count</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">ignored</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="n">normed</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="s">&#39;center&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">b</span><span class="p">))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">mu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">b</span><span class="p">))</span>
 </pre></div>
 </div>
@@ -1017,16 +904,13 @@ parameter, p (probability, 0 &lt; p &lt; 1).</p>
 </dl>
 <p>The probability density for the Log Series distribution is</p>
 <div class="math">
-\begin{equation*}
-P(k) = \frac{-p^k}{k \ln(1-p)},
-\end{equation*}
-</div>
+\[P(k) = \frac{-p^k}{k \ln(1-p)},\]</div>
 <p>where p = probability.</p>
 <p>The Log Series distribution is frequently used to represent species
 richness and occurrence, first proposed by Fisher, Corbet, and
 Williams in 1943 [2].  It may also be used to model the numbers of
 occupants seen in cars [3].</p>
-<table class="docutils footnote" frame="void" id="id29" rules="none">
+<table class="docutils footnote" frame="void" id="id26" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label">[1]</td><td>Buzas, Martin A.; Culver, Stephen J.,  Understanding regional
@@ -1035,7 +919,7 @@ occurrences: BIODIVERSITY RESEARCH Diversity &amp; Distributions,
 Volume 5, Number 5, September 1999 , pp. 187-195(9).</td></tr>
 </tbody>
 </table>
-<table class="docutils footnote" frame="void" id="id30" rules="none">
+<table class="docutils footnote" frame="void" id="id27" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label">[2]</td><td>Fisher, R.A,, A.S. Corbet, and C.B. Williams. 1943. The
@@ -1044,14 +928,14 @@ individuals in a random sample of an animal population.
 Journal of Animal Ecology, 12:42-58.</td></tr>
 </tbody>
 </table>
-<table class="docutils footnote" frame="void" id="id31" rules="none">
+<table class="docutils footnote" frame="void" id="id28" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label">[3]</td><td>D. J. Hand, F. Daly, D. Lunn, E. Ostrowski, A Handbook of Small
 Data Sets, CRC Press, 1994.</td></tr>
 </tbody>
 </table>
-<table class="docutils footnote" frame="void" id="id32" rules="none">
+<table class="docutils footnote" frame="void" id="id29" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label">[4]</td><td>Wikipedia, &#8220;Logarithmic-distribution&#8221;,
@@ -1135,7 +1019,7 @@ squared) of the one-dimensional normal distribution.</p>
 <dt>cov <span class="classifier-delimiter">:</span> <span class="classifier">2-D array_like, of shape (N, N)</span></dt>
 <dd>Covariance matrix of the distribution.  Must be symmetric and
 positive semi-definite for &#8220;physically meaningful&#8221; results.</dd>
-<dt>size <span class="classifier-delimiter">:</span> <span class="classifier">tuple of ints, optional</span></dt>
+<dt>size <span class="classifier-delimiter">:</span> <span class="classifier">int or tuple of ints, optional</span></dt>
 <dd>Given a shape of, for example, <tt class="docutils literal"><span class="pre">(m,n,k)</span></tt>, <tt class="docutils literal"><span class="pre">m*n*k</span></tt> samples are
 generated, and packed in an <cite>m</cite>-by-<cite>n</cite>-by-<cite>k</cite> arrangement.  Because
 each sample is <cite>N</cite>-dimensional, the output shape is <tt class="docutils literal"><span class="pre">(m,n,k,N)</span></tt>.
@@ -1155,21 +1039,9 @@ analogous to the peak of the bell curve for the one-dimensional or
 univariate normal distribution.</p>
 <p>Covariance indicates the level to which two variables vary together.
 From the multivariate normal distribution, we draw N-dimensional
-samples, <span class="math">
-\(X = [x_1, x_2, ... x_N]\)</span>
-.  The covariance matrix
-element <span class="math">
-\(C_{ij}\)</span>
- is the covariance of <span class="math">
-\(x_i\)</span>
- and <span class="math">
-\(x_j\)</span>
-.
-The element <span class="math">
-\(C_{ii}\)</span>
- is the variance of <span class="math">
-\(x_i\)</span>
- (i.e. its
+samples, <span class="math">\(X = [x_1, x_2, ... x_N]\)</span>.  The covariance matrix
+element <span class="math">\(C_{ij}\)</span> is the covariance of <span class="math">\(x_i\)</span> and <span class="math">\(x_j\)</span>.
+The element <span class="math">\(C_{ii}\)</span> is the variance of <span class="math">\(x_i\)</span> (i.e. its
 &#8220;spread&#8221;).</p>
 <p>Instead of specifying the full covariance matrix, popular
 approximations include:</p>
@@ -1233,24 +1105,15 @@ integer &gt; 0 and <cite>p</cite> is in the interval [0, 1].</p>
 </dl>
 <p>The probability density for the Negative Binomial distribution is</p>
 <div class="math">
-\begin{equation*}
-P(N;n,p) = \binom{N+n-1}{n-1}p^{n}(1-p)^{N},
-\end{equation*}
-</div>
-<p>where <span class="math">
-\(n-1\)</span>
- is the number of successes, <span class="math">
-\(p\)</span>
- is the probability
-of success, and <span class="math">
-\(N+n-1\)</span>
- is the number of trials.</p>
+\[P(N;n,p) = \binom{N+n-1}{n-1}p^{n}(1-p)^{N},\]</div>
+<p>where <span class="math">\(n-1\)</span> is the number of successes, <span class="math">\(p\)</span> is the probability
+of success, and <span class="math">\(N+n-1\)</span> is the number of trials.</p>
 <p>The negative binomial distribution gives the probability of n-1 successes
 and N failures in N+n-1 trials, and success on the (N+n)th trial.</p>
 <p>If one throws a die repeatedly until the third time a &#8220;1&#8221; appears, then the
 probability distribution of the number of non-&#8220;1&#8221;s that appear before the
 third &#8220;1&#8221; is a negative binomial distribution.</p>
-<table class="docutils footnote" frame="void" id="id33" rules="none">
+<table class="docutils footnote" frame="void" id="id30" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label">[1]</td><td>Weisstein, Eric W. &#8220;Negative Binomial Distribution.&#8221; From
@@ -1258,7 +1121,7 @@ MathWorld&#8211;A Wolfram Web Resource.
 <a class="reference external" href="http://mathworld.wolfram.com/NegativeBinomialDistribution.html">http://mathworld.wolfram.com/NegativeBinomialDistribution.html</a></td></tr>
 </tbody>
 </table>
-<table class="docutils footnote" frame="void" id="id34" rules="none">
+<table class="docutils footnote" frame="void" id="id31" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label">[2]</td><td>Wikipedia, &#8220;Negative binomial distribution&#8221;,
@@ -1283,12 +1146,8 @@ etc.?</p>
 <dt id="acsDynStatInTime.noncentral_chisquare">
 <tt class="descclassname">acsDynStatInTime.</tt><tt class="descname">noncentral_chisquare</tt><big>(</big><em>df</em>, <em>nonc</em>, <em>size=None</em><big>)</big><a class="headerlink" href="#acsDynStatInTime.noncentral_chisquare" title="Permalink to this definition">¶</a></dt>
 <dd><p>Draw samples from a noncentral chi-square distribution.</p>
-<p>The noncentral <span class="math">
-\(\chi^2\)</span>
- distribution is a generalisation of
-the <span class="math">
-\(\chi^2\)</span>
- distribution.</p>
+<p>The noncentral <span class="math">\(\chi^2\)</span> distribution is a generalisation of
+the <span class="math">\(\chi^2\)</span> distribution.</p>
 <dl class="docutils">
 <dt>df <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
 <dd>Degrees of freedom, should be &gt;= 1.</dd>
@@ -1300,18 +1159,13 @@ the <span class="math">
 <p>The probability density function for the noncentral Chi-square distribution
 is</p>
 <div class="math">
-\begin{equation*}
-P(x;df,nonc) = \sum^{\infty}_{i=0}
-\frac{e^{-nonc/2}(nonc/2)^{i}}{i!}P_{Y_{df+2i}}(x),
-\end{equation*}
-</div>
-<p>where <span class="math">
-\(Y_{q}\)</span>
- is the Chi-square with q degrees of freedom.</p>
+\[P(x;df,nonc) = \sum^{\infty}_{i=0}
+\frac{e^{-nonc/2}(nonc/2)^{i}}{i!}P_{Y_{df+2i}}(x),\]</div>
+<p>where <span class="math">\(Y_{q}\)</span> is the Chi-square with q degrees of freedom.</p>
 <p>In Delhi (2007), it is noted that the noncentral chi-square is useful in
 bombing and coverage problems, the probability of killing the point target
 given by the noncentral chi-squared distribution.</p>
-<table class="docutils footnote" frame="void" id="id35" rules="none">
+<table class="docutils footnote" frame="void" id="id32" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label">[1]</td><td>Delhi, M.S. Holla, &#8220;On a noncentral chi-square distribution in the
@@ -1319,7 +1173,7 @@ analysis of weapon systems effectiveness&#8221;, Metrika, Volume 15,
 Number 1 / December, 1970.</td></tr>
 </tbody>
 </table>
-<table class="docutils footnote" frame="void" id="id36" rules="none">
+<table class="docutils footnote" frame="void" id="id33" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label">[2]</td><td>Wikipedia, &#8220;Noncentral chi-square distribution&#8221;
@@ -1411,12 +1265,12 @@ distributions for comparison.</p>
 <dd><p>Draw random samples from a normal (Gaussian) distribution.</p>
 <p>The probability density function of the normal distribution, first
 derived by De Moivre and 200 years later by both Gauss and Laplace
-independently <a href="#id66"><span class="problematic" id="id67"><span id="id37"></span>[2]_</span></a>, is often called the bell curve because of
+independently <a href="#id72"><span class="problematic" id="id73"><span id="id34"></span>[2]_</span></a>, is often called the bell curve because of
 its characteristic shape (see the example below).</p>
 <p>The normal distributions occurs often in nature.  For example, it
 describes the commonly occurring distribution of samples influenced
 by a large number of tiny, random disturbances, each with its own
-unique distribution <a href="#id68"><span class="problematic" id="id69"><span id="id38"></span>[2]_</span></a>.</p>
+unique distribution <a href="#id74"><span class="problematic" id="id75"><span id="id35"></span>[2]_</span></a>.</p>
 <dl class="docutils">
 <dt>loc <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
 <dd>Mean (&#8220;centre&#8221;) of the distribution.</dd>
@@ -1432,37 +1286,24 @@ unique distribution <a href="#id68"><span class="problematic" id="id69"><span id
 </dl>
 <p>The probability density for the Gaussian distribution is</p>
 <div class="math">
-\begin{equation*}
-p(x) = \frac{1}{\sqrt{ 2 \pi \sigma^2 }}
-e^{ - \frac{ (x - \mu)^2 } {2 \sigma^2} },
-\end{equation*}
-</div>
-<p>where <span class="math">
-\(\mu\)</span>
- is the mean and <span class="math">
-\(\sigma\)</span>
- the standard deviation.
-The square of the standard deviation, <span class="math">
-\(\sigma^2\)</span>
-, is called the
+\[p(x) = \frac{1}{\sqrt{ 2 \pi \sigma^2 }}
+e^{ - \frac{ (x - \mu)^2 } {2 \sigma^2} },\]</div>
+<p>where <span class="math">\(\mu\)</span> is the mean and <span class="math">\(\sigma\)</span> the standard deviation.
+The square of the standard deviation, <span class="math">\(\sigma^2\)</span>, is called the
 variance.</p>
 <p>The function has its peak at the mean, and its &#8220;spread&#8221; increases with
 the standard deviation (the function reaches 0.607 times its maximum at
-<span class="math">
-\(x + \sigma\)</span>
- and <span class="math">
-\(x - \sigma\)</span>
- <a href="#id70"><span class="problematic" id="id71"><span id="id39"></span>[2]_</span></a>).  This implies that
+<span class="math">\(x + \sigma\)</span> and <span class="math">\(x - \sigma\)</span> <a href="#id76"><span class="problematic" id="id77"><span id="id36"></span>[2]_</span></a>).  This implies that
 <cite>numpy.random.normal</cite> is more likely to return samples lying close to the
 mean, rather than those far away.</p>
-<table class="docutils footnote" frame="void" id="id40" rules="none">
+<table class="docutils footnote" frame="void" id="id37" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label">[1]</td><td>Wikipedia, &#8220;Normal distribution&#8221;,
 <a class="reference external" href="http://en.wikipedia.org/wiki/Normal_distribution">http://en.wikipedia.org/wiki/Normal_distribution</a></td></tr>
 </tbody>
 </table>
-<table class="docutils footnote" frame="void" id="id41" rules="none">
+<table class="docutils footnote" frame="void" id="id38" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label">[2]</td><td>P. R. Peebles Jr., &#8220;Central Limit Theorem&#8221; in &#8220;Probability, Random
@@ -1527,15 +1368,8 @@ percent fill the remaining 80 percent of the range.</p>
 </dl>
 <p>The probability density for the Pareto distribution is</p>
 <div class="math">
-\begin{equation*}
-p(x) = \frac{am^a}{x^{a+1}}
-\end{equation*}
-</div>
-<p>where <span class="math">
-\(a\)</span>
- is the shape and <span class="math">
-\(m\)</span>
- the location</p>
+\[p(x) = \frac{am^a}{x^{a+1}}\]</div>
+<p>where <span class="math">\(a\)</span> is the shape and <span class="math">\(m\)</span> the location</p>
 <p>The Pareto distribution, named after the Italian economist Vilfredo Pareto,
 is a power law probability distribution useful in many real world problems.
 Outside the field of economics it is generally referred to as the Bradford
@@ -1544,27 +1378,27 @@ distribution of wealth in an economy.  It has also found use in insurance,
 web page access statistics, oil field sizes, and many other problems,
 including the download frequency for projects in Sourceforge [1].  It is
 one of the so-called &#8220;fat-tailed&#8221; distributions.</p>
-<table class="docutils footnote" frame="void" id="id42" rules="none">
+<table class="docutils footnote" frame="void" id="id39" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label">[1]</td><td>Francis Hunt and Paul Johnson, On the Pareto Distribution of
 Sourceforge projects.</td></tr>
 </tbody>
 </table>
-<table class="docutils footnote" frame="void" id="id43" rules="none">
+<table class="docutils footnote" frame="void" id="id40" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label">[2]</td><td>Pareto, V. (1896). Course of Political Economy. Lausanne.</td></tr>
 </tbody>
 </table>
-<table class="docutils footnote" frame="void" id="id44" rules="none">
+<table class="docutils footnote" frame="void" id="id41" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label">[3]</td><td>Reiss, R.D., Thomas, M.(2001), Statistical Analysis of Extreme
 Values, Birkhauser Verlag, Basel, pp 23-30.</td></tr>
 </tbody>
 </table>
-<table class="docutils footnote" frame="void" id="id45" rules="none">
+<table class="docutils footnote" frame="void" id="id42" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label">[4]</td><td>Wikipedia, &#8220;Pareto distribution&#8221;,
@@ -1635,32 +1469,21 @@ distribution for large N.</p>
 </dl>
 <p>The Poisson distribution</p>
 <div class="math">
-\begin{equation*}
-f(k; \lambda)=\frac{\lambda^k e^{-\lambda}}{k!}
-\end{equation*}
-</div>
-<p>For events with an expected separation <span class="math">
-\(\lambda\)</span>
- the Poisson
-distribution <span class="math">
-\(f(k; \lambda)\)</span>
- describes the probability of
-<span class="math">
-\(k\)</span>
- events occurring within the observed interval <span class="math">
-\(\lambda\)</span>
-.</p>
+\[f(k; \lambda)=\frac{\lambda^k e^{-\lambda}}{k!}\]</div>
+<p>For events with an expected separation <span class="math">\(\lambda\)</span> the Poisson
+distribution <span class="math">\(f(k; \lambda)\)</span> describes the probability of
+<span class="math">\(k\)</span> events occurring within the observed interval <span class="math">\(\lambda\)</span>.</p>
 <p>Because the output is limited to the range of the C long type, a
 ValueError is raised when <cite>lam</cite> is within 10 sigma of the maximum
 representable value.</p>
-<table class="docutils footnote" frame="void" id="id46" rules="none">
+<table class="docutils footnote" frame="void" id="id43" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label">[1]</td><td>Weisstein, Eric W. &#8220;Poisson Distribution.&#8221; From MathWorld&#8211;A Wolfram
 Web Resource. <a class="reference external" href="http://mathworld.wolfram.com/PoissonDistribution.html">http://mathworld.wolfram.com/PoissonDistribution.html</a></td></tr>
 </tbody>
 </table>
-<table class="docutils footnote" frame="void" id="id47" rules="none">
+<table class="docutils footnote" frame="void" id="id44" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label">[2]</td><td>Wikipedia, &#8220;Poisson distribution&#8221;,
@@ -1706,23 +1529,20 @@ exponent a - 1.</p>
 </dl>
 <p>The probability density function is</p>
 <div class="math">
-\begin{equation*}
-P(x; a) = ax^{a-1}, 0 \le x \le 1, a&gt;0.
-\end{equation*}
-</div>
+\[\begin{split}P(x; a) = ax^{a-1}, 0 \le x \le 1, a&gt;0.\end{split}\]</div>
 <p>The power function distribution is just the inverse of the Pareto
 distribution. It may also be seen as a special case of the Beta
 distribution.</p>
 <p>It is used, for example, in modeling the over-reporting of insurance
 claims.</p>
-<table class="docutils footnote" frame="void" id="id48" rules="none">
+<table class="docutils footnote" frame="void" id="id45" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label">[1]</td><td>Christian Kleiber, Samuel Kotz, &#8220;Statistical size distributions
 in economics and actuarial sciences&#8221;, Wiley, 2003.</td></tr>
 </tbody>
 </table>
-<table class="docutils footnote" frame="void" id="id49" rules="none">
+<table class="docutils footnote" frame="void" id="id46" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label">[2]</td><td>Heckert, N. A. and Filliben, James J. (2003). NIST Handbook 148:
@@ -1785,8 +1605,9 @@ the probability density function:</p>
 random samples from a uniform distribution
 over <tt class="docutils literal"><span class="pre">[0,</span> <span class="pre">1)</span></tt>.</p>
 <dl class="docutils">
-<dt>d0, d1, ..., dn <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>Shape of the output.</dd>
+<dt>d0, d1, ..., dn <span class="classifier-delimiter">:</span> <span class="classifier">int, optional</span></dt>
+<dd>The dimensions of the returned array, should all be positive.
+If no argument is given a single Python float is returned.</dd>
 </dl>
 <dl class="docutils">
 <dt>out <span class="classifier-delimiter">:</span> <span class="classifier">ndarray, shape <tt class="docutils literal"><span class="pre">(d0,</span> <span class="pre">d1,</span> <span class="pre">...,</span> <span class="pre">dn)</span></tt></span></dt>
@@ -1795,7 +1616,7 @@ over <tt class="docutils literal"><span class="pre">[0,</span> <span class="pre"
 <p>random</p>
 <p>This is a convenience function. If you want an interface that
 takes a shape-tuple as the first argument, refer to
-<cite>random</cite>.</p>
+np.random.random_sample .</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
 <span class="go">array([[ 0.14022471,  0.96360618],  #random</span>
 <span class="go">       [ 0.37601032,  0.25528411],  #random</span>
@@ -1850,33 +1671,30 @@ uniformly distributed discrete non-integers.</dd>
 
 <dl class="function">
 <dt id="acsDynStatInTime.randn">
-<tt class="descclassname">acsDynStatInTime.</tt><tt class="descname">randn</tt><big>(</big><span class="optional">[</span><em>d1</em>, <em>...</em>, <em>dn</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#acsDynStatInTime.randn" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">acsDynStatInTime.</tt><tt class="descname">randn</tt><big>(</big><em>d0</em>, <em>d1</em>, <em>...</em>, <em>dn</em><big>)</big><a class="headerlink" href="#acsDynStatInTime.randn" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a sample (or samples) from the &#8220;standard normal&#8221; distribution.</p>
 <p>If positive, int_like or int-convertible arguments are provided,
-<cite>randn</cite> generates an array of shape <tt class="docutils literal"><span class="pre">(d1,</span> <span class="pre">...,</span> <span class="pre">dn)</span></tt>, filled
+<cite>randn</cite> generates an array of shape <tt class="docutils literal"><span class="pre">(d0,</span> <span class="pre">d1,</span> <span class="pre">...,</span> <span class="pre">dn)</span></tt>, filled
 with random floats sampled from a univariate &#8220;normal&#8221; (Gaussian)
-distribution of mean 0 and variance 1 (if any of the <span class="math">
-\(d_i\)</span>
- are
+distribution of mean 0 and variance 1 (if any of the <span class="math">\(d_i\)</span> are
 floats, they are first converted to integers by truncation). A single
 float randomly sampled from the distribution is returned if no
 argument is provided.</p>
 <p>This is a convenience function.  If you want an interface that takes a
 tuple as the first argument, use <cite>numpy.random.standard_normal</cite> instead.</p>
 <dl class="docutils">
-<dt>d1, ..., dn <span class="classifier-delimiter">:</span> <span class="classifier"><cite>n</cite> ints, optional</span></dt>
-<dd>The dimensions of the returned array, should be all positive.</dd>
+<dt>d0, d1, ..., dn <span class="classifier-delimiter">:</span> <span class="classifier">int, optional</span></dt>
+<dd>The dimensions of the returned array, should be all positive.
+If no argument is given a single Python float is returned.</dd>
 </dl>
 <dl class="docutils">
 <dt>Z <span class="classifier-delimiter">:</span> <span class="classifier">ndarray or float</span></dt>
-<dd>A <tt class="docutils literal"><span class="pre">(d1,</span> <span class="pre">...,</span> <span class="pre">dn)</span></tt>-shaped array of floating-point samples from
+<dd>A <tt class="docutils literal"><span class="pre">(d0,</span> <span class="pre">d1,</span> <span class="pre">...,</span> <span class="pre">dn)</span></tt>-shaped array of floating-point samples from
 the standard normal distribution, or a single such float if
 no parameters were supplied.</dd>
 </dl>
 <p>random.standard_normal : Similar, but takes a tuple as its argument.</p>
-<p>For random samples from <span class="math">
-\(N(\mu, \sigma^2)\)</span>
-, use:</p>
+<p>For random samples from <span class="math">\(N(\mu, \sigma^2)\)</span>, use:</p>
 <p><tt class="docutils literal"><span class="pre">sigma</span> <span class="pre">*</span> <span class="pre">np.random.randn(...)</span> <span class="pre">+</span> <span class="pre">mu</span></tt></p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">()</span>
 <span class="go">2.1923875335537315 #random</span>
@@ -1896,9 +1714,7 @@ no parameters were supplied.</dd>
 <dd><p>random_sample(size=None)</p>
 <p>Return random floats in the half-open interval [0.0, 1.0).</p>
 <p>Results are from the &#8220;continuous uniform&#8221; distribution over the
-stated interval.  To sample <span class="math">
-\(Unif[a, b), b &gt; a\)</span>
- multiply
+stated interval.  To sample <span class="math">\(Unif[a, b), b &gt; a\)</span> multiply
 the output of <cite>random_sample</cite> by <cite>(b-a)</cite> and add <cite>a</cite>:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="p">(</span><span class="n">b</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span> <span class="o">*</span> <span class="n">random_sample</span><span class="p">()</span> <span class="o">+</span> <span class="n">a</span>
 </pre></div>
@@ -1975,9 +1791,7 @@ use:</p>
 </div>
 <p>Choose five random numbers from the set of five evenly-spaced
 numbers between 0 and 2.5, inclusive (<em>i.e.</em>, from the set
-<span class="math">
-\({0, 5/8, 10/8, 15/8, 20/8}\)</span>
-):</p>
+<span class="math">\({0, 5/8, 10/8, 15/8, 20/8}\)</span>):</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="mf">2.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random_integers</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,))</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mf">4.</span>
 <span class="go">array([ 0.625,  1.25 ,  0.625,  0.625,  2.5  ])</span>
 </pre></div>
@@ -2001,9 +1815,7 @@ numbers between 0 and 2.5, inclusive (<em>i.e.</em>, from the set
 <tt class="descclassname">acsDynStatInTime.</tt><tt class="descname">random_sample</tt><big>(</big><em>size=None</em><big>)</big><a class="headerlink" href="#acsDynStatInTime.random_sample" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return random floats in the half-open interval [0.0, 1.0).</p>
 <p>Results are from the &#8220;continuous uniform&#8221; distribution over the
-stated interval.  To sample <span class="math">
-\(Unif[a, b), b &gt; a\)</span>
- multiply
+stated interval.  To sample <span class="math">\(Unif[a, b), b &gt; a\)</span> multiply
 the output of <cite>random_sample</cite> by <cite>(b-a)</cite> and add <cite>a</cite>:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="p">(</span><span class="n">b</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span> <span class="o">*</span> <span class="n">random_sample</span><span class="p">()</span> <span class="o">+</span> <span class="n">a</span>
 </pre></div>
@@ -2041,9 +1853,7 @@ case a single float is returned).</dd>
 <dd><p>random_sample(size=None)</p>
 <p>Return random floats in the half-open interval [0.0, 1.0).</p>
 <p>Results are from the &#8220;continuous uniform&#8221; distribution over the
-stated interval.  To sample <span class="math">
-\(Unif[a, b), b &gt; a\)</span>
- multiply
+stated interval.  To sample <span class="math">\(Unif[a, b), b &gt; a\)</span> multiply
 the output of <cite>random_sample</cite> by <cite>(b-a)</cite> and add <cite>a</cite>:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="p">(</span><span class="n">b</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span> <span class="o">*</span> <span class="n">random_sample</span><span class="p">()</span> <span class="o">+</span> <span class="n">a</span>
 </pre></div>
@@ -2079,9 +1889,7 @@ case a single float is returned).</dd>
 <dt id="acsDynStatInTime.rayleigh">
 <tt class="descclassname">acsDynStatInTime.</tt><tt class="descname">rayleigh</tt><big>(</big><em>scale=1.0</em>, <em>size=None</em><big>)</big><a class="headerlink" href="#acsDynStatInTime.rayleigh" title="Permalink to this definition">¶</a></dt>
 <dd><p>Draw samples from a Rayleigh distribution.</p>
-<p>The <span class="math">
-\(\chi\)</span>
- and Weibull distributions are generalizations of the
+<p>The <span class="math">\(\chi\)</span> and Weibull distributions are generalizations of the
 Rayleigh.</p>
 <dl class="docutils">
 <dt>scale <span class="classifier-delimiter">:</span> <span class="classifier">scalar</span></dt>
@@ -2092,20 +1900,25 @@ value is returned.</dd>
 </dl>
 <p>The probability density function for the Rayleigh distribution is</p>
 <div class="math">
-\begin{equation*}
-P(x;scale) = \frac{x}{scale^2}e^{\frac{-x^2}{2 \cdotp scale^2}}
-\end{equation*}
-</div>
+\[P(x;scale) = \frac{x}{scale^2}e^{\frac{-x^2}{2 \cdotp scale^2}}\]</div>
 <p>The Rayleigh distribution arises if the wind speed and wind direction are
 both gaussian variables, then the vector wind velocity forms a Rayleigh
 distribution. The Rayleigh distribution is used to model the expected
 output from wind turbines.</p>
-<dl class="docutils">
-<dt>..[1] Brighton Webs Ltd., Rayleigh Distribution,</dt>
-<dd><a class="reference external" href="http://www.brighton-webs.co.uk/distributions/rayleigh.asp">http://www.brighton-webs.co.uk/distributions/rayleigh.asp</a></dd>
-<dt>..[2] Wikipedia, &#8220;Rayleigh distribution&#8221;</dt>
-<dd><a class="reference external" href="http://en.wikipedia.org/wiki/Rayleigh_distribution">http://en.wikipedia.org/wiki/Rayleigh_distribution</a></dd>
-</dl>
+<table class="docutils footnote" frame="void" id="id47" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[1]</td><td>Brighton Webs Ltd., Rayleigh Distribution,
+<a class="reference external" href="http://www.brighton-webs.co.uk/distributions/rayleigh.asp">http://www.brighton-webs.co.uk/distributions/rayleigh.asp</a></td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id48" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[2]</td><td>Wikipedia, &#8220;Rayleigh distribution&#8221;
+<a class="reference external" href="http://en.wikipedia.org/wiki/Rayleigh_distribution">http://en.wikipedia.org/wiki/Rayleigh_distribution</a></td></tr>
+</tbody>
+</table>
 <p>Draw values from the distribution and plot the histogram</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">values</span> <span class="o">=</span> <span class="n">hist</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rayleigh</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">100000</span><span class="p">),</span> <span class="n">bins</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">normed</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 </pre></div>
@@ -2131,9 +1944,7 @@ meters?</p>
 <dd><p>random_sample(size=None)</p>
 <p>Return random floats in the half-open interval [0.0, 1.0).</p>
 <p>Results are from the &#8220;continuous uniform&#8221; distribution over the
-stated interval.  To sample <span class="math">
-\(Unif[a, b), b &gt; a\)</span>
- multiply
+stated interval.  To sample <span class="math">\(Unif[a, b), b &gt; a\)</span> multiply
 the output of <cite>random_sample</cite> by <cite>(b-a)</cite> and add <cite>a</cite>:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="p">(</span><span class="n">b</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span> <span class="o">*</span> <span class="n">random_sample</span><span class="p">()</span> <span class="o">+</span> <span class="n">a</span>
 </pre></div>
@@ -2183,7 +1994,7 @@ called again to re-seed the generator. For details, see <cite>RandomState</cite>
 <tt class="descclassname">acsDynStatInTime.</tt><tt class="descname">set_state</tt><big>(</big><em>state</em><big>)</big><a class="headerlink" href="#acsDynStatInTime.set_state" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the internal state of the generator from a tuple.</p>
 <p>For use if one has reason to manually (re-)set the internal state of the
-&#8220;Mersenne Twister&#8221;<a href="#id72"><span class="problematic" id="id73"><span id="id50"></span>[1]_</span></a> pseudo-random number generating algorithm.</p>
+&#8220;Mersenne Twister&#8221;<a href="#id78"><span class="problematic" id="id79"><span id="id49"></span>[1]_</span></a> pseudo-random number generating algorithm.</p>
 <dl class="docutils">
 <dt>state <span class="classifier-delimiter">:</span> <span class="classifier">tuple(str, ndarray of 624 uints, int, int, float)</span></dt>
 <dd><p class="first">The <cite>state</cite> tuple has the following items:</p>
@@ -2207,7 +2018,7 @@ the user should know exactly what he/she is doing.</p>
 <p>For backwards compatibility, the form (str, array of 624 uints, int) is
 also accepted although it is missing some information about the cached
 Gaussian value: <tt class="docutils literal"><span class="pre">state</span> <span class="pre">=</span> <span class="pre">('MT19937',</span> <span class="pre">keys,</span> <span class="pre">pos)</span></tt>.</p>
-<table class="docutils footnote" frame="void" id="id51" rules="none">
+<table class="docutils footnote" frame="void" id="id50" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label">[1]</td><td>M. Matsumoto and T. Nishimura, &#8220;Mersenne Twister: A
@@ -2260,17 +2071,10 @@ multi-dimensional array:</p>
 </dl>
 <p>The probability density function for the full Cauchy distribution is</p>
 <div class="math">
-\begin{equation*}
-P(x; x_0, \gamma) = \frac{1}{\pi \gamma \bigl[ 1+
-(\frac{x-x_0}{\gamma})^2 \bigr] }
-\end{equation*}
-</div>
-<p>and the Standard Cauchy distribution just sets <span class="math">
-\(x_0=0\)</span>
- and
-<span class="math">
-\(\gamma=1\)</span>
-</p>
+\[P(x; x_0, \gamma) = \frac{1}{\pi \gamma \bigl[ 1+
+(\frac{x-x_0}{\gamma})^2 \bigr] }\]</div>
+<p>and the Standard Cauchy distribution just sets <span class="math">\(x_0=0\)</span> and
+<span class="math">\(\gamma=1\)</span></p>
 <p>The Cauchy distribution arises in the solution to the driven harmonic
 oscillator problem, and also describes spectral line broadening. It
 also describes the distribution of values at which a line tilted at
@@ -2279,16 +2083,29 @@ a random angle will cut the x axis.</p>
 tests perform on data from a Cauchy distribution is a good indicator of
 their sensitivity to a heavy-tailed distribution, since the Cauchy looks
 very much like a Gaussian distribution, but with heavier tails.</p>
-<dl class="docutils">
-<dt>..[1] NIST/SEMATECH e-Handbook of Statistical Methods, &#8220;Cauchy</dt>
-<dd>Distribution&#8221;,
-<a class="reference external" href="http://www.itl.nist.gov/div898/handbook/eda/section3/eda3663.htm">http://www.itl.nist.gov/div898/handbook/eda/section3/eda3663.htm</a></dd>
-<dt>..[2] Weisstein, Eric W. &#8220;Cauchy Distribution.&#8221; From MathWorld&#8211;A</dt>
-<dd>Wolfram Web Resource.
-<a class="reference external" href="http://mathworld.wolfram.com/CauchyDistribution.html">http://mathworld.wolfram.com/CauchyDistribution.html</a></dd>
-<dt>..[3] Wikipedia, &#8220;Cauchy distribution&#8221;</dt>
-<dd><a class="reference external" href="http://en.wikipedia.org/wiki/Cauchy_distribution">http://en.wikipedia.org/wiki/Cauchy_distribution</a></dd>
-</dl>
+<table class="docutils footnote" frame="void" id="id51" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[1]</td><td>NIST/SEMATECH e-Handbook of Statistical Methods, &#8220;Cauchy
+Distribution&#8221;,
+<a class="reference external" href="http://www.itl.nist.gov/div898/handbook/eda/section3/eda3663.htm">http://www.itl.nist.gov/div898/handbook/eda/section3/eda3663.htm</a></td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id52" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[2]</td><td>Weisstein, Eric W. &#8220;Cauchy Distribution.&#8221; From MathWorld&#8211;A
+Wolfram Web Resource.
+<a class="reference external" href="http://mathworld.wolfram.com/CauchyDistribution.html">http://mathworld.wolfram.com/CauchyDistribution.html</a></td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id53" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[3]</td><td>Wikipedia, &#8220;Cauchy distribution&#8221;
+<a class="reference external" href="http://en.wikipedia.org/wiki/Cauchy_distribution">http://en.wikipedia.org/wiki/Cauchy_distribution</a></td></tr>
+</tbody>
+</table>
 <p>Draw samples and plot the distribution:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">standard_cauchy</span><span class="p">(</span><span class="mi">1000000</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="p">[(</span><span class="n">s</span><span class="o">&gt;-</span><span class="mi">25</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">s</span><span class="o">&lt;</span><span class="mi">25</span><span class="p">)]</span>  <span class="c"># truncate distribution so it plots well</span>
@@ -2341,22 +2158,13 @@ shape (sometimes designated &#8220;k&#8221;) and scale=1.</p>
 </dl>
 <p>The probability density for the Gamma distribution is</p>
 <div class="math">
-\begin{equation*}
-p(x) = x^{k-1}\frac{e^{-x/\theta}}{\theta^k\Gamma(k)},
-\end{equation*}
-</div>
-<p>where <span class="math">
-\(k\)</span>
- is the shape and <span class="math">
-\(\theta\)</span>
- the scale,
-and <span class="math">
-\(\Gamma\)</span>
- is the Gamma function.</p>
+\[p(x) = x^{k-1}\frac{e^{-x/\theta}}{\theta^k\Gamma(k)},\]</div>
+<p>where <span class="math">\(k\)</span> is the shape and <span class="math">\(\theta\)</span> the scale,
+and <span class="math">\(\Gamma\)</span> is the Gamma function.</p>
 <p>The Gamma distribution is often used to model the times to failure of
 electronic components, and arises naturally in processes for which the
 waiting times between Poisson distributed events are relevant.</p>
-<table class="docutils footnote" frame="void" id="id52" rules="none">
+<table class="docutils footnote" frame="void" id="id54" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label">[1]</td><td>Weisstein, Eric W. &#8220;Gamma Distribution.&#8221; From MathWorld&#8211;A
@@ -2364,7 +2172,7 @@ Wolfram Web Resource.
 <a class="reference external" href="http://mathworld.wolfram.com/GammaDistribution.html">http://mathworld.wolfram.com/GammaDistribution.html</a></td></tr>
 </tbody>
 </table>
-<table class="docutils footnote" frame="void" id="id53" rules="none">
+<table class="docutils footnote" frame="void" id="id55" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label">[2]</td><td>Wikipedia, &#8220;Gamma-distribution&#8221;,
@@ -2435,11 +2243,8 @@ returned.</dd>
 </dl>
 <p>The probability density function for the t distribution is</p>
 <div class="math">
-\begin{equation*}
-P(x, df) = \frac{\Gamma(\frac{df+1}{2})}{\sqrt{\pi df}
-\Gamma(\frac{df}{2})}\Bigl( 1+\frac{x^2}{df} \Bigr)^{-(df+1)/2}
-\end{equation*}
-</div>
+\[P(x, df) = \frac{\Gamma(\frac{df+1}{2})}{\sqrt{\pi df}
+\Gamma(\frac{df}{2})}\Bigl( 1+\frac{x^2}{df} \Bigr)^{-(df+1)/2}\]</div>
 <p>The t test is based on an assumption that the data come from a Normal
 distribution. The t test provides a way to test whether the sample mean
 (that is the mean calculated from the data) is a good estimate of the true
@@ -2448,21 +2253,21 @@ mean.</p>
 Gisset while working for the Guinness Brewery in Dublin. Due to proprietary
 issues, he had to publish under a pseudonym, and so he used the name
 Student.</p>
-<table class="docutils footnote" frame="void" id="id54" rules="none">
+<table class="docutils footnote" frame="void" id="id56" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label">[1]</td><td>Dalgaard, Peter, &#8220;Introductory Statistics With R&#8221;,
 Springer, 2002.</td></tr>
 </tbody>
 </table>
-<table class="docutils footnote" frame="void" id="id55" rules="none">
+<table class="docutils footnote" frame="void" id="id57" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label">[2]</td><td>Wikipedia, &#8220;Student&#8217;s t-distribution&#8221;
 <a class="reference external" href="http://en.wikipedia.org/wiki/Student's_t-distribution">http://en.wikipedia.org/wiki/Student&#8217;s_t-distribution</a></td></tr>
 </tbody>
 </table>
-<p>From Dalgaard page 83 <a href="#id74"><span class="problematic" id="id75"><span id="id56"></span>[1]_</span></a>, suppose the daily energy intake for 11
+<p>From Dalgaard page 83 <a href="#id80"><span class="problematic" id="id81"><span id="id58"></span>[1]_</span></a>, suppose the daily energy intake for 11
 women in Kj is:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">intake</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">5260.</span><span class="p">,</span> <span class="mi">5470</span><span class="p">,</span> <span class="mi">5640</span><span class="p">,</span> <span class="mi">6180</span><span class="p">,</span> <span class="mi">6390</span><span class="p">,</span> <span class="mi">6515</span><span class="p">,</span> <span class="mi">6805</span><span class="p">,</span> <span class="mi">7515</span><span class="p">,</span> \
 <span class="gp">... </span>                   <span class="mi">7515</span><span class="p">,</span> <span class="mi">8230</span><span class="p">,</span> <span class="mi">8770</span><span class="p">])</span>
@@ -2522,21 +2327,21 @@ returned.</dd>
 </dl>
 <p>The probability density function for the Triangular distribution is</p>
 <div class="math">
-\begin{equation*}
-P(x;l, m, r) = \begin{cases}
+\[\begin{split}P(x;l, m, r) = \begin{cases}
 \frac{2(x-l)}{(r-l)(m-l)}&amp; \text{for $l \leq x \leq m$},\\
 \frac{2(m-x)}{(r-l)(r-m)}&amp; \text{for $m \leq x \leq r$},\\
 0&amp; \text{otherwise}.
-\end{cases}
-\end{equation*}
-</div>
+\end{cases}\end{split}\]</div>
 <p>The triangular distribution is often used in ill-defined problems where the
 underlying distribution is not known, but some knowledge of the limits and
 mode exists. Often it is used in simulations.</p>
-<dl class="docutils">
-<dt>..[1] Wikipedia, &#8220;Triangular distribution&#8221;</dt>
-<dd><a class="reference external" href="http://en.wikipedia.org/wiki/Triangular_distribution">http://en.wikipedia.org/wiki/Triangular_distribution</a></dd>
-</dl>
+<table class="docutils footnote" frame="void" id="id59" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[1]</td><td>Wikipedia, &#8220;Triangular distribution&#8221;
+<a class="reference external" href="http://en.wikipedia.org/wiki/Triangular_distribution">http://en.wikipedia.org/wiki/Triangular_distribution</a></td></tr>
+</tbody>
+</table>
 <p>Draw values from the distribution and plot the histogram:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">h</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">triangular</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">100000</span><span class="p">),</span> <span class="n">bins</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
@@ -2582,10 +2387,7 @@ rand : Convenience function that accepts dimensions as input, e.g.,</p>
 uniformly distributed over <tt class="docutils literal"><span class="pre">[0,</span> <span class="pre">1)</span></tt>.</div></blockquote>
 <p>The probability density function of the uniform distribution is</p>
 <div class="math">
-\begin{equation*}
-p(x) = \frac{1}{b - a}
-\end{equation*}
-</div>
+\[p(x) = \frac{1}{b - a}\]</div>
 <p>anywhere within the interval <tt class="docutils literal"><span class="pre">[a,</span> <span class="pre">b)</span></tt>, and zero elsewhere.</p>
 <p>Draw samples from the distribution:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1000</span><span class="p">)</span>
@@ -2637,18 +2439,9 @@ distribution.</p>
 </dl>
 <p>The probability density for the von Mises distribution is</p>
 <div class="math">
-\begin{equation*}
-p(x) = \frac{e^{\kappa cos(x-\mu)}}{2\pi I_0(\kappa)},
-\end{equation*}
-</div>
-<p>where <span class="math">
-\(\mu\)</span>
- is the mode and <span class="math">
-\(\kappa\)</span>
- the dispersion,
-and <span class="math">
-\(I_0(\kappa)\)</span>
- is the modified Bessel function of order 0.</p>
+\[p(x) = \frac{e^{\kappa cos(x-\mu)}}{2\pi I_0(\kappa)},\]</div>
+<p>where <span class="math">\(\mu\)</span> is the mode and <span class="math">\(\kappa\)</span> the dispersion,
+and <span class="math">\(I_0(\kappa)\)</span> is the modified Bessel function of order 0.</p>
 <p>The von Mises is named for Richard Edler von Mises, who was born in
 Austria-Hungary, in what is now the Ukraine.  He fled to the United
 States in 1939 and became a professor at Harvard.  He worked in
@@ -2703,24 +2496,34 @@ returned.</dd>
 </dl>
 <p>The probability density function for the Wald distribution is</p>
 <div class="math">
-\begin{equation*}
-P(x;mean,scale) = \sqrt{\frac{scale}{2\pi x^3}}e^
-\frac{-scale(x-mean)^2}{2\cdotp mean^2x}
-\end{equation*}
-</div>
+\[P(x;mean,scale) = \sqrt{\frac{scale}{2\pi x^3}}e^
+\frac{-scale(x-mean)^2}{2\cdotp mean^2x}\]</div>
 <p>As noted above the Inverse Gaussian distribution first arise from attempts
 to model Brownian Motion. It is also a competitor to the Weibull for use in
 reliability modeling and modeling stock returns and interest rate
 processes.</p>
-<dl class="docutils">
-<dt>..[1] Brighton Webs Ltd., Wald Distribution,</dt>
-<dd><a class="reference external" href="http://www.brighton-webs.co.uk/distributions/wald.asp">http://www.brighton-webs.co.uk/distributions/wald.asp</a></dd>
-<dt>..[2] Chhikara, Raj S., and Folks, J. Leroy, &#8220;The Inverse Gaussian</dt>
-<dd>Distribution: Theory : Methodology, and Applications&#8221;, CRC Press,
-1988.</dd>
-<dt>..[3] Wikipedia, &#8220;Wald distribution&#8221;</dt>
-<dd><a class="reference external" href="http://en.wikipedia.org/wiki/Wald_distribution">http://en.wikipedia.org/wiki/Wald_distribution</a></dd>
-</dl>
+<table class="docutils footnote" frame="void" id="id60" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[1]</td><td>Brighton Webs Ltd., Wald Distribution,
+<a class="reference external" href="http://www.brighton-webs.co.uk/distributions/wald.asp">http://www.brighton-webs.co.uk/distributions/wald.asp</a></td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id61" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[2]</td><td>Chhikara, Raj S., and Folks, J. Leroy, &#8220;The Inverse Gaussian
+Distribution: Theory : Methodology, and Applications&#8221;, CRC Press,
+1988.</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id62" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[3]</td><td>Wikipedia, &#8220;Wald distribution&#8221;
+<a class="reference external" href="http://en.wikipedia.org/wiki/Wald_distribution">http://en.wikipedia.org/wiki/Wald_distribution</a></td></tr>
+</tbody>
+</table>
 <p>Draw values from the distribution and plot the histogram:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">h</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">wald</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">100000</span><span class="p">),</span> <span class="n">bins</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">normed</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
@@ -2736,17 +2539,10 @@ processes.</p>
 <p>Draw samples from a 1-parameter Weibull distribution with the given
 shape parameter <cite>a</cite>.</p>
 <div class="math">
-\begin{equation*}
-X = (-ln(U))^{1/a}
-\end{equation*}
-</div>
+\[X = (-ln(U))^{1/a}\]</div>
 <p>Here, U is drawn from the uniform distribution over (0,1].</p>
 <p>The more common 2-parameter Weibull, including a scale parameter
-<span class="math">
-\(\lambda\)</span>
- is just <span class="math">
-\(X = \lambda(-ln(U))^{1/a}\)</span>
-.</p>
+<span class="math">\(\lambda\)</span> is just <span class="math">\(X = \lambda(-ln(U))^{1/a}\)</span>.</p>
 <dl class="docutils">
 <dt>a <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
 <dd>Shape of the distribution.</dd>
@@ -2754,34 +2550,24 @@ X = (-ln(U))^{1/a}
 <dd>Output shape.  If the given shape is, e.g., <tt class="docutils literal"><span class="pre">(m,</span> <span class="pre">n,</span> <span class="pre">k)</span></tt>, then
 <tt class="docutils literal"><span class="pre">m</span> <span class="pre">*</span> <span class="pre">n</span> <span class="pre">*</span> <span class="pre">k</span></tt> samples are drawn.</dd>
 </dl>
-<dl class="docutils">
-<dt>scipy.stats.distributions.weibull <span class="classifier-delimiter">:</span> <span class="classifier">probability density function,</span></dt>
-<dd>distribution or cumulative density function, etc.</dd>
-</dl>
-<p>gumbel, scipy.stats.distributions.genextreme</p>
+<p>scipy.stats.distributions.weibull_max
+scipy.stats.distributions.weibull_min
+scipy.stats.distributions.genextreme
+gumbel</p>
 <p>The Weibull (or Type III asymptotic extreme value distribution for smallest
 values, SEV Type III, or Rosin-Rammler distribution) is one of a class of
 Generalized Extreme Value (GEV) distributions used in modeling extreme
 value problems.  This class includes the Gumbel and Frechet distributions.</p>
 <p>The probability density for the Weibull distribution is</p>
 <div class="math">
-\begin{equation*}
-p(x) = \frac{a}
-{\lambda}(\frac{x}{\lambda})^{a-1}e^{-(x/\lambda)^a},
-\end{equation*}
-</div>
-<p>where <span class="math">
-\(a\)</span>
- is the shape and <span class="math">
-\(\lambda\)</span>
- the scale.</p>
+\[p(x) = \frac{a}
+{\lambda}(\frac{x}{\lambda})^{a-1}e^{-(x/\lambda)^a},\]</div>
+<p>where <span class="math">\(a\)</span> is the shape and <span class="math">\(\lambda\)</span> the scale.</p>
 <p>The function has its peak (the mode) at
-<span class="math">
-\(\lambda(\frac{a-1}{a})^{1/a}\)</span>
-.</p>
+<span class="math">\(\lambda(\frac{a-1}{a})^{1/a}\)</span>.</p>
 <p>When <tt class="docutils literal"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">1</span></tt>, the Weibull distribution reduces to the exponential
 distribution.</p>
-<table class="docutils footnote" frame="void" id="id57" rules="none">
+<table class="docutils footnote" frame="void" id="id63" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label">[1]</td><td>Waloddi Weibull, Professor, Royal Technical University, Stockholm,
@@ -2790,14 +2576,14 @@ Ingeniorsvetenskapsakademiens Handlingar Nr 151, 1939,
 Generalstabens Litografiska Anstalts Forlag, Stockholm.</td></tr>
 </tbody>
 </table>
-<table class="docutils footnote" frame="void" id="id58" rules="none">
+<table class="docutils footnote" frame="void" id="id64" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label">[2]</td><td>Waloddi Weibull, 1951 &#8220;A Statistical Distribution Function of Wide
 Applicability&#8221;,  Journal Of Applied Mechanics ASME Paper.</td></tr>
 </tbody>
 </table>
-<table class="docutils footnote" frame="void" id="id59" rules="none">
+<table class="docutils footnote" frame="void" id="id65" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label">[3]</td><td>Wikipedia, &#8220;Weibull distribution&#8221;,
@@ -2856,13 +2642,8 @@ scalar is returned.</dd>
 </dl>
 <p>The probability density for the Zipf distribution is</p>
 <div class="math">
-\begin{equation*}
-p(x) = \frac{x^{-a}}{\zeta(a)},
-\end{equation*}
-</div>
-<p>where <span class="math">
-\(\zeta\)</span>
- is the Riemann Zeta function.</p>
+\[p(x) = \frac{x^{-a}}{\zeta(a)},\]</div>
+<p>where <span class="math">\(\zeta\)</span> is the Riemann Zeta function.</p>
 <p>It is named for the American linguist George Kingsley Zipf, who noted
 that the frequency of any word in a sample of a language is inversely
 proportional to its rank in the frequency table.</p>
@@ -2895,6 +2676,9 @@ the probability density function:</p>
       </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/logo.png" alt="Logo"/>
+            </a></p>
   <h4>Previous topic</h4>
   <p class="topless"><a href="acsBufferedFluxes.html"
                         title="previous chapter">acsBufferedFluxes Module</a></p>
@@ -2938,12 +2722,12 @@ the probability density function:</p>
         <li class="right" >
           <a href="acsBufferedFluxes.html" title="acsBufferedFluxes Module"
              >previous</a> |</li>
-        <li><a href="index.html">ELDA::Emergent Levels Dynamic Assessment 20140204.004 documentation</a> &raquo;</li> 
+        <li><a href="index.html">CARNESS analysis package 20150424.001 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
-        &copy; Copyright 2014, Alessandro Filisetti.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+        &copy; Copyright 2015, Alessandro Filisetti.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
   </body>
 </html>

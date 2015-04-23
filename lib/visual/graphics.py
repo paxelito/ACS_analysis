@@ -9,7 +9,7 @@ import numpy as np
 import random as ran
 from matplotlib import rc
 from matplotlib import use
-use('Agg')
+#use('Agg')
 import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
 from pylab import *
@@ -162,9 +162,9 @@ def plotBipartiteGraph(rcts, cats, tmpFolder, tmpFilename, imgname='_bipartite.p
 		catalysis=[(u,v) for (u,v,d) in BIG.edges(data=True) if d['weight'] == 0.5]
 		reactions=[(u,v) for (u,v,d) in BIG.edges(data=True) if d['weight'] == 1.0]
 		warnings=[(u,v) for (u,v,d) in BIG.edges(data=True) if d['weight'] == 1.5]
-		nx.draw_networkx_edges(BIG,pos,edgelist=reactions, width=0.5)
+		nx.draw_networkx_edges(BIG,pos,edgelist=reactions, width=0.5,alpha=0.5)
 		nx.draw_networkx_edges(BIG,pos,edgelist=catalysis, width=0.5,alpha=0.5,edge_color='b',style='dashed')
-		nx.draw_networkx_edges(BIG,pos,edgelist=warnings, width=1.0,alpha=0.5,edge_color='r',style='dashed')
+		nx.draw_networkx_edges(BIG,pos,edgelist=warnings, width=1.5,edge_color='r')
 		nx.draw_networkx_labels(BIG,pos)
 		plt.axis('off')
 		plt.savefig(os.path.join(tmpFolder, imgname))
@@ -188,5 +188,5 @@ def plotGraph(BIG, tmpFolder, tmpFilename, imgname='_bipartite.pdf', savegraphim
 		#plt.show()
 		plt.savefig(os.path.join(tmpFolder, imgname))
 
-	nx.write_graphml(BIG, os.path.join(tmpFolder, tmpFilename))
+	nx.write_pajek(BIG, os.path.join(tmpFolder, tmpFilename))
 
