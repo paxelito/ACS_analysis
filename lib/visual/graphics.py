@@ -107,7 +107,7 @@ def PlotHist(tmpFilename, tmpX, tmpXlabel, tmpYlabel,tmpimgformat='png',tmpdpi=1
 	plt.close()
 	#os.rename(tmpFilename, os.path.join('__10_stastisticFiles',tmpFilename))
 
-def plotBipartiteGraph(rcts, cats, tmpFolder, tmpFilename, imgname='_bipartite.pdf', savegraphimage=False):
+def plotBipartiteGraph(rcts, cats, tmpFolder, tmpFilename, imgname='_bipartite.pdf', savegraphimage=False, par_node_size=300, par_font_size=12):
 	''' Function to create bipartite graphs starting from ctrs and cats structures
 
 		:param rcts: reactions structures
@@ -157,15 +157,15 @@ def plotBipartiteGraph(rcts, cats, tmpFolder, tmpFilename, imgname='_bipartite.p
 	species_nodes, reactions_nodes = bipartite.sets(BIG)
 	
 	if savegraphimage:
-		nx.draw_networkx_nodes(BIG,pos,nodelist=list(species_nodes),node_shape='o')
-		nx.draw_networkx_nodes(BIG,pos,nodelist=list(reactions_nodes),node_shape='s',node_color="green")
+		nx.draw_networkx_nodes(BIG,pos,nodelist=list(species_nodes), node_size=par_node_size, node_shape='o')
+		nx.draw_networkx_nodes(BIG,pos,nodelist=list(reactions_nodes), node_size=par_node_size, node_shape='s',node_color="green")
 		catalysis=[(u,v) for (u,v,d) in BIG.edges(data=True) if d['weight'] == 0.5]
 		reactions=[(u,v) for (u,v,d) in BIG.edges(data=True) if d['weight'] == 1.0]
 		warnings=[(u,v) for (u,v,d) in BIG.edges(data=True) if d['weight'] == 1.5]
-		nx.draw_networkx_edges(BIG,pos,edgelist=reactions, width=0.5,alpha=0.5)
-		nx.draw_networkx_edges(BIG,pos,edgelist=catalysis, width=0.5,alpha=0.5,edge_color='b',style='dashed')
-		nx.draw_networkx_edges(BIG,pos,edgelist=warnings, width=1.5,edge_color='r')
-		nx.draw_networkx_labels(BIG,pos)
+		nx.draw_networkx_edges(BIG,pos,edgelist=reactions, width=0.5, alpha=0.5)
+		nx.draw_networkx_edges(BIG,pos,edgelist=catalysis, width=0.5, alpha=0.5,edge_color='b',style='dashed')
+		nx.draw_networkx_edges(BIG,pos,edgelist=warnings, width=1.5, edge_color='r')
+		nx.draw_networkx_labels(BIG,pos, font_size=par_font_size)
 		plt.axis('off')
 		plt.savefig(os.path.join(tmpFolder, imgname))
 		#plt.show()

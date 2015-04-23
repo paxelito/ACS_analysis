@@ -1,10 +1,30 @@
 #!/usr/bin/env python
 # -*- coding: latin-1 -*-
 ''' 
-	This python tool evaluates a particular chemistry findind RAF, SCC and 
-	saving the multigraph bipartite network and the catalyst-product network
-	
-	NETWORKX formats :: http://networkx.lanl.gov/reference/readwrite.html
+	This python tool evaluates a particular chemistry finding RAF, SCC and 
+	saving the multigraph bipartite network and the catalyst-product network. 
+
+	RAF BIPARTITE NET
+	-----------------
+
+	Bipartite MultiGraph legend:
+
+	* Nodes
+		* Red Cicle: Molecular species
+		* Green Square: reactions
+	* Edges
+		* Grey: Substrate or product, according to the direction of the arrow, partipation 
+		* Blue: Catalyis
+		* Red: WARNING arrow. It means that a species is both a catalyst and a substrate of the reaction. 
+
+	OUTPUT files
+	------------
+
+	* completebipartitegraph.png.[png/net] :: Bipartite Multigraph of all the chemistry
+	* bipartiteRAFgraph.png.[png/net] :: Bipartite Multigraph of the reactions involved in the RAF only 
+	* chemistry_cat_prod_graph.[png/net] :: Catalyst -> Product representation of the chemistry
+
+	Currently graphs are exported in PAJEK (http://mrvar.fdv.uni-lj.si/pajek/) format, other formats are available at http://networkx.lanl.gov/reference/readwrite.html
 '''
 
 import sys, os # Standard library
@@ -85,14 +105,14 @@ if __name__ == '__main__':
 
 			raf, _, sccg = network.net_analysis_of_static_graphs(fid_initRafRes, fid_initRafResALL, fid_initRafResLIST, tmpDir, conf[9], 1, rcts, cats, foodList, args.maxDim)
 
-			grf.plotBipartiteGraph(rcts, cats, newdirAllResults, "0_graph_bipartite.graphml", "completebipartitegraph.png")
+			grf.plotBipartiteGraph(rcts, cats, newdirAllResults, "completebipartitegraph.net", "completebipartitegraph.png", True, 50, 6)
 
 			if len(raf[2]) > 0:
 				# Filter graf network
 				rafcats = cats[np.in1d(cats[:,1], raf[3])]
 				rafrcts = rcts[np.in1d(rcts[:,0], raf[2])]
-				grf.plotBipartiteGraph(rafrcts, rafcats, newdirAllResults, "0_graph_RAF_bipartite.net", "bipartiteRAFgraph.png", True)
-				grf.plotGraph(sccg, newdirAllResults, "0_graph_catalyst_product.net", "chemistrygraph.png", True)
+				grf.plotBipartiteGraph(rafrcts, rafcats, newdirAllResults, "bipartiteRAFgraph.net", "bipartiteRAFgraph.png", True, par_font_size=10)
+				grf.plotGraph(sccg, newdirAllResults, "chemistry_cat_prod_graph.net", "chemistry_cat_prod_graph.png", True)
 
 					
 	fid_initRafRes.close()
