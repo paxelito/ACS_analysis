@@ -1,21 +1,25 @@
 #!/usr/bin/env python
 # -*- coding: latin-1 -*-
 '''
-	This python tool evaluates a particular chemistry finding RAF, SCC and 
-	saving the multigraph bipartite network and the catalyst-product network. 
+	This script evaluates a selected chemistry finding RAF, SCC and 
+	saving the bipartite multigraph and the catalyst-product network. 
+	RAF and SCC summaries are saved too. 
 
 	Script SYNOPSIS::
 
-	sage: graph_chemistry_analysis.py [-h] [-p STRPATH] [-f LASTFLUXID] [-m MAXDIM]
+	usage: graph_chemistry_analysis.py [-h] [-p STRPATH] [-f LASTFLUXID] [-m MAXDIM]
+
+	Graph analysis of the chemistry
 
 	optional arguments:
 	  -h, --help            show this help message and exit
 	  -p STRPATH, --strPath STRPATH
-	                        Path where files are stored (def: ./)
+	                        Path of the artificial chemistry to analyze (def: ./)
 	  -f LASTFLUXID, --lastFluxID LASTFLUXID
-	                        Last ID of the flux species (def: 5)
+	                        Last ID of the food species (def: 5)
 	  -m MAXDIM, --maxDim MAXDIM
 	                        Max Dimension of the system (def: 6)
+
 
 	Bipartite MultiGraph legend
 	---------------------------
@@ -26,7 +30,7 @@
 		* Green Square: reactions
 	* Edges
 		* Grey: Substrate or product, according to the direction of the arrow, partipation 
-		* Blue: Catalyis
+		* Blue: Catalysis
 		* Red: WARNING arrow. It means that a species is both a catalyst and a substrate of the reaction. 
 
 	OUTPUT files
@@ -76,8 +80,8 @@ def paramsin():
 	parser = ArgumentParser(
 				description='Graph analysis of the chemistry'
 				, epilog='''Graph CHEMISTRY analysis. ''') 
-	parser.add_argument('-p', '--strPath', help='Path where files are stored (def: ./)', default='./')	
-	parser.add_argument('-f', '--lastFluxID', help='Last ID of the flux species (def: 5)', default='5', type=int)
+	parser.add_argument('-p', '--strPath', help='Path of the artificial chemistry to analyze (def: ./)', default='./')	
+	parser.add_argument('-f', '--lastFluxID', help='Last ID of the food species (def: 5)', default='5', type=int)
 	parser.add_argument('-m', '--maxDim', help='Max Dimension of the system (def: 6)', default='6', type=int)
 	return parser.parse_args()	
 

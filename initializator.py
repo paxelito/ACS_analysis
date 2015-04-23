@@ -1,14 +1,15 @@
-	#!/usr/bin/env python
+#!/usr/bin/env python
 # -*- coding: latin-1 -*-
-'''Script to initialize random catalytic nets 
-python <path>/GIT/ACS_analysis/initializator.py -t2 -a0 -o ~/Documents/lavoro/protocell/init/ 
-												-k3 -d2 -K10 -f2 -n2 -s6 -m6 -p7 -I ~/Documents/lavoro/protocell/init/acsm2s.conf 
-												-N600 -B600 -x1 -O0 -H10 -v2.5 -c0.5 -F TEST -i 1 -S2 -u -P2 -S2 -A0.1
-2015 - experiments on synchronization, init command
-python <path>/initializator.py t2 -H20 -K20 -u -v1.0 -P2 -S2 -F <folder_name> -A0.01
-and
-python <path>/initializator.py t2 -H20 -K20 -u -v2.5 -P2 -S2 -F <folder_name> -A0.01
 '''
+	
+
+	TO Do
+	-----
+
+	* Introduce here all the parameters allow to upload all the parameters from file, not some here and some on file 
+
+'''
+
 import sys, os # Standard librar
 #import glob
 from copy import deepcopy

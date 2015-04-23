@@ -8,7 +8,7 @@
     
     <title>CARNESS analysis python package documentation &mdash; CARNESS analysis package 20150424.001 documentation</title>
     
-    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
@@ -25,84 +25,86 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="top" title="CARNESS analysis package 20150424.001 documentation" href="#" />
-    <link rel="next" title="Chemistry Graph Analysis" href="graph_chemistry_analysis.html" /> 
+    <link rel="next" title="initializator Module" href="initializator.html" /> 
   </head>
   <body>
-    <div class="related">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             accesskey="I">index</a></li>
-        <li class="right" >
+    <div class="header-wrapper">
+      <div class="header">
+          <p class="logo"><a href="#">
+            <img class="logo" src="_static/logo.png" alt="Logo"/>
+          </a></p>
+        <div class="headertitle"><a
+          href="#">CARNESS analysis package 20150424.001 documentation</a></div>
+        <div class="rel">
+          <a href="initializator.html" title="initializator Module"
+             accesskey="N">next</a> |
           <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
-          <a href="graph_chemistry_analysis.html" title="Chemistry Graph Analysis"
-             accesskey="N">next</a> |</li>
-        <li><a href="#">CARNESS analysis package 20150424.001 documentation</a> &raquo;</li> 
-      </ul>
-    </div>  
+             >modules</a> |
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a>
+        </div>
+       </div>
+    </div>
 
-    <div class="document">
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
       <div class="documentwrapper">
         <div class="bodywrapper">
           <div class="body">
             
   <div class="section" id="carness-analysis-python-package-documentation">
 <h1>CARNESS analysis python package documentation<a class="headerlink" href="#carness-analysis-python-package-documentation" title="Permalink to this headline">¶</a></h1>
-<p>Contents:</p>
+<p>The CARNESS analysis python package contains a set of python scripts devoted to</p>
+<ol class="arabic simple">
+<li>the creation and the structural analysis of artificial catalytic reaction networks (CRS).</li>
+<li>the analysis of the dynamical outcomes of the artificial catalytic reaction networks simulated by means of the CAtalytic Reaction NEtworks Stochastic Simulator (<a class="reference external" href="http://github.org/paxelito">CARNESS</a>).</li>
+</ol>
+<div class="section" id="system-requirements">
+<h2>System Requirements<a class="headerlink" href="#system-requirements" title="Permalink to this headline">¶</a></h2>
+<p>In order to use scripts contained in this package, some packages need to be installed.
+On UNIX systems you can install the necessary packages by the usual commands, for example on DEBIAN-based systems:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ sudo apt-get update
+$ sudo apt-get install python-numpy python-scipy python-matplotlib python-setuptools python-networkx python-deap graphviz libgraphviz-dev pkg-config python-pygraphviz
+</pre></div>
+</div>
+<p>On WINDOWS system, I personally suggest that the simplest solution may be to rely on XXXXX python IDE. In XXXXX all the necessary packages are either yet installed or available by the XXXXXX packages administration tool.</p>
+</div>
+<div class="section" id="installing">
+<h2>Installing<a class="headerlink" href="#installing" title="Permalink to this headline">¶</a></h2>
+<p>To get the packages (the package is entirely contained in a folder named &#8220;ACS_analysis&#8221;) it is sufficent to clone it from GIT with the command:</p>
+<div class="highlight-python"><div class="highlight"><pre>git clone XXXXXXXX
+</pre></div>
+</div>
+<p>Since the package is still under development it is a good practice to check for possible updates or upgrades each time you use it. To seach for new updates please run the following command within the &#8220;ACS_analysis&#8221; folder</p>
+<div class="highlight-python"><div class="highlight"><pre>git pull
+</pre></div>
+</div>
+</div>
+<div class="section" id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+<p>To use the package you must run the opportune python script with the appropriate parameters. You can find a detailed description of the available scripts within this documentation.
+It is important to notice that not all the actually available scripts are depicted in this documentation. Hence, if you are familiar with python and with the CARNESS simulator, you can search into the package whether the desired analysis have been already implemented.
+Out objective is that of preparing the documentation for all the packages in the next few months.</p>
+<p>Current Available Scripts Analysis:</p>
 <div class="toctree-wrapper compound">
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="initializator.html">initializator Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="initializator.html#to-do">TO Do</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="graph_chemistry_analysis.html">Chemistry Graph Analysis</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="graph_chemistry_analysis.html#bipartite-multigraph-legend">Bipartite MultiGraph legend</a></li>
 <li class="toctree-l2"><a class="reference internal" href="graph_chemistry_analysis.html#output-files">OUTPUT files</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="acsAttractorAnalysis.html">acsAttractorAnalysis Module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="acsAttractorAnalysisInTime.html">acsAttractorAnalysisInTime Module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="acsBufferedFluxes.html">acsBufferedFluxes Module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="acsDynStatInTime.html">acsDynStatInTime Module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="acsFromWim2Carness.html">acsFromWim2Carness Module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="acsSCCanalysis.html">acsSCCanalysis Module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="acsSpeciesActivities.html">acsSpeciesActivities Module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="acsStatesAnalysis.html">acsStatesAnalysis Module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="initializator.html">initializator Module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="lib.html">lib Package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="lib.html#subpackages">Subpackages</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="lib.IO.html">IO Package</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="lib.IO.html#id1"><tt class="docutils literal"><span class="pre">IO</span></tt> Package</a></li>
-<li class="toctree-l4"><a class="reference internal" href="lib.IO.html#module-lib.IO.readfiles"><tt class="docutils literal"><span class="pre">readfiles</span></tt> Module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="lib.IO.html#module-lib.IO.writefiles"><tt class="docutils literal"><span class="pre">writefiles</span></tt> Module</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="lib.dyn.html">dyn Package</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="lib.dyn.html#module-lib.dyn.dynamics"><tt class="docutils literal"><span class="pre">dynamics</span></tt> Module</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="lib.graph.html">graph Package</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="lib.graph.html#module-lib.graph.network"><tt class="docutils literal"><span class="pre">network</span></tt> Module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="lib.graph.html#module-lib.graph.raf"><tt class="docutils literal"><span class="pre">raf</span></tt> Module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="lib.graph.html#module-lib.graph.scc"><tt class="docutils literal"><span class="pre">scc</span></tt> Module</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="lib.model.html">model Package</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="lib.model.html#module-lib.model.reactions"><tt class="docutils literal"><span class="pre">reactions</span></tt> Module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="lib.model.html#module-lib.model.species"><tt class="docutils literal"><span class="pre">species</span></tt> Module</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="main.html">main Module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="prepareNewSim.html">prepareNewSim Module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="topology_analysis.html">topology_analysis Module</a></li>
 </ul>
 </div>
 </div>
-<div class="section" id="indices-and-tables">
-<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+</div>
+<div class="section" id="indices">
+<h1>Indices<a class="headerlink" href="#indices" title="Permalink to this headline">¶</a></h1>
 <ul class="simple">
 <li><a class="reference internal" href="genindex.html"><em>Index</em></a></li>
 <li><a class="reference internal" href="py-modindex.html"><em>Module Index</em></a></li>
@@ -114,60 +116,53 @@
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
-        <div class="sphinxsidebarwrapper">
-            <p class="logo"><a href="#">
-              <img class="logo" src="_static/logo.png" alt="Logo"/>
-            </a></p>
-  <h3><a href="#">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">CARNESS analysis python package documentation</a></li>
-<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+        </div>
+        <div class="sidebar">
+          <h3>Table Of Contents</h3>
+          <ul>
+<li class="toctree-l1"><a class="reference internal" href="initializator.html">initializator Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="graph_chemistry_analysis.html">Chemistry Graph Analysis</a></li>
 </ul>
 
-  <h4>Next topic</h4>
-  <p class="topless"><a href="graph_chemistry_analysis.html"
-                        title="next chapter">Chemistry Graph Analysis</a></p>
-  <h3>This Page</h3>
-  <ul class="this-page-menu">
-    <li><a href="_sources/index.txt"
-           rel="nofollow">Show Source</a></li>
-  </ul>
-<div id="searchbox" style="display: none">
-  <h3>Quick search</h3>
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+          <h3 style="margin-top: 1.5em;">Search</h3>
+          <form class="search" action="search.html" method="get">
+            <input type="text" name="q" />
+            <input type="submit" value="Go" />
+            <input type="hidden" name="check_keywords" value="yes" />
+            <input type="hidden" name="area" value="default" />
+          </form>
+          <p class="searchtip" style="font-size: 90%">
+            Enter search terms or a module, class or function name.
+          </p>
         </div>
+        <div class="clearer"></div>
       </div>
-      <div class="clearer"></div>
     </div>
-    <div class="related">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             >index</a></li>
-        <li class="right" >
+
+    <div class="footer-wrapper">
+      <div class="footer">
+        <div class="left">
+          <a href="initializator.html" title="initializator Module"
+             >next</a> |
           <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
-          <a href="graph_chemistry_analysis.html" title="Chemistry Graph Analysis"
-             >next</a> |</li>
-        <li><a href="#">CARNESS analysis package 20150424.001 documentation</a> &raquo;</li> 
-      </ul>
-    </div>
+             >modules</a> |
+          <a href="genindex.html" title="General Index"
+             >index</a>
+            <br/>
+            <a href="_sources/index.txt"
+               rel="nofollow">Show Source</a>
+        </div>
+
+        <div class="right">
+          
     <div class="footer">
         &copy; Copyright 2015, Alessandro Filisetti.
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
   </body>
 </html>
