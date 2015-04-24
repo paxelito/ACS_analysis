@@ -44,11 +44,11 @@ if __name__ == '__main__':
 	parser = ArgumentParser(
 				description='This script initialize new simulation structures.'
 				, epilog='''CARNESS INITIALIZATION PROCEDURE. ''') 
+	parser.add_argument('-o', '--strOut', help='Path for output file storing (Default: ./)', default='./')
 	parser.add_argument('-F', '--folderName', help='Simulation Folder Name (Deafault: SIMS)', default='SIMS')
 	parser.add_argument('-C', '--core', help='Number of core on which simulations are distributed (def:2)', default='2', type=int)
 	parser.add_argument('-t', '--sysType', help='System Architecture [1:CLOSE, 2:PROTO, 3:CSTR], deafult: 1', default='2')
 	parser.add_argument('-a', '--prefAttach', help='Type of catalyst choice (1: Preferential Attachment, 0: Random attachment, DEF: 0', default='0', type=int)
-	parser.add_argument('-o', '--strOut', help='Path for output file storing (Default: ./)', default='./')
 	parser.add_argument('-k', '--creationMethod', help='Network creation method (1: Filisetti, 2: Wim, 3: WimNoRevs, 4: WIM_RAFinREV_noRAFinNOrev, DEF: 3)', default='3', type=int)
 	parser.add_argument('-R', '--revRcts', help='Reverse reactions are allowed to be created for chance(1: Yes, 0: No, Deafult: No)', default='0', type=int)		
 	parser.add_argument('-d', '--directRctDirection', help='Direction of the forward reaction where necessary (1: cleavage, 0: condensation, 2: random with probability 0.5,Default: 2)', default='2', type=int)
@@ -93,6 +93,12 @@ if __name__ == '__main__':
 		fid_run.append(open(fname_run, 'w'))
 		# Set exe file permissions
 		os.chmod(fname_run, 0755)
+
+	# Create reset file
+	resfilename = os.path.join(folderName, '__resetsimulations.sh')
+	fid_resfile = open(resfilename, 'w')
+	os.chmod(resfilename, 0755)
+
 		
 	# Read Conf File !!!!
 	parameters = readfiles.read_sims_conf_file(args.conf)
@@ -266,7 +272,13 @@ if __name__ == '__main__':
 			fid_run[fidid].write(str2w)
 			fidid += 1
 			if fidid == args.core: fidid = 0 
+
+			# UPDATE RESET FILE
+			str2w = "rm " + '../' + condFolderPath + "/res/*\n"
+			fid_resfile.write(str2w)
 	
 	# Close fid runs	
 	fid_initRafRes.close()	
+	fid_resfile.close()
+
 	map(lambda x: x.close(),fid_run)

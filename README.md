@@ -1,12 +1,12 @@
 CARNESS APP :: Analysis Python Package
 ======================================
 
-CARNESS APP is a python scripts package containing useful scripts to study and analyse the simulations carried out by means of the CARNESS simulator. 
+CARNESS APP is a python scripts package containing useful scripts to study and analyse the simulations carried out by means of the `CARNESS <https://github.com/paxelito/carness>`_ simulator. 
 
 System requirements
 -------------------
 
-Python Libraries: python-numpy python-scipy python-matplotlib python-setuptools python-networkx python-deap graphviz libgraphviz-dev pkg-config python-pygraphvizNumpy, Scipy, networkX, matplotlib
+Python Libraries: python-numpy python-scipy python-matplotlib python-setuptools python-networkx python-deap graphviz libgraphviz-dev pkg-config python-pygraphviz
 
 All Scripts
 -----------
@@ -36,8 +36,9 @@ Version 001 - 20150424
 **********************
 
 * Documentation update 
-* initializator.py :: the permission of the lunghers is not automatically set to 0755 
-
+* initializator.py
+	* the permission of the lunghers is not automatically set to 0755 
+	* the __resetsimulations.sh file has been created (CAUTION in using it!!! All the simulation results folders will be erased) 
 
 
 controllare creazione di reazioni spontanee, 
