@@ -1,20 +1,9 @@
-\BOOKMARK [0][-]{chapter.1}{Chemistry Graph Analysis}{}% 1
-\BOOKMARK [1][-]{section.1.1}{Bipartite MultiGraph legend}{chapter.1}% 2
-\BOOKMARK [1][-]{section.1.2}{OUTPUT files}{chapter.1}% 3
-\BOOKMARK [0][-]{chapter.2}{acsAttractorAnalysis Module}{}% 4
-\BOOKMARK [0][-]{chapter.3}{acsAttractorAnalysisInTime Module}{}% 5
-\BOOKMARK [0][-]{chapter.4}{acsBufferedFluxes Module}{}% 6
-\BOOKMARK [0][-]{chapter.5}{acsDynStatInTime Module}{}% 7
-\BOOKMARK [0][-]{chapter.6}{acsFromWim2Carness Module}{}% 8
-\BOOKMARK [0][-]{chapter.7}{acsSCCanalysis Module}{}% 9
-\BOOKMARK [0][-]{chapter.8}{acsSpeciesActivities Module}{}% 10
-\BOOKMARK [0][-]{chapter.9}{acsStatesAnalysis Module}{}% 11
-\BOOKMARK [0][-]{chapter.10}{initializator Module}{}% 12
-\BOOKMARK [0][-]{chapter.11}{lib Package}{}% 13
-\BOOKMARK [1][-]{section.11.1}{Subpackages}{chapter.11}% 14
-\BOOKMARK [0][-]{chapter.12}{main Module}{}% 15
-\BOOKMARK [0][-]{chapter.13}{prepareNewSim Module}{}% 16
-\BOOKMARK [0][-]{chapter.14}{topology\137analysis Module}{}% 17
-\BOOKMARK [0][-]{chapter.15}{Indices and tables}{}% 18
-\BOOKMARK [0][-]{section*.783}{Python Module Index}{}% 19
-\BOOKMARK [0][-]{section*.784}{Index}{}% 20
+\BOOKMARK [0][-]{chapter.1}{System Requirements}{}% 1
+\BOOKMARK [0][-]{chapter.2}{Installing}{}% 2
+\BOOKMARK [0][-]{chapter.3}{Usage}{}% 3
+\BOOKMARK [1][-]{section.3.1}{initializator Module}{chapter.3}% 4
+\BOOKMARK [1][-]{section.3.2}{Chemistry Graph Analysis}{chapter.3}% 5
+\BOOKMARK [1][-]{section.3.3}{Protocell Duplication Analysis}{chapter.3}% 6
+\BOOKMARK [0][-]{chapter.4}{Indices}{}% 7
+\BOOKMARK [0][-]{section*.3}{Python Module Index}{}% 8
+\BOOKMARK [0][-]{section*.4}{Index}{}% 9

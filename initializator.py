@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: latin-1 -*-
 '''
+	This script concerns all the aspect of the creation and the initialization of artificial catalytic reaction networks in th format 
+	requested by the `CARNESS simulation platform <http://github.org/carness>`_.
+	To have a description of all the parameters admitted by the initializator plase digit::
+
+		python <path>/initializator.py -h 
 	
 
 	TO Do
@@ -86,6 +91,8 @@ if __name__ == '__main__':
 		runFileName = zeroBeforeName + str(sngCore+1) + '_simulation.sh'
 		fname_run = os.path.join(folderName, runFileName)
 		fid_run.append(open(fname_run, 'w'))
+		# Set exe file permissions
+		os.chmod(fname_run, 0755)
 		
 	# Read Conf File !!!!
 	parameters = readfiles.read_sims_conf_file(args.conf)

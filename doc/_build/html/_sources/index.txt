@@ -45,6 +45,7 @@ Current Available Scripts Analysis:
 
    initializator
    graph_chemistry_analysis
+   acsDuplicationAnalysis
 ..   acsAttractorAnalysis
 ..  acsAttractorAnalysisInTime
 ..   acsBufferedFluxes

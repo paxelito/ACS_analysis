@@ -1,6 +1,18 @@
 #!/usr/bin/env python
 # -*- coding: latin-1 -*-
-'''Script to compute the successive cell division times and the value of each molecule in proximity of the cell division
+'''
+	Script to compute the successive cell division times and the value of each molecule in proximity of the cell division.
+	Please digit::
+
+		python <path>/acsDuplicationAnalysis.py 
+
+	for the SYNOPSIS of the script. 
+
+	In particular by means of this analysis three files are saved:
+
+	1. deltat_<CHEMISTRY>.csv: In this file the cell division time and the overall amount of each molecular species at each division are stored
+	2. delta_ALL_<CHEMISTRY>.csv: In this file the overall amount of each molecular species at each division is stored
+	3. divplot_<CHEMISTRY>.[png/eps]: If `param --graphs -g`, hence the plot of the species amount at each generation is generated. 
 '''
 
 import sys, os # Standard library
@@ -11,6 +23,7 @@ from argparse import ArgumentParser
 import numpy as np # Scientific library
 from numpy import * 
 from lib.visual import graphics as gr
+from lib.miscellaneous import utilities as ut
 
 try:
     from pylab import *
@@ -19,26 +32,15 @@ except:
    
 from lib.IO import *
 
-def zeroBeforeStrNum(tmpl, tmpL):
-	''' Function to create string zero string vector before graph filename.
-	According to the total number of reactions N zeros will be add before the instant reaction number 
-	(e.g. reaction 130 of 10000 the string became '00130')'''
-	strZero = ''
-	nZeros = len(str(tmpL)) - len(str(tmpl))
-	if nZeros > 0:
-		for i in range(0,nZeros): strZero = strZero + '0'
-	return strZero
-
 if __name__ == '__main__':
 	parser = ArgumentParser(
-				description='Function to evaluate the activity of each species during the simulation, \
-				catalyst substrate product or nothing. Moreover the script recognize all those molecules functioning as hub'
+				description='Protocell division and synchronization assessment'
 				, epilog='''File with angle trajectories are created. ''') 
 	parser.add_argument('-p', '--StrPath', help='Path where files are stored (def: ./)', default='./')
 	parser.add_argument('-l', '--lastFlux', help='Last flux ID species (def: 5)', default='5', type=int)
 	parser.add_argument('-m', '--species', help='Number of species (def: 126)', default='126', type=int)
 	parser.add_argument('-d', '--divisions', help='Number of divisions (def: 100)', default='100', type=int)
-	parser.add_argument('-g', '--graphs', help='Draw graphs (def: 0)', default='0', type=int)
+	parser.add_argument('-g', '--graphs', help='Draw graphs (def: 0)', action="store_true", default=False)
 	parser.add_argument('-c', '--cols2plot', help='cols to plot', nargs='*', default=[], type=int)
 	args = parser.parse_args()
 	
@@ -83,7 +85,7 @@ if __name__ == '__main__':
 					
 					print "|- Generation ", idgen+1
 				
-					strZeros = zeroBeforeStrNum(ngen, args.divisions)
+					strZeros = ut.zeroBeforeStrNum(ngen, args.divisions)
 					
 					strSpecies = 'timeSpeciesAmount_' + strZeros + str(ngen) + '*'
 					#strSpecies = 'timeSpeciesAmount_00' + strZeros + str(ngen) + '*'  

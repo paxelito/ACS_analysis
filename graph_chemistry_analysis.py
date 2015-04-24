@@ -106,7 +106,7 @@ if __name__ == '__main__':
 	if not os.path.isdir(newdirAllResults):
 		try: os.mkdir(newdirAllResults)
 		except: print "Impossible to create statistic directory", newdirAllResults; sys.exit(1)
-	print "\n\n********************\n\n|- Simulation Folder: ", strPath
+	print "\n\n******** ARTIFICIAL CHEMISTRY GRAPH ANALYSIS ************\n\n|- Simulation Folder: ", strPath
 	
 	fname_initRafRes = os.path.join(newdirAllResults, '0_initRafAnalysis.csv')
 	fname_initRafResLIST = os.path.join(newdirAllResults, '0_initRafAnalysisLIST.csv')
@@ -118,32 +118,36 @@ if __name__ == '__main__':
 	fid_initRafRes.write(strToWrite)
 	
 	for tmpDir in tmpDirs:
+
+		if tmpDir != '_0_new_allStatResults':
 		
-		totDirName = os.path.join(strPath,tmpDir)
+			totDirName = os.path.join(strPath,tmpDir)
 
-		if os.path.isdir(totDirName):
-			# Move to the directory 
-			os.chdir(totDirName)
-			
-			print " \- Results Folder: {0}".format(totDirName)				
-			# Analysis of the initial structures 
-			conf = readfiles.readConfFile(totDirName) #ÊConfiguration file upload
-			foodList = range(0,args.lastFluxID+1)
-							
-			# Initial Analysis are turned ON (RAF ANALYSIS)
-			print "   |- LOADING init structures..."
-			rcts = readfiles.loadAllData(totDirName,'_acsreactions.csv') # reaction file upload
-			cats = readfiles.loadAllData(totDirName,'_acscatalysis.csv') #Êcatalysis file upload
+			if os.path.isdir(totDirName):
+				# Move to the directory 
+				os.chdir(totDirName)
+				
+				print "\t\- Results Folder: {0}".format(totDirName)				
+				# Analysis of the initial structures 
+				conf = readfiles.readConfFile(totDirName) #ÊConfiguration file upload
+				foodList = range(0,args.lastFluxID+1)
+								
+				# Initial Analysis are turned ON (RAF ANALYSIS)
+				print "\t\t|- LOADING init structures..."
+				rcts = readfiles.loadAllData(totDirName,'_acsreactions.csv') # reaction file upload
+				cats = readfiles.loadAllData(totDirName,'_acscatalysis.csv') #Êcatalysis file upload
 
-			raf, sccstat, sccg = network.net_analysis_of_static_graphs(fid_initRafRes, fid_initRafResALL, fid_initRafResLIST, tmpDir, conf[9], 1, rcts, cats, foodList, args.maxDim)
-			grf.plotBipartiteGraph(rcts, cats, sccstat[0], newdirAllResults, "completebipartitegraph.net", "completebipartitegraph.png", True, 50, 6)
+				raf, sccstat, sccg = network.net_analysis_of_static_graphs(fid_initRafRes, fid_initRafResALL, fid_initRafResLIST, tmpDir, conf[9], 1, rcts, cats, foodList, args.maxDim)
+				grf.plotBipartiteGraph(rcts, cats, sccstat[0], newdirAllResults, "completebipartitegraph.net", "completebipartitegraph.png", True, 50, 6)
 
-			if len(raf[2]) > 0:
-				# Filter graf network
-				rafcats = cats[np.in1d(cats[:,1], raf[3])]
-				rafrcts = rcts[np.in1d(rcts[:,0], raf[2])]
-				grf.plotBipartiteGraph(rafrcts, rafcats, None, newdirAllResults, "bipartiteRAFgraph.net", "bipartiteRAFgraph.png", True, par_font_size=10)
-				grf.plotGraph(sccg, sccstat[0], newdirAllResults, "chemistry_cat_prod_graph.net", "chemistry_cat_prod_graph.png", True, 50, 6)
+				if len(raf[2]) > 0:
+					# Filter graf network
+					rafcats = cats[np.in1d(cats[:,1], raf[3])]
+					rafrcts = rcts[np.in1d(rcts[:,0], raf[2])]
+					grf.plotBipartiteGraph(rafrcts, rafcats, None, newdirAllResults, "bipartiteRAFgraph.net", "bipartiteRAFgraph.png", True, par_font_size=10)
+					grf.plotGraph(sccg, sccstat[0], newdirAllResults, "chemistry_cat_prod_graph.net", "chemistry_cat_prod_graph.png", True, 50, 6)
+
+	print "\n|- *** ANALYSIS ENDED, see you next time and get life!!!\n"
 
 					
 	fid_initRafRes.close()
