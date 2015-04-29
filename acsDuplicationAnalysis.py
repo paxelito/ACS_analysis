@@ -4,13 +4,13 @@
 	Script to compute the successive cell division times and the value of each molecule in proximity of the cell division.
 	Please digit::
 
-		python <path>/acsDuplicationAnalysis.py 
+		python <path>/acsDuplicationAnalysis.py -h
 
 	for the SYNOPSIS of the script. 
 
-	In particular by means of this analysis three files are saved:
+	In particular, a folder named _0_new_allStatResults will be created into the chemistry and three files will be stored there:
 
-	1. deltat_<CHEMISTRY>.csv: In this file the cell division time and the overall amount of each molecular species at each division are stored
+	1. deltat_<CHEMISTRY>.csv: In this file the cell division time and the overall amount of molecules at each division are stored
 	2. delta_ALL_<CHEMISTRY>.csv: In this file the overall amount of each molecular species at each division is stored
 	3. divplot_<CHEMISTRY>.[png/eps]: If `param --graphs -g`, hence the plot of the species amount at each generation is generated. 
 '''
