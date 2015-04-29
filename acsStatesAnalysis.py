@@ -200,7 +200,7 @@ if __name__ == '__main__':
 				group_A_prev_NI = []; group_HAM_prev_NI = []; group_EUC_prev_NI = [];
 				group_A_start_NI = []; group_HAM_start_NI = []; group_EUC_start_NI = [];
 				
-				print "This Simulation is Composed of ", numberOfGen, " successive runs..."
+				print "\t\t|- This Simulation is Composed of ", numberOfGen, " successive runs..."
 				
 				for ngen in range(1,numberOfGen+1):
 				  
